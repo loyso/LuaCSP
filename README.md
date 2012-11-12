@@ -1,4 +1,4 @@
 LuaCSP
 ======
 
-Communicating Sequential Processes in Lua
+Communicating Sequential Processes in Lua: an extension.
