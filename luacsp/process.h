@@ -5,6 +5,8 @@
 
 #include <luacpp/luacpp.h>
 
+struct lua_State;
+
 namespace csp
 {
     class Operation;
@@ -17,7 +19,15 @@ namespace csp
 
 		lua::LuaState & LuaThread();
 
+		static Process* GetProcess( lua_State* luaState );
+		static void SetProcess( lua_State* luaState, Process* process );
+
+		int Operate( Operation& operation );
+
     private:
+		void SwitchCurrentOperation( Operation* pOperation );
+		Operation& CurrentOperation();
+
         Process* m_parentProcess;
 		lua::LuaState m_luaThread;
         Operation* m_operation;

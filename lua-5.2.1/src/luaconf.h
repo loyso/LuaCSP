@@ -382,15 +382,16 @@
 ** change lua_number2int & lua_number2integer.
 ** ===================================================================
 */
+#define l_tg(x)		x##f
 
-#define LUA_NUMBER_DOUBLE
-#define LUA_NUMBER	double
+// #define LUA_NUMBER_DOUBLE
+#define LUA_NUMBER	float
 
 /*
 @@ LUAI_UACNUMBER is the result of an 'usual argument conversion'
 @* over a number.
 */
-#define LUAI_UACNUMBER	double
+#define LUAI_UACNUMBER	float
 
 
 /*
@@ -399,7 +400,7 @@
 @@ lua_number2str converts a number to a string.
 @@ LUAI_MAXNUMBER2STR is maximum size of previous conversion.
 */
-#define LUA_NUMBER_SCAN		"%lf"
+#define LUA_NUMBER_SCAN		"%f"
 #define LUA_NUMBER_FMT		"%.14g"
 #define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n))
 #define LUAI_MAXNUMBER2STR	32 /* 16 digits, sign, point, and \0 */
@@ -413,7 +414,7 @@
 ** systems, you can leave 'lua_strx2number' undefined and Lua will
 ** provide its own implementation.
 */
-#define lua_str2number(s,p)	strtod((s), (p))
+#define lua_str2number(s,p)	(float)strtod((s), (p))
 
 #if defined(LUA_USE_STRTODHEX)
 #define lua_strx2number(s,p)	strtod((s), (p))
@@ -427,8 +428,8 @@
 /* the following operations need the math library */
 #if defined(lobject_c) || defined(lvm_c)
 #include <math.h>
-#define luai_nummod(L,a,b)	((a) - floor((a)/(b))*(b))
-#define luai_numpow(L,a,b)	(pow(a,b))
+#define luai_nummod(L,a,b)	((a) - floorf((a)/(b))*(b))
+#define luai_numpow(L,a,b)	(powf(a,b))
 #endif
 
 /* these are quite standard operations */

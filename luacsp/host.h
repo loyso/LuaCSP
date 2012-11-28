@@ -2,6 +2,7 @@
 
 #include <luacpp/luacpp.h>
 
+#include "csp.h"
 #include "process.h"
 
 namespace csp
@@ -17,7 +18,8 @@ namespace csp
         void Initialize();
         void Shutdown();
 
-        lua::Return::Value Main();
+        WorkResult::Enum Main();
+		WorkResult::Enum Work( time_t dt );
 
         lua::LuaState& LuaState();
 

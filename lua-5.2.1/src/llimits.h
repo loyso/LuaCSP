@@ -282,7 +282,7 @@ union luai_Cast { double l_d; LUA_INT32 l_p[2]; };
 #include <math.h>
 
 #define luai_hashnum(i,n) { int e;  \
-  n = frexp(n, &e) * (lua_Number)(INT_MAX - DBL_MAX_EXP);  \
+  n = frexpf(n, &e) * (lua_Number)(INT_MAX - DBL_MAX_EXP);  \
   lua_number2int(i, n); i += e; }
 
 #endif

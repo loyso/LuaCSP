@@ -2,10 +2,15 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <assert.h>
+
+#include <stdio.h>
+#include <stdarg.h>
 
 extern "C"
 {
 #include <lua-5.2.1/src/lua.h>
+#include <lua-5.2.1/src/lauxlib.h>
 }
 
 void* LuaDefaultAlloc (void* ud, void* ptr, size_t osize, size_t nsize) {
@@ -53,9 +58,10 @@ private:
 };
 
 
-lua::LuaState::LuaState(lua_State& state)
-    : m_state(&state)
+lua::LuaState::LuaState(lua_State* state)
+    : m_state(state)
 {
+	assert( state );
 }
 
 lua_State* lua::LuaState::InternalState() const
@@ -66,7 +72,7 @@ lua_State* lua::LuaState::InternalState() const
 lua::LuaState lua::LuaState::NewState()
 {
     lua_State* state = lua_newstate(LuaDefaultAlloc, NULL);
-    return LuaState(*state);
+    return LuaState(state);
 }
 
 void lua::LuaState::Close()
@@ -77,37 +83,39 @@ void lua::LuaState::Close()
 
 lua::LuaState lua::LuaState::NewThread()
 {
-	return LuaState( *lua_newthread(m_state) );
+	return LuaState( lua_newthread(m_state) );
 }
 
-lua::Return::Value lua::LuaState::LoadFromMemory(const void* data, size_t size, const char* chunkname)
+lua::Return::Enum lua::LuaState::LoadFromMemory(const void* data, size_t size, const char* chunkname)
 {
     LuaReader luaReader(data, size);
     int value = lua_load(m_state, LuaReader::Read, &luaReader, chunkname, "bt");
-    return (Return::Value)value;
+    return (Return::Enum)value;
 }
 
 
-void* lua::LuaState::GetUserData() const
+void* lua::LuaState::GetUserData( lua_State* luaState )
 {
-    return *((void**)m_state - 1);
+	assert( luaState );
+    return *((void**)luaState - 1);
 }
 
-void lua::LuaState::SetUserData(void* userData)
+void lua::LuaState::SetUserData( lua_State* luaState, void* userData )
 {
-    *((void**)m_state - 1) = userData;
+	assert( luaState );
+    *((void**)luaState - 1) = userData;
 }
 
 lua::LuaStackValue lua::LuaState::GetGlobal(const char * var) const
 {
 	CheckStack();
 	lua_getglobal(m_state, var);
-	return LuaStackValue( *this, GetTop() );
+	return LuaStackValue( m_state, GetTop() );
 }
 
 void lua::LuaState::CheckStack() const
 {
-	lua_checkstack(m_state, LUA_MINSTACK);
+	luaL_checkstack(m_state, LUA_MINSTACK, NULL);
 }
 
 int lua::LuaState::GetTop() const
@@ -120,21 +128,122 @@ void lua::LuaState::Pop( int numValues )
 	lua_pop(m_state, numValues);
 }
 
-lua::Return::Value lua::LuaState::Call(int numArgs, int numResults)
+
+lua::Return::Enum lua::LuaState::Call( int numArgs, int numResults )
 {
 	if (!GetTopValue().IsFunction())
 		return Return::ERRRUN;
 
-	return (Return::Value)lua_pcall(m_state, numArgs, numResults, 0); // TODO: stack traceback in msgh.
+	return (Return::Enum)lua_pcall(m_state, numArgs, numResults, 0); // TODO: use msgh to trace stack.
 }
+
+
+int PrintError(const char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	int retval = vprintf(fmt, ap);
+	va_end(ap);
+	return retval;
+}
+
+lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
+{
+	if (!GetTopValue().IsFunction())
+		return Return::ERRRUN;
+
+	Return::Enum retValue = (Return::Enum)lua_resume(m_state, pStateFrom ? pStateFrom->InternalState() : NULL, numArgs);
+
+	const char * errCode = "[no error code]";
+
+	switch( retValue )
+	{
+	case LUA_ERRRUN:
+		errCode = "LuaState::Resume: runtime error";
+		break;
+	case LUA_ERRMEM:
+		errCode = "LuaState::Resume: memory allocation error";
+		break;
+	case LUA_ERRERR:
+		errCode = "LuaState::Resume: error while running the error handler function";
+		break;
+	case LUA_ERRGCMM: 
+		errCode = "LuaState::Resume: error while running a gc metamethod";
+		break;
+	case LUA_OK:
+	case LUA_YIELD:
+		return retValue;
+	}
+
+	const char * errMessage = GetTopValue().OptString( "[no error message]" );
+	PrintError("%s\n%s\n", errCode, errMessage);
+
+	luaL_traceback( m_state, m_state, NULL, 0 );
+	const char * stackInfo = GetTopValue().OptString( "[no stack]" );
+	PrintError( "%s\n", stackInfo );
+
+	Pop(2);
+	return retValue;
+}
+
+int lua::LuaState::Yield( int numArgs )
+{
+	return lua_yield( m_state, numArgs );
+};
 
 lua::LuaStackValue lua::LuaState::GetTopValue() const
 {
-	return LuaStackValue( *this, GetTop() );
+	return LuaStackValue( m_state, GetTop() );
 }
 
-lua::LuaStackValue::LuaStackValue( LuaState const & luaState, int index )
-	: m_state( luaState.InternalState() )
+lua::LuaStackValue lua::LuaState::GetField(LuaStackValue & value, const char * key) const
+{
+	lua_getfield(m_state, value.Index(), key);
+	return GetTopValue();
+}
+
+void lua::LuaState::SetField( LuaStackValue & value, const char * key )
+{
+	lua_setfield(m_state, value.Index(), key);
+}
+
+void lua::LuaState::PushNil()
+{
+	lua_pushnil(m_state);
+}
+
+lua::LuaStackValue lua::LuaState::GetGlobals() const
+{
+	lua_pushinteger( m_state, LUA_RIDX_GLOBALS );
+	lua_rawget( m_state, LUA_REGISTRYINDEX ); 
+	return GetTopValue();
+}
+
+void lua::LuaState::PushCFunction( int (*function)(lua_State* L) )
+{
+	lua_pushcfunction( m_state, function );
+}
+
+int lua::LuaState::Error( const char* format, ... )
+{
+	char buffer[1024];
+	
+	va_list args;
+	va_start( args, format );
+	_vsnprintf( buffer, sizeof(buffer), format, args );
+	va_end( args );
+
+	return luaL_error( m_state, "%s", buffer );
+}
+
+void lua::LuaState::CloseState( LuaState & luaState )
+{
+	lua_close( luaState.InternalState() );
+	luaState.m_state = NULL;
+}
+
+lua::LuaStackValue::LuaStackValue( lua_State* luaState, int index )
+	: m_state( luaState )
 	, m_index( index )
 {
 }
@@ -152,4 +261,59 @@ bool lua::LuaStackValue::IsFunction() const
 bool lua::LuaStackValue::IsCFunction() const
 {
 	return !!lua_iscfunction(m_state, m_index);
+}
+
+bool lua::LuaStackValue::IsNumber() const
+{
+	return !!lua_isnumber( m_state, m_index );
+}
+
+int lua::LuaStackValue::Index() const
+{
+	return m_index;
+}
+
+lua::LuaNumber_t lua::LuaStackValue::GetNumber() const
+{
+	return lua_tonumber( m_state, m_index );
+}
+
+lua::LuaNumber_t lua::LuaStackValue::CheckNumber() const
+{
+	return luaL_checknumber( m_state, m_index );
+}
+
+lua::LuaNumber_t lua::LuaStackValue::OptNumber( LuaNumber_t default ) const
+{
+	return luaL_optnumber( m_state, m_index, default );
+}
+
+int lua::LuaStackValue::ArgError( const char * errMsg )
+{
+	return luaL_argerror( m_state, m_index, errMsg );
+}
+
+const char* lua::LuaStackValue::OptString( const char* default ) const
+{
+	return luaL_optstring( m_state, m_index, default );
+}
+
+lua::LuaStack::LuaStack( lua_State* luaState )
+	: m_state( luaState )
+{
+}
+
+lua::LuaStackValue lua::LuaStack::operator[]( int index ) const
+{
+	return LuaStackValue( m_state, index );
+}
+
+int lua::LuaStack::NumArgs() const
+{
+	return lua_gettop( m_state );
+}
+
+lua::LuaState lua::LuaStack::State() const
+{
+	return LuaState( m_state );
 }

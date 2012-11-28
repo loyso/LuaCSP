@@ -4,15 +4,18 @@ namespace csp
 {
     class Host;
 
+	typedef float time_t;
+
 	namespace WorkResult
 	{
 		enum Enum
 		{
-			  RESUME = 0
-			, YIELD			
-			, ERROR_REPORTED
+			  FINISH = 0
+			, YIELD
+			, ERROR
 		};
 	}
+
 
     Host& Initialize();
     void Shutdown(Host& host);

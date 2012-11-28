@@ -8,13 +8,19 @@
 csp::Host& csp::Initialize()
 {
     lua::LuaState luaState = lua::LuaState::NewState();
-    csp::Host& host = *new csp::Host(luaState);
+    
+	csp::Host& host = *new csp::Host(luaState);
     host.Initialize();
-    return host;
+    
+	return host;
 }
 
 void csp::Shutdown(csp::Host& host)
 {
-    host.Shutdown();
+	lua::LuaState luaState = host.LuaState();
+    
+	host.Shutdown();
     delete &host;
+
+	lua::LuaState::CloseState( luaState );
 }

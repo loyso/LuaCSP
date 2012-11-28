@@ -25,9 +25,12 @@
 
 #undef PI
 #define PI (l_tg(3.1415926535897932384626433832795))
-#define RADIANS_PER_DEGREE (PI/180.0)
+#define RADIANS_PER_DEGREE (PI/l_tg(180.0))
 
-
+void test()
+{
+	float g = fabsf(0.657676f);
+}
 
 static int math_abs (lua_State *L) {
   lua_pushnumber(L, l_tg(fabs)(luaL_checknumber(L, 1)));
@@ -211,7 +214,7 @@ static int math_random (lua_State *L) {
     case 1: {  /* only upper limit */
       lua_Number u = luaL_checknumber(L, 1);
       luaL_argcheck(L, 1.0 <= u, 1, "interval is empty");
-      lua_pushnumber(L, l_tg(floor)(r*u) + 1.0);  /* int in [1, u] */
+      lua_pushnumber(L, l_tg(floor)(r*u) + l_tg(1.0));  /* int in [1, u] */
       break;
     }
     case 2: {  /* lower and upper limits */
@@ -276,7 +279,7 @@ LUAMOD_API int luaopen_math (lua_State *L) {
   luaL_newlib(L, mathlib);
   lua_pushnumber(L, PI);
   lua_setfield(L, -2, "pi");
-  lua_pushnumber(L, HUGE_VAL);
+  lua_pushnumber(L, (float)HUGE_VAL);
   lua_setfield(L, -2, "huge");
   return 1;
 }

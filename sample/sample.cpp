@@ -29,16 +29,21 @@ int main(int argc, const char* argv[])
         file.read (memblock, size);
         file.close();
 
-        lua::Return::Value valueLoad = host.LuaState().LoadFromMemory(memblock, size, fileName);
+		char chunkname [1024];
+		sprintf( chunkname, "@%s", fileName );
+
+        lua::Return::Enum valueLoad = host.LuaState().LoadFromMemory(memblock, size, chunkname);
         if( valueLoad == lua::Return::OK )
         {
-			lua::Return::Value valueCall = host.LuaState().Call(0, 0);
+			lua::Return::Enum valueCall = host.LuaState().Call(0, 0);
 			if( valueCall == lua::Return::OK )
 			{
-				int a = 0;
+				csp::WorkResult::Enum mainCall = host.Main();
+				while( mainCall == lua::Return::YIELD )
+				{
+					host.Work( 0.1f );
+				} 
 			}
-            
-			host.Main();
         }
 
         delete[] memblock;
