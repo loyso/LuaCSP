@@ -29,14 +29,16 @@ int main(int argc, const char* argv[])
         file.read (memblock, size);
         file.close();
 
-        lua::Return::Value value = host.LuaState().LoadFromMemory(memblock, size, fileName);
-        if(value == lua::Return::OK)
+        lua::Return::Value valueLoad = host.LuaState().LoadFromMemory(memblock, size, fileName);
+        if( valueLoad == lua::Return::OK )
         {
-            host.Main();
-        }
-        else
-        {
-            int a = 0;
+			lua::Return::Value valueCall = host.LuaState().Call(0, 0);
+			if( valueCall == lua::Return::OK )
+			{
+				int a = 0;
+			}
+            
+			host.Main();
         }
 
         delete[] memblock;

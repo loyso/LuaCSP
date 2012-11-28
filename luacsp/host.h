@@ -1,11 +1,8 @@
 #pragma once
 
-struct lua_State;
+#include <luacpp/luacpp.h>
 
-namespace lua
-{
-    class LuaState;
-}
+#include "process.h"
 
 namespace csp
 {
@@ -20,11 +17,12 @@ namespace csp
         void Initialize();
         void Shutdown();
 
-        void Main();
+        lua::Return::Value Main();
 
-        lua::LuaState LuaState();
+        lua::LuaState& LuaState();
 
     private:
-        lua_State* m_InternalState;
+        lua::LuaState m_luaState;
+		Process * m_mainProcess;
     };
 }

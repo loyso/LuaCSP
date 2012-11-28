@@ -54,13 +54,13 @@ private:
 
 
 lua::LuaState::LuaState(lua_State& state)
-    : m_State(&state)
+    : m_state(&state)
 {
 }
 
 lua_State* lua::LuaState::InternalState() const
 {
-    return m_State;
+    return m_state;
 }
 
 lua::LuaState lua::LuaState::NewState()
@@ -71,24 +71,85 @@ lua::LuaState lua::LuaState::NewState()
 
 void lua::LuaState::Close()
 {
-    lua_close(m_State);
-    m_State = NULL;
+    lua_close(m_state);
+    m_state = NULL;
+}
+
+lua::LuaState lua::LuaState::NewThread()
+{
+	return LuaState( *lua_newthread(m_state) );
 }
 
 lua::Return::Value lua::LuaState::LoadFromMemory(const void* data, size_t size, const char* chunkname)
 {
     LuaReader luaReader(data, size);
-    int value = lua_load(m_State, LuaReader::Read, &luaReader, chunkname, "bt");
+    int value = lua_load(m_state, LuaReader::Read, &luaReader, chunkname, "bt");
     return (Return::Value)value;
 }
 
 
-void* lua::LuaState::GetUserData()
+void* lua::LuaState::GetUserData() const
 {
-    return *((void**)m_State - 1);
+    return *((void**)m_state - 1);
 }
 
 void lua::LuaState::SetUserData(void* userData)
 {
-    *((void**)m_State - 1) = userData;
+    *((void**)m_state - 1) = userData;
+}
+
+lua::LuaStackValue lua::LuaState::GetGlobal(const char * var) const
+{
+	CheckStack();
+	lua_getglobal(m_state, var);
+	return LuaStackValue( *this, GetTop() );
+}
+
+void lua::LuaState::CheckStack() const
+{
+	lua_checkstack(m_state, LUA_MINSTACK);
+}
+
+int lua::LuaState::GetTop() const
+{
+	return lua_gettop(m_state);
+}
+
+void lua::LuaState::Pop( int numValues )
+{
+	lua_pop(m_state, numValues);
+}
+
+lua::Return::Value lua::LuaState::Call(int numArgs, int numResults)
+{
+	if (!GetTopValue().IsFunction())
+		return Return::ERRRUN;
+
+	return (Return::Value)lua_pcall(m_state, numArgs, numResults, 0); // TODO: stack traceback in msgh.
+}
+
+lua::LuaStackValue lua::LuaState::GetTopValue() const
+{
+	return LuaStackValue( *this, GetTop() );
+}
+
+lua::LuaStackValue::LuaStackValue( LuaState const & luaState, int index )
+	: m_state( luaState.InternalState() )
+	, m_index( index )
+{
+}
+
+bool lua::LuaStackValue::IsNil() const
+{
+	return lua_isnil(m_state, m_index);
+}
+
+bool lua::LuaStackValue::IsFunction() const
+{
+	return lua_isfunction(m_state, m_index);
+}
+
+bool lua::LuaStackValue::IsCFunction() const
+{
+	return !!lua_iscfunction(m_state, m_index);
 }
