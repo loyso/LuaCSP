@@ -7,6 +7,9 @@
 #include <iostream>
 #include <fstream>
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
 int main(int argc, const char* argv[])
 {
     if(argc<2)
@@ -39,9 +42,11 @@ int main(int argc, const char* argv[])
 			if( valueCall == lua::Return::OK )
 			{
 				csp::WorkResult::Enum mainCall = host.Main();
+				const float dt = 0.01f;
 				while( mainCall == lua::Return::YIELD )
 				{
-					host.Work( 0.1f );
+					Sleep( (unsigned int)(dt * 1000.0) );
+					mainCall = host.Work( dt );
 				} 
 			}
         }

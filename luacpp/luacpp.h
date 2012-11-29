@@ -20,6 +20,8 @@ namespace lua
         };
     };
 
+	int Print(const char* fmt, ...);
+
 	class LuaState;
 	class LuaStack;
 	class LuaStackValue;
@@ -34,6 +36,7 @@ namespace lua
 		bool IsCFunction() const;
 		bool IsNumber() const;
 		bool IsString() const;
+		bool IsBoolean() const;
 
 		LuaNumber_t GetNumber() const;
 		LuaNumber_t CheckNumber() const;
@@ -43,12 +46,15 @@ namespace lua
 		const char* CheckString() const; 
 		const char* OptString( const char* default ) const; 
 
-		int ArgError( const char * errMsg );
+		bool GetBoolean() const; 
+
+		int ArgError( const char* errMsg );
 
 		int Index() const;
+		void PushValue();
 
 	private:
-		lua_State * m_state;
+		lua_State* m_state;
 		int m_index;
 	};
 
@@ -63,8 +69,19 @@ namespace lua
 
 		LuaState State() const;
 
+		void PushNil();
+		void PushCFunction( int (*function)(lua_State* L) );
+		void PushRegistryReferenced( int key );
+
+		int RefInRegistry();
+		void UnrefInRegistry( int key );
+
+		LuaState NewThread();
+
+		void XMove( const LuaStack& toStack, int numValues );
+
 	private:
-		lua_State * m_state;
+		lua_State* m_state;
 	};
 
     class LuaState
@@ -75,14 +92,13 @@ namespace lua
         
         void Close();
 
+		LuaState();
         explicit LuaState(lua_State* luaState);
         lua_State* InternalState() const;
 
         Return::Enum LoadFromMemory(const void* data, size_t size, const char* chunkname);
 		Return::Enum Call(int numArgs, int numResults);
 		Return::Enum Resume(int numArgs, LuaState * pStateFrom);
-
-		LuaState NewThread();
 
 		void CheckStack() const;		
 		void Pop(int numValues);
@@ -92,12 +108,10 @@ namespace lua
 
 		LuaStackValue GetGlobal(const char * var) const;
 		LuaStackValue GetGlobals() const;
+		LuaStack GetStack() const;
 		
 		LuaStackValue GetField(LuaStackValue & value, const char * key) const;
 		void SetField(LuaStackValue & value, const char * key);
-
-		void PushNil();
-		void PushCFunction( int (*function)(lua_State* L) );
 
         // Per-thread user data requires the Lua interpreter to be compiled with LUAI_EXTRASPACE=sizeof(void*)
         static void* GetUserData( lua_State* luaState );
@@ -106,6 +120,8 @@ namespace lua
 		int Error(const char* format, ...);
 
 		int Yield( int numArgs );
+
+		Return::Enum Status() const;
 
     private:
         lua_State* m_state;

@@ -25,6 +25,6 @@ namespace csp
 
     private:
         lua::LuaState m_luaState;
-		Process * m_mainProcess;
+		Process m_mainProcess;
     };
 }

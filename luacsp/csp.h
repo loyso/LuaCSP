@@ -12,7 +12,6 @@ namespace csp
 		{
 			  FINISH = 0
 			, YIELD
-			, ERROR
 		};
 	}
 

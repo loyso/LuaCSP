@@ -57,6 +57,10 @@ private:
     size_t m_Size;
 };
 
+lua::LuaState::LuaState()
+	: m_state()
+{
+}
 
 lua::LuaState::LuaState(lua_State* state)
     : m_state(state)
@@ -79,11 +83,6 @@ void lua::LuaState::Close()
 {
     lua_close(m_state);
     m_state = NULL;
-}
-
-lua::LuaState lua::LuaState::NewThread()
-{
-	return LuaState( lua_newthread(m_state) );
 }
 
 lua::Return::Enum lua::LuaState::LoadFromMemory(const void* data, size_t size, const char* chunkname)
@@ -138,7 +137,7 @@ lua::Return::Enum lua::LuaState::Call( int numArgs, int numResults )
 }
 
 
-int PrintError(const char* fmt, ...)
+int lua::Print(const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -149,10 +148,7 @@ int PrintError(const char* fmt, ...)
 
 lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
 {
-	if (!GetTopValue().IsFunction())
-		return Return::ERRRUN;
-
-	Return::Enum retValue = (Return::Enum)lua_resume(m_state, pStateFrom ? pStateFrom->InternalState() : NULL, numArgs);
+	Return::Enum retValue = (Return::Enum)lua_resume( m_state, pStateFrom ? pStateFrom->InternalState() : NULL, numArgs );
 
 	const char * errCode = "[no error code]";
 
@@ -176,11 +172,11 @@ lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
 	}
 
 	const char * errMessage = GetTopValue().OptString( "[no error message]" );
-	PrintError("%s\n%s\n", errCode, errMessage);
+	Print("%s\n%s\n", errCode, errMessage);
 
 	luaL_traceback( m_state, m_state, NULL, 0 );
 	const char * stackInfo = GetTopValue().OptString( "[no stack]" );
-	PrintError( "%s\n", stackInfo );
+	Print( "%s\n", stackInfo );
 
 	Pop(2);
 	return retValue;
@@ -207,21 +203,11 @@ void lua::LuaState::SetField( LuaStackValue & value, const char * key )
 	lua_setfield(m_state, value.Index(), key);
 }
 
-void lua::LuaState::PushNil()
-{
-	lua_pushnil(m_state);
-}
-
 lua::LuaStackValue lua::LuaState::GetGlobals() const
 {
 	lua_pushinteger( m_state, LUA_RIDX_GLOBALS );
 	lua_rawget( m_state, LUA_REGISTRYINDEX ); 
 	return GetTopValue();
-}
-
-void lua::LuaState::PushCFunction( int (*function)(lua_State* L) )
-{
-	lua_pushcfunction( m_state, function );
 }
 
 int lua::LuaState::Error( const char* format, ... )
@@ -240,6 +226,16 @@ void lua::LuaState::CloseState( LuaState & luaState )
 {
 	lua_close( luaState.InternalState() );
 	luaState.m_state = NULL;
+}
+
+lua::LuaStack lua::LuaState::GetStack() const
+{
+	return lua::LuaStack( m_state );
+}
+
+lua::Return::Enum lua::LuaState::Status() const
+{
+	return (Return::Enum)lua_status( m_state );
 }
 
 lua::LuaStackValue::LuaStackValue( lua_State* luaState, int index )
@@ -298,6 +294,31 @@ const char* lua::LuaStackValue::OptString( const char* default ) const
 	return luaL_optstring( m_state, m_index, default );
 }
 
+bool lua::LuaStackValue::GetBoolean() const
+{
+	return !!lua_toboolean( m_state, m_index );
+}
+
+bool lua::LuaStackValue::IsBoolean() const
+{
+	return !!lua_isboolean( m_state, m_index );
+}
+
+const char* lua::LuaStackValue::GetString() const
+{
+	return lua_tostring( m_state, m_index );
+}
+
+bool lua::LuaStackValue::IsString() const
+{
+	return lua_type( m_state, m_index ) == LUA_TSTRING;
+}
+
+void lua::LuaStackValue::PushValue()
+{
+	lua_pushvalue( m_state, m_index );
+}
+
 lua::LuaStack::LuaStack( lua_State* luaState )
 	: m_state( luaState )
 {
@@ -317,3 +338,41 @@ lua::LuaState lua::LuaStack::State() const
 {
 	return LuaState( m_state );
 }
+
+void lua::LuaStack::PushNil()
+{
+	lua_pushnil(m_state);
+}
+
+void lua::LuaStack::PushCFunction( int (*function)(lua_State* L) )
+{
+	lua_pushcfunction( m_state, function );
+}
+
+
+void lua::LuaStack::PushRegistryReferenced( int key )
+{
+	lua_rawgeti( m_state, LUA_REGISTRYINDEX, key );
+}
+
+int lua::LuaStack::RefInRegistry()
+{
+	return luaL_ref( m_state, LUA_REGISTRYINDEX );
+}
+
+void lua::LuaStack::UnrefInRegistry( int key )
+{
+	luaL_unref( m_state, LUA_REGISTRYINDEX, key );
+}
+
+lua::LuaState lua::LuaStack::NewThread()
+{
+	return LuaState( lua_newthread(m_state) );
+}
+
+void lua::LuaStack::XMove( const LuaStack& toStack, int numValues )
+{
+	lua_xmove( m_state, toStack.State().InternalState(), numValues );
+}
+
+

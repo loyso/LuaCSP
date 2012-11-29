@@ -10,7 +10,6 @@ csp::Host::Host(const lua::LuaState& luaState)
 
 csp::Host::~Host()
 {
-	assert( m_mainProcess == NULL );
 }
 
 lua::LuaState& csp::Host::LuaState()
@@ -28,36 +27,24 @@ void csp::Host::Shutdown()
 {
 	lua::LuaStackValue globals = m_luaState.GetGlobals();
 	UnregisterStandardOperations( m_luaState, globals );
-
-	if( m_mainProcess )
-	{
-		delete m_mainProcess;
-		m_mainProcess = NULL;
-	}
 }
 
 csp::WorkResult::Enum csp::Host::Main()
 {
-	m_mainProcess = new Process( m_luaState, NULL );
+	m_mainProcess.SetLuaThread( m_luaState );
 
-	lua::LuaStackValue stackValue = m_mainProcess->LuaThread().GetGlobal("main");
+	lua::LuaStackValue stackValue = m_mainProcess.LuaThread().GetGlobal("main");
 	if ( !stackValue.IsFunction() || stackValue.IsCFunction() )
-		return WorkResult::ERROR;
-	
-	lua::Return::Enum retValue = m_mainProcess->LuaThread().Resume(0, NULL);
-	switch( retValue )
-	{
-	case lua::Return::YIELD:
-		return WorkResult::YIELD;
-	case lua::Return::OK:
 		return WorkResult::FINISH;
-	default:
-		return WorkResult::ERROR;
-	}
+	
+	return m_mainProcess.Resume(0);
 }
 
 csp::WorkResult::Enum csp::Host::Work( time_t dt )
 {
-	return WorkResult::FINISH;
+	if( !m_mainProcess.IsRunning() )
+		return WorkResult::FINISH;
+
+	return m_mainProcess.Work( dt );
 }
 
