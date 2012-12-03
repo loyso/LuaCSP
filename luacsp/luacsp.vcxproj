@@ -11,12 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="channel.cpp" />
     <ClCompile Include="csp.cpp" />
     <ClCompile Include="host.cpp" />
     <ClCompile Include="operation.cpp" />
     <ClCompile Include="process.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="channel.h" />
     <ClInclude Include="csp.h" />
     <ClInclude Include="host.h" />
     <ClInclude Include="operation.h" />
