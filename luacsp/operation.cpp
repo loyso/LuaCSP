@@ -2,9 +2,11 @@
 
 #include "process.h"
 #include "operation.h"
+#include "host.h"
 
 csp::Operation::Operation()
 	: m_pProcess()
+	, m_finished( false )
 {
 
 }
@@ -18,7 +20,7 @@ int csp::Operation::PushResults( lua::LuaStack & )
 	return 0;
 }
 
-csp::Process& csp::Operation::GetProcess() const
+csp::Process& csp::Operation::ThisProcess() const
 {
 	assert( m_pProcess );
 	return *m_pProcess;
@@ -42,12 +44,28 @@ int csp::Operation::Initialize( lua_State* luaState )
 		return 0;
 	}
 
-	return m_pProcess->Operate( *this );
+	m_pProcess->SwitchCurrentOperation( this );
+	return state.Yield( 0 );
 }
 
 bool csp::Operation::Init( lua::LuaStack & )
 {
 	return true;
+}
+
+bool csp::Operation::IsFinished() const
+{
+	return m_finished;
+}
+
+void csp::Operation::SetFinished( bool finished )
+{
+	m_finished = finished;
+}
+
+csp::WorkResult::Enum csp::Operation::Evaluate( Host& )
+{
+	return WorkResult::YIELD;
 }
 
 
@@ -65,10 +83,11 @@ bool csp::OpSleep::Init( lua::LuaStack & args )
 	}
 
 	m_seconds = args[1].GetNumber();
+	SetFinished( m_seconds <= 0 );
 	return true;
 }
 
-csp::WorkResult::Enum csp::OpSleep::Work( time_t dt )
+csp::WorkResult::Enum csp::OpSleep::Work( Host&, time_t dt )
 {
 	m_seconds -= dt;
 	return m_seconds > 0 ? WorkResult::YIELD : WorkResult::FINISH;
@@ -201,48 +220,67 @@ bool csp::OpPar::Init( lua::LuaStack& args )
 		args.XMove( thread.GetStack(), 1 );
 
 		closure.process.SetLuaThread( thread );
-		closure.process.SetParentProcess( GetProcess() );
+		closure.process.SetParentProcess( ThisProcess() );
 		closure.refKey = args.RefInRegistry();
 	}
 
 	return true;
 }
 
-csp::WorkResult::Enum csp::OpPar::RunNextClosure()
+csp::WorkResult::Enum csp::OpPar::Evaluate( Host& host )
 {
-	if( m_closureToRun >= m_numClosures )
-		return WorkResult::FINISH;
+	bool finished = true;
 
-	ParClosure& closure = m_closures[ m_closureToRun++ ];
-	return closure.process.Resume(0);
+	if( m_closureToRun < m_numClosures )
+	{
+		ParClosure& closure = m_closures[ m_closureToRun++ ];
+
+		if( m_closureToRun < m_numClosures )
+		{
+			host.PushEvalStep( ThisProcess() );
+			finished = false;
+		}
+
+		closure.process.Evaluate( host );
+	}
+
+	if ( !CheckFinished() )
+		finished = false;
+
+	if (finished && !IsFinished())
+		SetFinished( true );
+
+	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
 }
 
-csp::WorkResult::Enum csp::OpPar::Work( time_t dt )
+csp::WorkResult::Enum csp::OpPar::Work( Host& host, time_t dt )
 {
-	//TODO: work here. We need stack and eval steps.
-	RunNextClosure();
-	RunNextClosure();
+	for( int i = 0; i < m_closureToRun; ++i )
+	{
+		Process& process = m_closures[ i ].process;
+		if( process.IsRunning() )
+			process.Work( host, dt );
+	}
 
-	WorkResult::Enum parResult = WorkResult::FINISH;
+	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
+}
 
+bool csp::OpPar::CheckFinished()
+{
+	bool finished = true;
 	for( int i = 0; i < m_closureToRun; ++i )
 	{
 		Process& process = m_closures[ i ].process;
 		if( process.IsRunning() )
 		{
-			WorkResult::Enum r = process.Work( dt );
-			if( r == WorkResult::YIELD )
-			{
-				parResult = WorkResult::YIELD;
-			}
-			else if( r == WorkResult::FINISH )
-			{
-				GetProcess().LuaThread().GetStack().UnrefInRegistry( m_closures[ i ].refKey );
-				m_closures[ i ].refKey = -1;
-			}
+			finished = false;
+		}
+		else if( m_closures[ i ].refKey != -1 )
+		{
+			ThisProcess().LuaThread().GetStack().UnrefInRegistry( m_closures[ i ].refKey );
+			m_closures[ i ].refKey = -1;
 		}
 	}
-
-	return parResult;
+	return finished;
 }
 

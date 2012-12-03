@@ -26,16 +26,15 @@ namespace csp
 		static Process* GetProcess( lua_State* luaState );
 		static void SetProcess( lua_State* luaState, Process* process );
 
-		int Operate( Operation& operation );
+		void Work( Host& host, time_t dt );
+		WorkResult::Enum Evaluate( Host& host );
 
-		WorkResult::Enum Resume( int numArgs );
-		WorkResult::Enum Work( time_t dt );
-
+		void SwitchCurrentOperation( Operation* pOperation );
 		bool IsRunning() const;
 
     private:
-		void SwitchCurrentOperation( Operation* pOperation );
 		Operation& CurrentOperation();
+		WorkResult::Enum Resume( int numArgs );
 
 		lua::LuaState m_luaThread;
 		Process* m_parentProcess;

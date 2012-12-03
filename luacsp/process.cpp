@@ -1,6 +1,7 @@
 
 #include "process.h"
 #include "operation.h"
+#include "host.h"
 
 csp::Process::Process()
 	: m_luaThread()
@@ -30,26 +31,6 @@ void csp::Process::SetProcess( lua_State* luaState, Process* process )
 	lua::LuaState::SetUserData( luaState, process );
 }
 
-int csp::Process::Operate( Operation& operation )
-{
-	SwitchCurrentOperation( &operation );
-
-	WorkResult::Enum res = CurrentOperation().Work( 0 );
-	switch( res )
-	{
-	case WorkResult::FINISH:
-	default:
-		{
-			lua::LuaStack luaStack = m_luaThread.GetStack();
-			int numRets = CurrentOperation().PushResults( luaStack );
-			SwitchCurrentOperation( NULL );
-			return numRets;
-		}
-	case WorkResult::YIELD:
-		return m_luaThread.Yield( 0 );
-	}
-}
-
 void csp::Process::SwitchCurrentOperation( Operation* pOperation )
 {
 	if( m_operation )
@@ -67,30 +48,50 @@ csp::Operation& csp::Process::CurrentOperation()
 	return *m_operation;
 }
 
-csp::WorkResult::Enum csp::Process::Work( time_t dt )
+void csp::Process::Work( Host& host, time_t dt )
 {
+	assert( m_operation );
+	WorkResult::Enum result = m_operation->Work( host, dt );
+	
+	if( result == WorkResult::FINISH )
+	{
+		m_operation->SetFinished( true );
+		assert( m_luaThread.Status() == lua::Return::YIELD );
+		host.PushEvalStep( *this );
+	}
+}
+
+
+csp::WorkResult::Enum csp::Process::Evaluate( Host& host )
+{
+	int numArgs = 0;
+
 	if( m_operation )
 	{
-		WorkResult::Enum result = m_operation->Work( dt );
-		if( result == WorkResult::YIELD )
-			return WorkResult::YIELD;
-	}
-	
-	if( m_luaThread.Status() == lua::Return::YIELD )
-	{
-		int numArgs = 0;
-		if( m_operation )
+		WorkResult::Enum result = m_operation->IsFinished()
+			? WorkResult::FINISH
+			: m_operation->Evaluate( host );
+
+		if( result == WorkResult::FINISH )
 		{
 			lua::LuaStack luaStack = m_luaThread.GetStack();
 			numArgs = m_operation->PushResults( luaStack );
 			SwitchCurrentOperation( NULL );
 		}
-		return Resume( numArgs );
+		else
+			return WorkResult::YIELD;
 	}
-
-	SwitchCurrentOperation( NULL );
-	return WorkResult::FINISH;
+	
+	WorkResult::Enum result = Resume( numArgs );
+	
+	if ( result == WorkResult::YIELD && m_operation )
+		host.PushEvalStep( *this );
+	else if ( result == WorkResult::FINISH && m_parentProcess )
+		host.PushEvalStep( *m_parentProcess );		
+	
+	return result;
 }
+
 
 csp::WorkResult::Enum csp::Process::Resume( int numArgs )
 {

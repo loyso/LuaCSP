@@ -1,7 +1,9 @@
 
 function main()
-	log(nil, true, 3.1415, "hello\n")
+	log("main begin\n")
+	sleep(0)
 	test1()
+	log("main end\n")
 end
 
 function test1()
@@ -18,7 +20,18 @@ function test2()
 		end,
 		function()
 			log("p2{\n")
-			sleep(2)
+			par(
+				function()
+					log("p2a{\n")
+					sleep(2)
+					log("p2a}\n")
+				end,
+				function()
+					log("p2b{\n")
+					sleep(1)
+					log("p2b}\n")
+				end
+			)
 			log("p2}\n")
 		end
 	)

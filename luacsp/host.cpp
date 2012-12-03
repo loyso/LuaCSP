@@ -37,7 +37,18 @@ csp::WorkResult::Enum csp::Host::Main()
 	if ( !stackValue.IsFunction() || stackValue.IsCFunction() )
 		return WorkResult::FINISH;
 	
-	return m_mainProcess.Resume(0);
+	PushEvalStep( m_mainProcess );
+	Evaluate();
+	return WorkResult::YIELD;
+}
+
+void csp::Host::Evaluate()
+{
+	while( !m_evalSteps.empty() )
+	{
+		csp::Process& process = PopEvalStep();
+		process.Evaluate( *this );
+	}
 }
 
 csp::WorkResult::Enum csp::Host::Work( time_t dt )
@@ -45,6 +56,21 @@ csp::WorkResult::Enum csp::Host::Work( time_t dt )
 	if( !m_mainProcess.IsRunning() )
 		return WorkResult::FINISH;
 
-	return m_mainProcess.Work( dt );
+	m_mainProcess.Work( *this, dt );
+	Evaluate();
+	return m_mainProcess.IsRunning() ? WorkResult::YIELD : WorkResult::FINISH;
+}
+
+void csp::Host::PushEvalStep( Process& process )
+{
+	m_evalSteps.push( &process );
+}
+
+csp::Process& csp::Host::PopEvalStep()
+{
+	Process* pProcess = m_evalSteps.top();
+	assert( pProcess );
+	m_evalSteps.pop();
+	return *pProcess;
 }
 

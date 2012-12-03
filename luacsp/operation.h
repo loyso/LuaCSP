@@ -22,16 +22,22 @@ namespace csp
 
 		int Initialize( lua_State* luaState );
 
-		virtual WorkResult::Enum Work( time_t dt ) = 0;
+		virtual WorkResult::Enum Evaluate( Host& host );
+		virtual WorkResult::Enum Work( Host& host, time_t dt ) = 0;
+		
 		virtual int PushResults( lua::LuaStack & luaStack );
 
+		bool IsFinished() const;
+		void SetFinished( bool finished );
+
 	protected:
-		Process& GetProcess() const;
+		Process& ThisProcess() const;
 
     private:
 		virtual bool Init( lua::LuaStack & args );
 
 		Process* m_pProcess;
+		bool m_finished;
     };
 
 	class OpSleep : public Operation
@@ -39,7 +45,8 @@ namespace csp
 	public:
 		OpSleep();
 
-		virtual WorkResult::Enum Work( time_t dt );
+		// virtual WorkResult::Enum Evaluate( Host& host );
+		virtual WorkResult::Enum Work( Host& host, time_t dt );
 
 	private:
 		virtual bool Init( lua::LuaStack & args );
@@ -60,10 +67,11 @@ namespace csp
 
 		virtual bool Init( lua::LuaStack& args );
 
-		virtual WorkResult::Enum Work( time_t dt );
+		virtual WorkResult::Enum Evaluate( Host& host );
+		virtual WorkResult::Enum Work( Host& host, time_t dt );
 
 	private:
-		WorkResult::Enum RunNextClosure();
+		bool CheckFinished();
 
 		struct ParClosure
 		{
