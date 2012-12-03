@@ -19,21 +19,23 @@ lua::LuaState& csp::Host::LuaState()
 
 void csp::Host::Initialize()
 {
-	lua::LuaStackValue globals = m_luaState.GetGlobals();
+	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
 	RegisterStandardOperations( m_luaState, globals );
+	m_luaState.GetStack().Pop(1);
 }
 
 void csp::Host::Shutdown()
 {
-	lua::LuaStackValue globals = m_luaState.GetGlobals();
+	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
 	UnregisterStandardOperations( m_luaState, globals );
+	m_luaState.GetStack().Pop(1);
 }
 
 csp::WorkResult::Enum csp::Host::Main()
 {
 	m_mainProcess.SetLuaThread( m_luaState );
 
-	lua::LuaStackValue stackValue = m_mainProcess.LuaThread().GetGlobal("main");
+	lua::LuaStackValue stackValue = m_mainProcess.LuaThread().GetStack().PushGlobalValue("main");
 	if ( !stackValue.IsFunction() || stackValue.IsCFunction() )
 		return WorkResult::FINISH;
 	

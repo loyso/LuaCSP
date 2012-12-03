@@ -53,12 +53,6 @@ namespace csp
 		float m_seconds;
 	};
 
-	struct OperationDescription
-	{
-		int (*function)( lua_State* L );
-		const char* name;
-	};
-
 	class OpPar : public Operation
 	{
 	public:
@@ -83,9 +77,6 @@ namespace csp
 		int m_closureToRun;
 	};
 
-
-	void RegisterOperations( lua::LuaState & state, lua::LuaStackValue & value, const OperationDescription descriptions[] );
-	void UnregisterOperations( lua::LuaState & state, lua::LuaStackValue & value, const OperationDescription descriptions[] );
 
 	void RegisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value );
 	void UnregisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value );

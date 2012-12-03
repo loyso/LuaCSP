@@ -37,6 +37,8 @@ namespace lua
 		bool IsNumber() const;
 		bool IsString() const;
 		bool IsBoolean() const;
+		bool IsUserData() const;
+		bool IsTable() const;
 
 		LuaNumber_t GetNumber() const;
 		LuaNumber_t CheckNumber() const;
@@ -46,7 +48,8 @@ namespace lua
 		const char* CheckString() const; 
 		const char* OptString( const char* default ) const; 
 
-		bool GetBoolean() const; 
+		bool GetBoolean() const;
+		void* GetUserData() const;
 
 		int ArgError( const char* errMsg );
 
@@ -64,6 +67,8 @@ namespace lua
 		LuaStack( lua_State* state );
 
 		LuaStackValue operator[]( int index ) const;
+		int GetTop() const;
+		LuaStackValue GetTopValue() const;
 
 		int NumArgs() const;
 
@@ -71,14 +76,29 @@ namespace lua
 
 		void PushNil();
 		void PushCFunction( int (*function)(lua_State* L) );
-		void PushRegistryReferenced( int key );
+		void PushLightUserData( void* userData );
+		LuaStackValue PushTable( int narr=0, int nrec=0 );
+		void* PushUserData( size_t size );
+
+		LuaStackValue PushGlobalValue(const char * var) const;
+		LuaStackValue PushGlobalTable() const;
 
 		int RefInRegistry();
 		void UnrefInRegistry( int key );
+		void PushRegistryReferenced( int key );
+
+		void RegistrySet();
+		lua::LuaStackValue RegistryGet();
+
+		LuaStackValue GetField(LuaStackValue & value, const char * key) const;
+		void SetField(LuaStackValue & value, const char * key);
 
 		LuaState NewThread();
 
 		void XMove( const LuaStack& toStack, int numValues );
+		void SetMetaTable( const LuaStackValue& value );
+
+		void Pop(int numValues);
 
 	private:
 		lua_State* m_state;
@@ -101,23 +121,18 @@ namespace lua
 		Return::Enum Resume(int numArgs, LuaState * pStateFrom);
 
 		void CheckStack() const;		
-		void Pop(int numValues);
 
 		int GetTop() const;
 		LuaStackValue GetTopValue() const;
 
-		LuaStackValue GetGlobal(const char * var) const;
-		LuaStackValue GetGlobals() const;
 		LuaStack GetStack() const;
 		
-		LuaStackValue GetField(LuaStackValue & value, const char * key) const;
-		void SetField(LuaStackValue & value, const char * key);
-
         // Per-thread user data requires the Lua interpreter to be compiled with LUAI_EXTRASPACE=sizeof(void*)
         static void* GetUserData( lua_State* luaState );
         static void SetUserData( lua_State* luaState, void* userData );
 
 		int Error(const char* format, ...);
+		Return::Enum PrintError( Return::Enum result );
 
 		int Yield( int numArgs );
 

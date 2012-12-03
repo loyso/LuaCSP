@@ -1,8 +1,11 @@
 
 function main()
 	log("main begin\n")
-	sleep(0)
+	local chan = Channel()
+	SLEEP(0)
 	test1()
+	chan:IN()
+	chan:OUT()
 	log("main end\n")
 end
 
@@ -12,29 +15,29 @@ end
 
 function test2()
 	log("before\n")
-	par(
+	PAR(
 		function()
 			log("p1{\n")
-			sleep(3)
+			SLEEP(3)
 			log("p1}\n")
 		end,
 		function()
 			log("p2{\n")
-			par(
+			PAR(
 				function()
 					log("p2a{\n")
-					sleep(2)
+					SLEEP(2)
 					log("p2a}\n")
 				end,
 				function()
 					log("p2b{\n")
-					sleep(1)
+					SLEEP(1)
 					log("p2b}\n")
 				end
 			)
 			log("p2}\n")
 		end
 	)
-	sleep(3)
+	SLEEP(3)
 	log("after\n")
 end

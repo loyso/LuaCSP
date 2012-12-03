@@ -88,8 +88,11 @@ void lua::LuaState::Close()
 lua::Return::Enum lua::LuaState::LoadFromMemory(const void* data, size_t size, const char* chunkname)
 {
     LuaReader luaReader(data, size);
-    int value = lua_load(m_state, LuaReader::Read, &luaReader, chunkname, "bt");
-    return (Return::Enum)value;
+    Return::Enum retValue = (Return::Enum)lua_load(m_state, LuaReader::Read, &luaReader, chunkname, "bt");
+	if( retValue == LUA_OK || retValue == LUA_YIELD )
+		return retValue;
+
+	return PrintError( retValue );
 }
 
 
@@ -105,13 +108,6 @@ void lua::LuaState::SetUserData( lua_State* luaState, void* userData )
     *((void**)luaState - 1) = userData;
 }
 
-lua::LuaStackValue lua::LuaState::GetGlobal(const char * var) const
-{
-	CheckStack();
-	lua_getglobal(m_state, var);
-	return LuaStackValue( m_state, GetTop() );
-}
-
 void lua::LuaState::CheckStack() const
 {
 	luaL_checkstack(m_state, LUA_MINSTACK, NULL);
@@ -121,12 +117,6 @@ int lua::LuaState::GetTop() const
 {
 	return lua_gettop(m_state);
 }
-
-void lua::LuaState::Pop( int numValues )
-{
-	lua_pop(m_state, numValues);
-}
-
 
 lua::Return::Enum lua::LuaState::Call( int numArgs, int numResults )
 {
@@ -146,29 +136,31 @@ int lua::Print(const char* fmt, ...)
 	return retval;
 }
 
-lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
-{
-	Return::Enum retValue = (Return::Enum)lua_resume( m_state, pStateFrom ? pStateFrom->InternalState() : NULL, numArgs );
 
+lua::Return::Enum lua::LuaState::PrintError( Return::Enum result )
+{
 	const char * errCode = "[no error code]";
 
-	switch( retValue )
+	switch( result )
 	{
 	case LUA_ERRRUN:
-		errCode = "LuaState::Resume: runtime error";
+		errCode = "LuaState: runtime error";
+		break;
+	case LUA_ERRSYNTAX:
+		errCode = "LuaState: syntax error";
 		break;
 	case LUA_ERRMEM:
-		errCode = "LuaState::Resume: memory allocation error";
+		errCode = "LuaState: memory allocation error";
 		break;
 	case LUA_ERRERR:
-		errCode = "LuaState::Resume: error while running the error handler function";
+		errCode = "LuaState: error while running the error handler function";
 		break;
 	case LUA_ERRGCMM: 
-		errCode = "LuaState::Resume: error while running a gc metamethod";
+		errCode = "LuaState: error while running a gc metamethod";
 		break;
 	case LUA_OK:
 	case LUA_YIELD:
-		return retValue;
+		return result;
 	}
 
 	const char * errMessage = GetTopValue().OptString( "[no error message]" );
@@ -178,8 +170,17 @@ lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
 	const char * stackInfo = GetTopValue().OptString( "[no stack]" );
 	Print( "%s\n", stackInfo );
 
-	Pop(2);
-	return retValue;
+	GetStack().Pop(2);
+	return result;
+}
+
+lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
+{
+	Return::Enum retValue = (Return::Enum)lua_resume( m_state, pStateFrom ? pStateFrom->InternalState() : NULL, numArgs );
+	if( retValue == LUA_OK || retValue == LUA_YIELD )
+		return retValue;
+
+	return PrintError( retValue );
 }
 
 int lua::LuaState::Yield( int numArgs )
@@ -190,24 +191,6 @@ int lua::LuaState::Yield( int numArgs )
 lua::LuaStackValue lua::LuaState::GetTopValue() const
 {
 	return LuaStackValue( m_state, GetTop() );
-}
-
-lua::LuaStackValue lua::LuaState::GetField(LuaStackValue & value, const char * key) const
-{
-	lua_getfield(m_state, value.Index(), key);
-	return GetTopValue();
-}
-
-void lua::LuaState::SetField( LuaStackValue & value, const char * key )
-{
-	lua_setfield(m_state, value.Index(), key);
-}
-
-lua::LuaStackValue lua::LuaState::GetGlobals() const
-{
-	lua_pushinteger( m_state, LUA_RIDX_GLOBALS );
-	lua_rawget( m_state, LUA_REGISTRYINDEX ); 
-	return GetTopValue();
 }
 
 int lua::LuaState::Error( const char* format, ... )
@@ -319,6 +302,21 @@ void lua::LuaStackValue::PushValue()
 	lua_pushvalue( m_state, m_index );
 }
 
+void* lua::LuaStackValue::GetUserData() const
+{
+	return lua_touserdata( m_state, m_index );
+}
+
+bool lua::LuaStackValue::IsUserData() const
+{
+	return !!lua_isuserdata( m_state, m_index );
+}
+
+bool lua::LuaStackValue::IsTable() const
+{
+	return !!lua_istable( m_state, m_index );
+}
+
 lua::LuaStack::LuaStack( lua_State* luaState )
 	: m_state( luaState )
 {
@@ -374,5 +372,79 @@ void lua::LuaStack::XMove( const LuaStack& toStack, int numValues )
 {
 	lua_xmove( m_state, toStack.State().InternalState(), numValues );
 }
+
+void lua::LuaStack::Pop( int numValues )
+{
+	lua_pop(m_state, numValues);
+}
+
+void lua::LuaStack::PushLightUserData( void* userData )
+{
+	lua_pushlightuserdata( m_state, userData );
+}
+
+void* lua::LuaStack::PushUserData( size_t size )
+{
+	return lua_newuserdata( m_state, size );
+}
+
+lua::LuaStackValue lua::LuaStack::PushTable( int narr, int nrec )
+{
+	lua_createtable( m_state, narr, nrec );
+	return GetTopValue();
+}
+
+void lua::LuaStack::SetMetaTable( const LuaStackValue& value )
+{
+	lua_setmetatable( m_state, value.Index() );
+}
+
+lua::LuaStackValue lua::LuaStack::GetField(LuaStackValue & value, const char * key) const
+{
+	lua_getfield(m_state, value.Index(), key);
+	return GetTopValue();
+}
+
+void lua::LuaStack::SetField( LuaStackValue & value, const char * key )
+{
+	lua_setfield(m_state, value.Index(), key);
+}
+
+lua::LuaStackValue lua::LuaStack::GetTopValue() const
+{
+	return LuaStackValue( m_state, GetTop() );
+}
+
+void lua::LuaStack::RegistrySet()
+{
+	lua_rawset( m_state, LUA_REGISTRYINDEX );
+}
+
+lua::LuaStackValue lua::LuaStack::RegistryGet()
+{
+	lua_rawget( m_state, LUA_REGISTRYINDEX );
+	return GetTopValue();
+}
+
+lua::LuaStackValue lua::LuaStack::PushGlobalValue(const char * var) const
+{
+	lua_getglobal(m_state, var);
+	return LuaStackValue( m_state, GetTop() );
+}
+
+lua::LuaStackValue lua::LuaStack::PushGlobalTable() const
+{
+	lua_pushinteger( m_state, LUA_RIDX_GLOBALS );
+	lua_rawget( m_state, LUA_REGISTRYINDEX ); 
+	return GetTopValue();
+}
+
+int lua::LuaStack::GetTop() const
+{
+	return lua_gettop( m_state );
+}
+
+
+
 
 

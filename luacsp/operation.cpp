@@ -3,6 +3,7 @@
 #include "process.h"
 #include "operation.h"
 #include "host.h"
+#include "channel.h"
 
 csp::Operation::Operation()
 	: m_pProcess()
@@ -95,13 +96,13 @@ csp::WorkResult::Enum csp::OpSleep::Work( Host&, time_t dt )
 
 namespace operations
 {
-	int sleep( lua_State* L );
-	int par( lua_State* L );
+	int SLEEP( lua_State* luaState );
+	int PAR( lua_State* luaState );
 }
 
 namespace helpers
 {
-	int log( lua_State* L );
+	int log( lua_State* luaState );
 }
 
 int helpers::log( lua_State* luaState )
@@ -127,52 +128,36 @@ int helpers::log( lua_State* luaState )
 	return 0;
 }
 
-int operations::sleep( lua_State* luaState )
+int operations::SLEEP( lua_State* luaState )
 {
 	csp::OpSleep* pSleep = new csp::OpSleep();
 	return pSleep->Initialize( luaState );
 }
 
-int operations::par( lua_State* luaState )
+int operations::PAR( lua_State* luaState )
 {
 	csp::OpPar* pPar = new csp::OpPar();
 	return pPar->Initialize( luaState );
 }
 
-const csp::OperationDescription operationDescriptions[] =
+const csp::FunctionRegistration operationDescriptions[] =
 {
-	  helpers::log, "log"
-	, operations::sleep, "sleep"
-	, operations::par, "par"
+	  "log", helpers::log
+	, "SLEEP", operations::SLEEP
+	, "PAR", operations::PAR
 	, NULL, NULL
 };
 
-void csp::RegisterOperations( lua::LuaState & state, lua::LuaStackValue & value, const OperationDescription descriptions[] )
-{
-	for( int i = 0; descriptions[i].function; ++i)
-	{
-		state.GetStack().PushCFunction( descriptions[i].function );
-		state.SetField( value, descriptions[i].name );
-	}
-}
-
-void csp::UnregisterOperations( lua::LuaState & state, lua::LuaStackValue & value, const OperationDescription descriptions[] )
-{
-	for( int i = 0; descriptions[i].function; ++i)
-	{
-		state.GetStack().PushNil();
-		state.SetField( value, descriptions[i].name );
-	}
-}
-
 void csp::RegisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value )
 {
-	RegisterOperations( state, value, operationDescriptions );
+	RegisterFunctions( state, value, operationDescriptions );
+	InitializeChannels( state );
 }
 
 void csp::UnregisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value )
 {
-	UnregisterOperations( state, value, operationDescriptions );
+	ShutdownChannels( state );
+	UnregisterFunctions( state, value, operationDescriptions );
 }
 
 csp::OpPar::OpPar()

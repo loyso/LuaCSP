@@ -50,6 +50,10 @@ int main(int argc, const char* argv[])
 				} 
 			}
         }
+		else
+		{
+
+		}
 
         delete[] memblock;
     }
