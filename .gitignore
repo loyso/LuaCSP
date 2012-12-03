@@ -1,5 +1,5 @@
 intermediate
-/output
-/*.suo
-/*.vcxproj.user
-/*.vcxproj.filters
+output
+*.suo
+*.vcxproj.user
+*.vcxproj.filters
