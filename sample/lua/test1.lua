@@ -1,17 +1,32 @@
 
 function main()
 	log("main begin\n")
-	SLEEP(0)
-	test1()
-	test3()
+	testInOut()
+	-- testPar()
 	log("main end\n")
 end
 
-function test1()
-	test2()
+function testInOut()
+	local ch = Channel()
+	PAR(
+		function()
+			log("rcv1{\n")
+			local str, num, bool = ch:IN()
+			log("received:", str, num, bool, "\n")
+			ch:IN()
+			log("rcv1}\n")
+		end,
+		function()
+			log("send1{\n")
+			ch:OUT("hi", 1, true)
+			SLEEP(3)
+			ch:OUT()
+			log("send1}\n")
+		end
+	)
 end
 
-function test2()
+function testPar()
 	log("before\n")
 	PAR(
 		function()
@@ -40,21 +55,3 @@ function test2()
 	log("after\n")
 end
 
-function test3()
-	local ch = Channel()
-	PAR(
-		function()
-			log("send1{\n")
-			ch:OUT("hi", 1, true)
-			ch:OUT()
-			log("send1}\n")
-		end,
-		function()
-			log("rcv1{\n")
-			local str, num, bool = ch:IN()
-			log("received:", str, num, bool, "\n")
-			ch:IN()
-			log("rcv1}\n")
-		end
-	)
-end
