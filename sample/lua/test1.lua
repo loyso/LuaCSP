@@ -1,11 +1,9 @@
 
 function main()
 	log("main begin\n")
-	local chan = Channel()
 	SLEEP(0)
 	test1()
-	chan:IN()
-	chan:OUT()
+	test3()
 	log("main end\n")
 end
 
@@ -40,4 +38,23 @@ function test2()
 	)
 	SLEEP(3)
 	log("after\n")
+end
+
+function test3()
+	local ch = Channel()
+	PAR(
+		function()
+			log("send1{\n")
+			ch:OUT("hi", 1, true)
+			ch:OUT()
+			log("send1}\n")
+		end,
+		function()
+			log("rcv1{\n")
+			local str, num, bool = ch:IN()
+			log("received:", str, num, bool, "\n")
+			ch:IN()
+			log("rcv1}\n")
+		end
+	)
 end

@@ -75,6 +75,7 @@ namespace csp
 		};
 		ParClosure * m_closures;
 		int m_numClosures;
+
 		int m_closureToRun;
 	};
 

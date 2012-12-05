@@ -146,15 +146,26 @@ void csp::ShutdownChannels( lua::LuaState& state )
 csp::OpChannel::OpChannel()
 	: m_pChannel()
 	, m_channelRefKey( lua::LUA_NO_REF )
+	, m_arguments()
+	, m_numArguments( 0 )
+	, m_argumentsMoved( false )
 {
 }
 
 csp::OpChannel::~OpChannel()
 {
 	assert( m_channelRefKey == lua::LUA_NO_REF );
+
+	for( int i = 0; i < m_numArguments; ++i )
+	{
+		assert( m_arguments[i].refKey == lua::LUA_NO_REF );
+	}
+
+	delete[] m_arguments;
+	m_arguments = NULL;
 }
 
-bool csp::OpChannel::Init( lua::LuaStack& args )
+bool csp::OpChannel::InitChannel( lua::LuaStack& args )
 {
 	lua::LuaStackValue channelArg = args[1];
 	if( !IsChannelArg( channelArg ) )
@@ -170,9 +181,24 @@ bool csp::OpChannel::Init( lua::LuaStack& args )
 		return false;
 	}
 
+	channelArg.PushValue();
 	m_channelRefKey = args.RefInRegistry();
+
 	m_pChannel = pChannel;
 	return true;
+}
+
+void csp::OpChannel::InitArguments( lua::LuaStack& args )
+{
+	m_numArguments = args.NumArgs() - 1;
+	if ( m_numArguments > 0 )
+		m_arguments = new ChannelArgument[ m_numArguments ];
+
+	for( int i = 2; i <= args.NumArgs(); ++i )
+	{
+		args[ i ].PushValue();
+		m_arguments[ i-2 ].refKey = args.RefInRegistry();
+	}
 }
 
 csp::WorkResult::Enum csp::OpChannel::Work( Host&, time_t )
@@ -187,6 +213,60 @@ void csp::OpChannel::UnrefChannel( lua::LuaStack const& stack )
 	m_channelRefKey = lua::LUA_NO_REF;
 }
 
+csp::Channel& csp::OpChannel::ThisChannel()
+{
+	assert( m_pChannel );
+	return *m_pChannel;
+}
+
+bool csp::OpChannel::HasChannel()
+{
+	return m_pChannel != NULL;
+}
+
+void csp::OpChannel::UnrefArguments( lua::LuaStack const& stack )
+{
+	for( int i = 0; i < m_numArguments; ++i )
+	{
+		stack.UnrefInRegistry( m_arguments[i].refKey );
+		m_arguments[i].refKey = lua::LUA_NO_REF;
+	}
+}
+
+void csp::OpChannel::MoveChannelArguments( ChannelArgument* arguments, int numArguments )
+{
+	assert( m_arguments == NULL );
+	assert( m_numArguments == 0 );
+
+	m_arguments = arguments;
+	m_numArguments = numArguments;
+
+	m_argumentsMoved = true;
+}
+
+void csp::OpChannel::ArgumentsMoved()
+{
+	m_arguments = NULL;
+	m_numArguments = 0;
+
+	m_argumentsMoved = true;
+}
+
+csp::ChannelArgument* csp::OpChannel::Arguments() const
+{
+	return m_arguments;
+}
+
+int csp::OpChannel::NumArguments() const
+{
+	return m_numArguments;
+}
+
+bool csp::OpChannel::HaveArgumentsMoved() const
+{
+	return m_argumentsMoved;
+}
+
 
 csp::OpChannelOut::OpChannelOut()
 {
@@ -196,10 +276,60 @@ csp::OpChannelOut::~OpChannelOut()
 {
 }
 
+bool csp::OpChannelOut::Init( lua::LuaStack & args )
+{
+	if( !InitChannel( args ) )
+		return false;
+
+	InitArguments( args );
+
+	if( ThisChannel().OutAttached() )
+	{
+		args[1].ArgError( "channel is in output operation already" );
+		return false;
+	}
+
+	ThisChannel().SetAttachmentOut( this );
+	return true;
+}
+
 csp::WorkResult::Enum csp::OpChannelOut::Evaluate( Host& host )
 {
-	UnrefChannel( host.LuaState().GetStack() );
-	return WorkResult::FINISH;
+	Channel& channel = ThisChannel();
+
+	if( HaveArgumentsMoved() )
+	{
+		UnrefChannel( host.LuaState().GetStack() );
+		return WorkResult::FINISH;
+	}
+
+	if( channel.InAttached() )
+	{
+		ChannelAttachmentIn_i& in = channel.InAttachment();
+
+		MoveChannelArguments();
+
+		host.PushEvalStep( ThisProcess() );
+		host.PushEvalStep( in.ProcessToEvaluate() );
+	}
+
+	return WorkResult::YIELD;
+}
+
+csp::Process& csp::OpChannelOut::ProcessToEvaluate()
+{
+	return ThisProcess();
+}
+
+void csp::OpChannelOut::MoveChannelArguments()
+{
+	Channel& channel = ThisChannel();
+	ChannelAttachmentIn_i& in = channel.InAttachment();
+	
+	in.MoveChannelArguments( Arguments(), NumArguments() );
+	ArgumentsMoved();	
+
+	channel.SetAttachmentOut( NULL );
 }
 
 
@@ -211,9 +341,110 @@ csp::OpChannelIn::~OpChannelIn()
 {
 }
 
+bool csp::OpChannelIn::Init( lua::LuaStack & args )
+{
+	if( !InitChannel( args ) )
+		return false;
+
+	if( ThisChannel().InAttached() )
+	{
+		args[1].ArgError( "channel is in input operation already" );
+		return false;
+	}
+
+	ThisChannel().SetAttachmentIn( this );
+	return true;
+}
+
 csp::WorkResult::Enum csp::OpChannelIn::Evaluate( Host& host )
 {
-	UnrefChannel( host.LuaState().GetStack() );
-	return WorkResult::FINISH;
+	Channel& channel = ThisChannel();
+
+	if( HaveArgumentsMoved() )
+	{
+		UnrefChannel( host.LuaState().GetStack() );
+		return WorkResult::FINISH;
+	}
+		
+	if( channel.OutAttached() )
+	{
+		ChannelAttachmentOut_i& out = channel.OutAttachment();
+		out.MoveChannelArguments();
+
+		host.PushEvalStep( out.ProcessToEvaluate() );
+		host.PushEvalStep( ThisProcess() );
+	}
+
+	return WorkResult::YIELD;
+}
+
+csp::Process& csp::OpChannelIn::ProcessToEvaluate()
+{
+	return ThisProcess();
+}
+
+void csp::OpChannelIn::MoveChannelArguments( ChannelArgument* arguments, int numArguments )
+{
+	OpChannel::MoveChannelArguments( arguments, numArguments );
+	ThisChannel().SetAttachmentIn( NULL );
+}
+
+int csp::OpChannelIn::PushResults( lua::LuaStack & luaStack )
+{
+	ChannelArgument* arguments = Arguments();
+	int numArguments = NumArguments();
+
+	for( int i = 0; i < numArguments; ++i )
+	{
+		luaStack.PushRegistryReferenced( arguments[i].refKey );
+	}
+
+	UnrefArguments( luaStack );
+	return numArguments;
+}
+
+
+csp::Channel::Channel()
+	: m_pAttachmentIn()
+	, m_pAttachmentOut()
+{
+}
+
+csp::Channel::~Channel()
+{
+	assert( m_pAttachmentIn == NULL );
+	assert( m_pAttachmentOut == NULL );
+}
+
+void csp::Channel::SetAttachmentIn( ChannelAttachmentIn_i* pAttachment )
+{
+	m_pAttachmentIn = pAttachment;
+}
+
+void csp::Channel::SetAttachmentOut( ChannelAttachmentOut_i* pAttachment )
+{
+	m_pAttachmentOut = pAttachment;
+}
+
+bool csp::Channel::InAttached() const
+{
+	return m_pAttachmentIn != NULL;
+}
+
+bool csp::Channel::OutAttached() const
+{
+	return m_pAttachmentOut != NULL;
+}
+
+csp::ChannelAttachmentIn_i& csp::Channel::InAttachment() const
+{
+	assert( m_pAttachmentIn );
+	return *m_pAttachmentIn;
+}
+
+csp::ChannelAttachmentOut_i& csp::Channel::OutAttachment() const
+{
+	assert( m_pAttachmentOut );
+	return *m_pAttachmentOut;
 }
 
