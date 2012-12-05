@@ -171,7 +171,7 @@ csp::OpPar::~OpPar()
 {
 	for( int i = 0; i < m_numClosures; ++i )
 	{
-		assert( m_closures[i].refKey == -1 );
+		assert( m_closures[i].refKey == lua::LUA_NO_REF );
 	}
 
 	delete[] m_closures;
@@ -260,10 +260,10 @@ bool csp::OpPar::CheckFinished()
 		{
 			finished = false;
 		}
-		else if( m_closures[ i ].refKey != -1 )
+		else if( m_closures[ i ].refKey != lua::LUA_NO_REF )
 		{
 			ThisProcess().LuaThread().GetStack().UnrefInRegistry( m_closures[ i ].refKey );
-			m_closures[ i ].refKey = -1;
+			m_closures[ i ].refKey = lua::LUA_NO_REF;
 		}
 	}
 	return finished;

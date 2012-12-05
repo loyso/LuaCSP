@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "csp.h"
+#include "process.h"
 
 namespace lua
 {
@@ -70,7 +71,7 @@ namespace csp
 		struct ParClosure
 		{
 			Process process;
-			int refKey;
+			lua::LuaRef_t refKey;
 		};
 		ParClosure * m_closures;
 		int m_numClosures;

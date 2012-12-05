@@ -6,6 +6,9 @@ namespace lua
 {
 	typedef float LuaNumber_t; // must be correspondent to lua_Number in luaconf.h
 
+	typedef int LuaRef_t;
+	const LuaRef_t LUA_NO_REF = -2; // LUA_NOREF
+
     namespace Return
     {
         enum Enum
@@ -83,9 +86,9 @@ namespace lua
 		LuaStackValue PushGlobalValue(const char * var) const;
 		LuaStackValue PushGlobalTable() const;
 
-		int RefInRegistry();
-		void UnrefInRegistry( int key );
-		void PushRegistryReferenced( int key );
+		LuaRef_t RefInRegistry() const;
+		void UnrefInRegistry( LuaRef_t key ) const;
+		void PushRegistryReferenced( LuaRef_t key ) const;
 
 		void RegistrySet();
 		lua::LuaStackValue RegistryGet();

@@ -1,6 +1,7 @@
 #include <luacpp/luacpp.h>
 
 #include "channel.h"
+#include "host.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -54,12 +55,14 @@ int csp::GcObject_Gc( lua_State* luaState )
 
 int csp::Channel_IN( lua_State* luaState )
 {
-	return 0;
+	OpChannelIn* pIn = new OpChannelIn();
+	return pIn->Initialize( luaState );
 }
 
 int csp::Channel_OUT( lua_State* luaState )
 {
-	return 0;
+	OpChannelOut* pOut = new OpChannelOut();
+	return pOut->Initialize( luaState );
 }
 
 void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey )
@@ -81,6 +84,24 @@ void csp::PushChannel( lua_State* luaState, Channel& ch )
 {
 	PushGcObject( luaState, ch, (void*)channelFunctions );
 }
+
+
+bool csp::IsChannelArg( lua::LuaStackValue const& value )
+{
+	return value.IsUserData(); //TODO: add more checks.
+}
+
+
+csp::Channel* csp::GetChannelArg( lua::LuaStackValue const& value )
+{
+	if( !value.IsUserData() )
+		return NULL;
+
+	GcObject** pGcObject = (GcObject**)value.GetUserData();
+	Channel* pChannel = static_cast< Channel* >( *pGcObject ); //TODO: add more type checks.
+	return pChannel;
+}
+
 
 int csp::channel( lua_State* luaState )
 {
@@ -120,3 +141,79 @@ void csp::ShutdownChannels( lua::LuaState& state )
 	UnregisterFunctions( state, globals, channelGlobals );
 	stack.Pop(1);
 }
+
+
+csp::OpChannel::OpChannel()
+	: m_pChannel()
+	, m_channelRefKey( lua::LUA_NO_REF )
+{
+}
+
+csp::OpChannel::~OpChannel()
+{
+	assert( m_channelRefKey == lua::LUA_NO_REF );
+}
+
+bool csp::OpChannel::Init( lua::LuaStack& args )
+{
+	lua::LuaStackValue channelArg = args[1];
+	if( !IsChannelArg( channelArg ) )
+	{
+		channelArg.ArgError( "channel expected" );
+		return false;
+	}
+
+	Channel* pChannel = GetChannelArg( channelArg );
+	if( pChannel == NULL )
+	{
+		channelArg.ArgError( "channel value expected" );
+		return false;
+	}
+
+	m_channelRefKey = args.RefInRegistry();
+	m_pChannel = pChannel;
+	return true;
+}
+
+csp::WorkResult::Enum csp::OpChannel::Work( Host&, time_t )
+{
+	return WorkResult::YIELD;
+}
+
+void csp::OpChannel::UnrefChannel( lua::LuaStack const& stack )
+{
+	m_pChannel = NULL;
+	stack.UnrefInRegistry( m_channelRefKey );
+	m_channelRefKey = lua::LUA_NO_REF;
+}
+
+
+csp::OpChannelOut::OpChannelOut()
+{
+}
+
+csp::OpChannelOut::~OpChannelOut()
+{
+}
+
+csp::WorkResult::Enum csp::OpChannelOut::Evaluate( Host& host )
+{
+	UnrefChannel( host.LuaState().GetStack() );
+	return WorkResult::FINISH;
+}
+
+
+csp::OpChannelIn::OpChannelIn()
+{
+}
+
+csp::OpChannelIn::~OpChannelIn()
+{
+}
+
+csp::WorkResult::Enum csp::OpChannelIn::Evaluate( Host& host )
+{
+	UnrefChannel( host.LuaState().GetStack() );
+	return WorkResult::FINISH;
+}
+

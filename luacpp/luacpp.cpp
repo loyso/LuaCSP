@@ -348,17 +348,17 @@ void lua::LuaStack::PushCFunction( int (*function)(lua_State* L) )
 }
 
 
-void lua::LuaStack::PushRegistryReferenced( int key )
+void lua::LuaStack::PushRegistryReferenced( LuaRef_t key ) const
 {
 	lua_rawgeti( m_state, LUA_REGISTRYINDEX, key );
 }
 
-int lua::LuaStack::RefInRegistry()
+lua::LuaRef_t lua::LuaStack::RefInRegistry() const
 {
 	return luaL_ref( m_state, LUA_REGISTRYINDEX );
 }
 
-void lua::LuaStack::UnrefInRegistry( int key )
+void lua::LuaStack::UnrefInRegistry( LuaRef_t key ) const
 {
 	luaL_unref( m_state, LUA_REGISTRYINDEX, key );
 }
