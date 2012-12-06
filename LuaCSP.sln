@@ -1,16 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "core\core.vcxproj", "{1017276B-F91C-4426-8423-28E2E48B391F}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-5.2.1", "lua-5.2.1\lua-5.2.1.vcxproj", "{58A96FC6-C017-4F92-8DDA-89A22D96FC8E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1017276B-F91C-4426-8423-28E2E48B391F} = {1017276B-F91C-4426-8423-28E2E48B391F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sample", "sample\sample.vcxproj", "{94F73E47-C1D8-4937-A9B0-8BEDC55A20D3}"
 	ProjectSection(ProjectDependencies) = postProject
+		{1017276B-F91C-4426-8423-28E2E48B391F} = {1017276B-F91C-4426-8423-28E2E48B391F}
 		{58A96FC6-C017-4F92-8DDA-89A22D96FC8E} = {58A96FC6-C017-4F92-8DDA-89A22D96FC8E}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luacpp", "luacpp\luacpp.vcxproj", "{C0455ADD-9287-4877-9B59-9532E4A7D127}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1017276B-F91C-4426-8423-28E2E48B391F} = {1017276B-F91C-4426-8423-28E2E48B391F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luacsp", "luacsp\luacsp.vcxproj", "{9281941B-01D5-4B94-BA72-C670D8DA856D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1017276B-F91C-4426-8423-28E2E48B391F} = {1017276B-F91C-4426-8423-28E2E48B391F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +46,10 @@ Global
 		{9281941B-01D5-4B94-BA72-C670D8DA856D}.Debug|Win32.Build.0 = Debug|Win32
 		{9281941B-01D5-4B94-BA72-C670D8DA856D}.Release|Win32.ActiveCfg = Release|Win32
 		{9281941B-01D5-4B94-BA72-C670D8DA856D}.Release|Win32.Build.0 = Release|Win32
+		{1017276B-F91C-4426-8423-28E2E48B391F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1017276B-F91C-4426-8423-28E2E48B391F}.Debug|Win32.Build.0 = Debug|Win32
+		{1017276B-F91C-4426-8423-28E2E48B391F}.Release|Win32.ActiveCfg = Release|Win32
+		{1017276B-F91C-4426-8423-28E2E48B391F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

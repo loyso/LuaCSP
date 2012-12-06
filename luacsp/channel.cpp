@@ -55,13 +55,13 @@ int csp::GcObject_Gc( lua_State* luaState )
 
 int csp::Channel_IN( lua_State* luaState )
 {
-	OpChannelIn* pIn = new OpChannelIn();
+	OpChannelIn* pIn = CORE_NEW OpChannelIn();
 	return pIn->Initialize( luaState );
 }
 
 int csp::Channel_OUT( lua_State* luaState )
 {
-	OpChannelOut* pOut = new OpChannelOut();
+	OpChannelOut* pOut = CORE_NEW OpChannelOut();
 	return pOut->Initialize( luaState );
 }
 
@@ -105,7 +105,7 @@ csp::Channel* csp::GetChannelArg( lua::LuaStackValue const& value )
 
 int csp::channel( lua_State* luaState )
 {
-	csp::Channel* pChannel = new csp::Channel();
+	csp::Channel* pChannel = CORE_NEW csp::Channel();
 	csp::PushChannel( luaState, *pChannel );
 	return 1;
 }
@@ -192,7 +192,7 @@ void csp::OpChannel::InitArguments( lua::LuaStack& args )
 {
 	m_numArguments = args.NumArgs() - 1;
 	if ( m_numArguments > 0 )
-		m_arguments = new ChannelArgument[ m_numArguments ];
+		m_arguments = CORE_NEW ChannelArgument[ m_numArguments ];
 
 	for( int i = 2; i <= args.NumArgs(); ++i )
 	{

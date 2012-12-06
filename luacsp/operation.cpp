@@ -130,13 +130,13 @@ int helpers::log( lua_State* luaState )
 
 int operations::SLEEP( lua_State* luaState )
 {
-	csp::OpSleep* pSleep = new csp::OpSleep();
+	csp::OpSleep* pSleep = CORE_NEW csp::OpSleep();
 	return pSleep->Initialize( luaState );
 }
 
 int operations::PAR( lua_State* luaState )
 {
-	csp::OpPar* pPar = new csp::OpPar();
+	csp::OpPar* pPar = CORE_NEW csp::OpPar();
 	return pPar->Initialize( luaState );
 }
 
@@ -193,7 +193,7 @@ bool csp::OpPar::Init( lua::LuaStack& args )
 		}
 	}
 
-	m_closures = new ParClosure[ m_numClosures ];
+	m_closures = CORE_NEW ParClosure[ m_numClosures ];
 
 	for( int i = 1; i <= args.NumArgs(); ++i )
 	{

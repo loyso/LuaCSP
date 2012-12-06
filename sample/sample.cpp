@@ -1,4 +1,4 @@
-
+#include <core/core.h>
 #include <luacpp/luacpp.h>
 
 #include <luacsp/csp.h>
@@ -17,6 +17,8 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+	core::InitializeCore();
+
     csp::Host& host = csp::Initialize();
 
     const char* fileName = argv[1];
@@ -26,7 +28,7 @@ int main(int argc, const char* argv[])
     {
         size_t size = (unsigned int)file.tellg();
         
-        char* memblock = new char [size];
+        char* memblock = CORE_NEW char [size];
         
         file.seekg (0, std::ios::beg);
         file.read (memblock, size);
@@ -50,15 +52,12 @@ int main(int argc, const char* argv[])
 				} 
 			}
         }
-		else
-		{
-
-		}
 
         delete[] memblock;
     }
 
     csp::Shutdown(host);
+	core::ShutdownCore();
 
 	return 0;
 }
