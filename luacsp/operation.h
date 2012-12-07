@@ -102,7 +102,7 @@ namespace csp
 
 	private:
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
-		bool CheckArgs( lua::LuaStack &args, InitError &initError );
+		bool CheckArgs( lua::LuaStack &args, InitError &initError ) const;
 		void InitCases( lua::LuaStack &args );
 
 		struct AltCase
@@ -113,15 +113,13 @@ namespace csp
 
 			Channel* m_pChannel;
 			lua::LuaRef_t m_channelRefKey;
-
-			time_t		m_time;				
-			bool		m_useTime	: 1;
-			bool		m_nil		: 1;	
+			time_t m_time;				
 		};
-		AltCase * m_cases;
+		AltCase* m_cases;
 		int m_numCases;
 		
 		int m_caseTriggered;
+		int m_nilCase;
 		Process m_process;
 		lua::LuaRef_t m_processRefKey;
 	};

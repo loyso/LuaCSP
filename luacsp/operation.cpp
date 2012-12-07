@@ -292,6 +292,7 @@ csp::OpAlt::OpAlt()
 	: m_cases()
 	, m_numCases( 0 )
 	, m_caseTriggered( -1 )
+	, m_nilCase( -1 )
 	, m_processRefKey( lua::LUA_NO_REF )
 {
 }
@@ -314,24 +315,33 @@ bool csp::OpAlt::Init( lua::LuaStack& args, InitError& initError )
 	return true;
 }
 
-bool csp::OpAlt::CheckArgs( lua::LuaStack &args, InitError &initError )
+bool csp::OpAlt::CheckArgs( lua::LuaStack &args, InitError &initError ) const
 {
 	if( (args.NumArgs() & 1) != 0 )
 		return initError.Error( "even number of arguments required. (guard+closure) pairs required" );
 
+	bool nilCase = false;
 	for( int i = 1; i <= args.NumArgs(); i+=2 )
 	{
 		lua::LuaStackValue guard = args[i];
 		lua::LuaStackValue closure = args[i+1];
-		if( !closure.IsFunction() )
-			return initError.ArgError( i+1, "closure required");
 
 		if( !(IsChannelArg(guard) && GetChannelArg(guard )!= NULL) 
 			&& !guard.IsNumber() 
 			&& !guard.IsNil() )
 		{
-			return initError.ArgError( i+1, "channel, number or nil required as a guard");
+			return initError.ArgError( i, "channel, number or nil required as a guard");
 		}
+
+		if( guard.IsNil() )
+		{
+			if( nilCase )
+				return initError.ArgError( i, "there must be just one nil case" );
+			nilCase = true;
+		}
+
+		if( !closure.IsFunction() )
+			return initError.ArgError( i+1, "closure required");
 	}
 
 	return true;
@@ -361,11 +371,10 @@ void csp::OpAlt::InitCases( lua::LuaStack &args )
 		else if( guard.IsNumber() )
 		{
 			m_cases[ initCase ].m_time = guard.GetNumber();
-			m_cases[ initCase ].m_useTime = true;
 		}
 		else if( guard.IsNil() )
 		{
-			m_cases[ initCase ].m_nil = true;
+			m_nilCase = initCase;
 		}
 
 		++initCase;
@@ -408,8 +417,6 @@ csp::OpAlt::AltCase::AltCase()
 	: m_closureRefKey( lua::LUA_NO_REF )
 	, m_pChannel()
 	, m_channelRefKey( lua::LUA_NO_REF )
-	, m_time()
-	, m_useTime( false )
-	, m_nil( false )
+	, m_time( -1 )
 {
 }
