@@ -165,21 +165,15 @@ csp::OpChannel::~OpChannel()
 	m_arguments = NULL;
 }
 
-bool csp::OpChannel::InitChannel( lua::LuaStack& args )
+bool csp::OpChannel::InitChannel( lua::LuaStack& args, InitError& initError )
 {
 	lua::LuaStackValue channelArg = args[1];
 	if( !IsChannelArg( channelArg ) )
-	{
-		channelArg.ArgError( "channel expected" );
-		return false;
-	}
+		return initError.ArgError( 1, "channel expected" );
 
 	Channel* pChannel = GetChannelArg( channelArg );
 	if( pChannel == NULL )
-	{
-		channelArg.ArgError( "channel value expected" );
-		return false;
-	}
+		return initError.ArgError( 1, "channel value expected" );
 
 	channelArg.PushValue();
 	m_channelRefKey = args.RefInRegistry();
@@ -188,7 +182,7 @@ bool csp::OpChannel::InitChannel( lua::LuaStack& args )
 	return true;
 }
 
-void csp::OpChannel::InitArguments( lua::LuaStack& args )
+void csp::OpChannel::InitArguments( lua::LuaStack& args, InitError& )
 {
 	m_numArguments = args.NumArgs() - 1;
 	if ( m_numArguments > 0 )
@@ -276,18 +270,15 @@ csp::OpChannelOut::~OpChannelOut()
 {
 }
 
-bool csp::OpChannelOut::Init( lua::LuaStack & args )
+bool csp::OpChannelOut::Init( lua::LuaStack & args, InitError& initError )
 {
-	if( !InitChannel( args ) )
+	if( !InitChannel( args, initError ) )
 		return false;
 
-	InitArguments( args );
+	InitArguments( args, initError );
 
 	if( ThisChannel().OutAttached() )
-	{
-		args[1].ArgError( "channel is in output operation already" );
-		return false;
-	}
+		return initError.ArgError( 1, "channel is in output operation already" );
 
 	ThisChannel().SetAttachmentOut( this );
 	return true;
@@ -341,16 +332,13 @@ csp::OpChannelIn::~OpChannelIn()
 {
 }
 
-bool csp::OpChannelIn::Init( lua::LuaStack & args )
+bool csp::OpChannelIn::Init( lua::LuaStack & args, InitError& initError )
 {
-	if( !InitChannel( args ) )
+	if( !InitChannel( args, initError ) )
 		return false;
 
 	if( ThisChannel().InAttached() )
-	{
-		args[1].ArgError( "channel is in input operation already" );
-		return false;
-	}
+		return initError.ArgError( 1, "channel is in input operation already" );
 
 	ThisChannel().SetAttachmentIn( this );
 	return true;

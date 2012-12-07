@@ -79,10 +79,10 @@ namespace csp
 		virtual WorkResult::Enum Work( Host& host, time_t dt );
 
 	protected:
-		bool InitChannel( lua::LuaStack& args );
+		bool InitChannel( lua::LuaStack& args, InitError& initError );
 		void UnrefChannel( lua::LuaStack const& stack );
 
-		void InitArguments( lua::LuaStack& args );
+		void InitArguments( lua::LuaStack& args, InitError& initError );
 		void UnrefArguments( lua::LuaStack const& stack );
 
 		bool HasChannel();
@@ -111,7 +111,7 @@ namespace csp
 		virtual ~OpChannelIn();
 
 	private:
-		virtual bool Init( lua::LuaStack & args );
+		virtual bool Init( lua::LuaStack & args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual int PushResults( lua::LuaStack & luaStack );
 		
@@ -126,7 +126,7 @@ namespace csp
 		virtual ~OpChannelOut();
 
 	private:
-		virtual bool Init( lua::LuaStack & args );
+		virtual bool Init( lua::LuaStack & args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
 
 		virtual Process& ProcessToEvaluate();

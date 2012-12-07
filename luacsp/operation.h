@@ -13,8 +13,13 @@ namespace lua
 
 namespace csp
 {
-    class Process;
+	class Process;
+	class Channel;
+	class Operation;
+}
 
+namespace csp
+{
     class Operation
     {
 	public:
@@ -34,8 +39,17 @@ namespace csp
 	protected:
 		Process& ThisProcess() const;
 
+		struct InitError
+		{
+			bool ArgError( int arg, const char* message );
+			bool Error( const char* message );
+
+			int errorArg;
+			const char* errorMessage;
+		};
+
     private:
-		virtual bool Init( lua::LuaStack & args );
+		virtual bool Init( lua::LuaStack & args, InitError& initError );
 
 		Process* m_pProcess;
 		bool m_finished;
@@ -46,11 +60,10 @@ namespace csp
 	public:
 		OpSleep();
 
-		// virtual WorkResult::Enum Evaluate( Host& host );
+	private:
+		virtual bool Init( lua::LuaStack & args, InitError& initError );
 		virtual WorkResult::Enum Work( Host& host, time_t dt );
 
-	private:
-		virtual bool Init( lua::LuaStack & args );
 		float m_seconds;
 	};
 
@@ -60,12 +73,11 @@ namespace csp
 		OpPar();
 		virtual ~OpPar();
 
-		virtual bool Init( lua::LuaStack& args );
-
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual WorkResult::Enum Work( Host& host, time_t dt );
 
 	private:
+		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		bool CheckFinished();
 
 		struct ParClosure
@@ -77,6 +89,41 @@ namespace csp
 		int m_numClosures;
 
 		int m_closureToRun;
+	};
+
+	class OpAlt : public Operation
+	{
+	public:
+		OpAlt();
+		virtual ~OpAlt();
+
+		virtual WorkResult::Enum Evaluate( Host& host );
+		virtual WorkResult::Enum Work( Host& host, time_t dt );
+
+	private:
+		virtual bool Init( lua::LuaStack& args, InitError& initError );
+		bool CheckArgs( lua::LuaStack &args, InitError &initError );
+		void InitCases( lua::LuaStack &args );
+
+		struct AltCase
+		{
+			AltCase();
+
+			lua::LuaRef_t m_closureRefKey;
+
+			Channel* m_pChannel;
+			lua::LuaRef_t m_channelRefKey;
+
+			time_t		m_time;				
+			bool		m_useTime	: 1;
+			bool		m_nil		: 1;	
+		};
+		AltCase * m_cases;
+		int m_numCases;
+		
+		int m_caseTriggered;
+		Process m_process;
+		lua::LuaRef_t m_processRefKey;
 	};
 
 

@@ -205,6 +205,18 @@ int lua::LuaState::Error( const char* format, ... )
 	return luaL_error( m_state, "%s", buffer );
 }
 
+int lua::LuaState::ArgError( int arg, const char* format, ... )
+{
+	char buffer[1024];
+
+	va_list args;
+	va_start( args, format );
+	_vsnprintf( buffer, sizeof(buffer), format, args );
+	va_end( args );
+
+	return luaL_argerror( m_state, arg, buffer );
+}
+
 void lua::LuaState::CloseState( LuaState & luaState )
 {
 	lua_close( luaState.InternalState() );

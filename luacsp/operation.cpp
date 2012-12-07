@@ -39,19 +39,35 @@ int csp::Operation::Initialize( lua_State* luaState )
 	}
 
 	lua::LuaStack args( luaState );
-	if ( !Init( args ) )
+	InitError initError;
+	if ( !Init( args, initError ) )
 	{
 		delete this;
-		return 0;
+		return state.ArgError( initError.errorArg, initError.errorMessage );
 	}
 
 	m_pProcess->SwitchCurrentOperation( this );
 	return state.Yield( 0 );
 }
 
-bool csp::Operation::Init( lua::LuaStack & )
+bool csp::Operation::Init( lua::LuaStack &, InitError& )
 {
 	return true;
+}
+
+
+bool csp::Operation::InitError::ArgError( int arg, const char* message )
+{
+	errorArg = arg;
+	errorMessage = message;
+	return false;
+}
+
+bool csp::Operation::InitError::Error( const char* message )
+{
+	errorArg = 0;
+	errorMessage = message;
+	return false;
 }
 
 bool csp::Operation::IsFinished() const
@@ -75,13 +91,10 @@ csp::OpSleep::OpSleep()
 {
 }
 
-bool csp::OpSleep::Init( lua::LuaStack & args )
+bool csp::OpSleep::Init( lua::LuaStack & args, InitError& initError )
 {
 	if ( !args[1].IsNumber() )
-	{
-		args[1].ArgError("seconds expected"); 
-		return false;
-	}
+		return initError.ArgError( 1, "seconds expected" );
 
 	m_seconds = args[1].GetNumber();
 	SetFinished( m_seconds <= 0 );
@@ -98,6 +111,7 @@ namespace operations
 {
 	int SLEEP( lua_State* luaState );
 	int PAR( lua_State* luaState );
+	int ALT( lua_State* luaState );
 }
 
 namespace helpers
@@ -140,11 +154,18 @@ int operations::PAR( lua_State* luaState )
 	return pPar->Initialize( luaState );
 }
 
+int operations::ALT( lua_State* luaState )
+{
+	csp::OpAlt* pAlt = CORE_NEW csp::OpAlt();
+	return pAlt->Initialize( luaState );
+}
+
 const csp::FunctionRegistration operationDescriptions[] =
 {
 	  "log", helpers::log
 	, "SLEEP", operations::SLEEP
 	, "PAR", operations::PAR
+	, "ALT", operations::ALT
 	, NULL, NULL
 };
 
@@ -178,7 +199,7 @@ csp::OpPar::~OpPar()
 	m_closures = NULL;
 }
 
-bool csp::OpPar::Init( lua::LuaStack& args )
+bool csp::OpPar::Init( lua::LuaStack& args, InitError& initError )
 {
 	m_numClosures = 0;
 	for( int i = 1; i <= args.NumArgs(); ++i )
@@ -187,10 +208,7 @@ bool csp::OpPar::Init( lua::LuaStack& args )
 		if ( arg.IsFunction() )
 			++m_numClosures;
 		else
-		{
-			arg.ArgError( "function closure expected" );
-			return false;
-		}
+			return initError.ArgError( i, "function closure expected" );
 	}
 
 	m_closures = CORE_NEW ParClosure[ m_numClosures ];
@@ -269,3 +287,129 @@ bool csp::OpPar::CheckFinished()
 	return finished;
 }
 
+
+csp::OpAlt::OpAlt()
+	: m_cases()
+	, m_numCases( 0 )
+	, m_caseTriggered( -1 )
+	, m_processRefKey( lua::LUA_NO_REF )
+{
+}
+
+csp::OpAlt::~OpAlt()
+{
+	assert( m_processRefKey == lua::LUA_NO_REF );
+
+	delete m_cases;
+	m_cases = NULL;
+	m_numCases = 0;
+}
+
+bool csp::OpAlt::Init( lua::LuaStack& args, InitError& initError )
+{
+	if( !CheckArgs( args, initError ) )
+		return false;
+
+	InitCases( args );
+	return true;
+}
+
+bool csp::OpAlt::CheckArgs( lua::LuaStack &args, InitError &initError )
+{
+	if( (args.NumArgs() & 1) != 0 )
+		return initError.Error( "even number of arguments required. (guard+closure) pairs required" );
+
+	for( int i = 1; i <= args.NumArgs(); i+=2 )
+	{
+		lua::LuaStackValue guard = args[i];
+		lua::LuaStackValue closure = args[i+1];
+		if( !closure.IsFunction() )
+			return initError.ArgError( i+1, "closure required");
+
+		if( !(IsChannelArg(guard) && GetChannelArg(guard )!= NULL) 
+			&& !guard.IsNumber() 
+			&& !guard.IsNil() )
+		{
+			return initError.ArgError( i+1, "channel, number or nil required as a guard");
+		}
+	}
+
+	return true;
+}
+
+void csp::OpAlt::InitCases( lua::LuaStack &args )
+{
+	m_numCases = args.NumArgs()/2;
+	m_cases = CORE_NEW AltCase [ m_numCases ];
+
+	int initCase = 0;
+	for( int i = 1; i <= args.NumArgs(); i+=2 )
+	{
+		lua::LuaStackValue guard = args[i];
+		lua::LuaStackValue closure = args[i+1];
+
+		closure.PushValue();
+		m_cases[ initCase ].m_closureRefKey = args.RefInRegistry();
+
+		if( IsChannelArg(guard) )
+		{
+			m_cases[ initCase ].m_pChannel = GetChannelArg( guard );
+			assert( m_cases[ initCase ].m_pChannel != NULL );
+			guard.PushValue();
+			m_cases[ initCase ].m_channelRefKey = args.RefInRegistry();
+		}
+		else if( guard.IsNumber() )
+		{
+			m_cases[ initCase ].m_time = guard.GetNumber();
+			m_cases[ initCase ].m_useTime = true;
+		}
+		else if( guard.IsNil() )
+		{
+			m_cases[ initCase ].m_nil = true;
+		}
+
+		++initCase;
+	}
+}
+
+csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
+{
+	if( m_caseTriggered >= 0 && m_caseTriggered < m_numCases )
+	{
+		if( m_process.IsRunning() )
+		{
+			return WorkResult::YIELD;
+		}
+		else if( m_processRefKey != lua::LUA_NO_REF )
+		{
+			ThisProcess().LuaThread().GetStack().UnrefInRegistry( m_processRefKey );
+			m_processRefKey = lua::LUA_NO_REF;
+			return WorkResult::FINISH;
+		}
+	}
+
+	//TODO: work here.
+
+	return WorkResult::YIELD;
+}
+
+csp::WorkResult::Enum csp::OpAlt::Work( Host& host, time_t dt )
+{
+	if( m_caseTriggered >= 0 && m_caseTriggered < m_numCases )
+	{
+		if( m_process.IsRunning() )
+			m_process.Work( host, dt );
+	}
+
+	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
+}
+
+csp::OpAlt::AltCase::AltCase()
+	: m_closureRefKey( lua::LUA_NO_REF )
+	, m_pChannel()
+	, m_channelRefKey( lua::LUA_NO_REF )
+	, m_time()
+	, m_useTime( false )
+	, m_nil( false )
+{
+}

@@ -134,7 +134,8 @@ namespace lua
         static void* GetUserData( lua_State* luaState );
         static void SetUserData( lua_State* luaState, void* userData );
 
-		int Error(const char* format, ...);
+		int Error( const char* format, ... );
+		int ArgError( int arg, const char* format, ... );
 		Return::Enum PrintError( Return::Enum result );
 
 		int Yield( int numArgs );
