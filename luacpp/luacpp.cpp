@@ -1,8 +1,6 @@
 #include "luacpp.h"
 
-#include <stdlib.h>
 #include <stdint.h>
-#include <assert.h>
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -58,19 +56,19 @@ private:
 };
 
 lua::LuaState::LuaState()
-	: m_state()
+	: m_stack( NULL )
 {
 }
 
 lua::LuaState::LuaState(lua_State* state)
-    : m_state(state)
+    : m_stack( state )
 {
-	assert( state );
+	CORE_ASSERT( state );
 }
 
 lua_State* lua::LuaState::InternalState() const
 {
-    return m_state;
+    return m_stack.InternalState();
 }
 
 lua::LuaState lua::LuaState::NewState()
@@ -81,14 +79,14 @@ lua::LuaState lua::LuaState::NewState()
 
 void lua::LuaState::Close()
 {
-    lua_close(m_state);
-    m_state = NULL;
+    lua_close(m_stack.InternalState());
+    m_stack.SetInternalState( NULL );
 }
 
 lua::Return::Enum lua::LuaState::LoadFromMemory(const void* data, size_t size, const char* chunkname)
 {
-    LuaReader luaReader(data, size);
-    Return::Enum retValue = (Return::Enum)lua_load(m_state, LuaReader::Read, &luaReader, chunkname, "bt");
+    LuaReader luaReader( data, size );
+	Return::Enum retValue = (Return::Enum)lua_load( m_stack.InternalState(), LuaReader::Read, &luaReader, chunkname, "bt" );
 	if( retValue == LUA_OK || retValue == LUA_YIELD )
 		return retValue;
 
@@ -98,24 +96,24 @@ lua::Return::Enum lua::LuaState::LoadFromMemory(const void* data, size_t size, c
 
 void* lua::LuaState::GetUserData( lua_State* luaState )
 {
-	assert( luaState );
+	CORE_ASSERT( luaState );
     return *((void**)luaState - 1);
 }
 
 void lua::LuaState::SetUserData( lua_State* luaState, void* userData )
 {
-	assert( luaState );
+	CORE_ASSERT( luaState );
     *((void**)luaState - 1) = userData;
 }
 
 void lua::LuaState::CheckStack() const
 {
-	luaL_checkstack(m_state, LUA_MINSTACK, NULL);
+	luaL_checkstack( m_stack.InternalState(), LUA_MINSTACK, NULL );
 }
 
 int lua::LuaState::GetTop() const
 {
-	return lua_gettop(m_state);
+	return lua_gettop( m_stack.InternalState() );
 }
 
 lua::Return::Enum lua::LuaState::Call( int numArgs, int numResults )
@@ -123,7 +121,7 @@ lua::Return::Enum lua::LuaState::Call( int numArgs, int numResults )
 	if (!GetTopValue().IsFunction())
 		return Return::ERRRUN;
 
-	return (Return::Enum)lua_pcall(m_state, numArgs, numResults, 0); // TODO: use msgh to trace stack.
+	return (Return::Enum)lua_pcall( m_stack.InternalState(), numArgs, numResults, 0 ); // TODO: use msgh to trace stack.
 }
 
 
@@ -166,7 +164,7 @@ lua::Return::Enum lua::LuaState::PrintError( Return::Enum result )
 	const char * errMessage = GetTopValue().OptString( "[no error message]" );
 	Print("%s\n%s\n", errCode, errMessage);
 
-	luaL_traceback( m_state, m_state, NULL, 0 );
+	luaL_traceback( m_stack.InternalState(), m_stack.InternalState(), NULL, 0 );
 	const char * stackInfo = GetTopValue().OptString( "[no stack]" );
 	Print( "%s\n", stackInfo );
 
@@ -176,7 +174,7 @@ lua::Return::Enum lua::LuaState::PrintError( Return::Enum result )
 
 lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
 {
-	Return::Enum retValue = (Return::Enum)lua_resume( m_state, pStateFrom ? pStateFrom->InternalState() : NULL, numArgs );
+	Return::Enum retValue = (Return::Enum)lua_resume( m_stack.InternalState(), pStateFrom ? pStateFrom->InternalState() : NULL, numArgs );
 	if( retValue == LUA_OK || retValue == LUA_YIELD )
 		return retValue;
 
@@ -185,12 +183,12 @@ lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
 
 int lua::LuaState::Yield( int numArgs )
 {
-	return lua_yield( m_state, numArgs );
+	return lua_yield( m_stack.InternalState(), numArgs );
 };
 
 lua::LuaStackValue lua::LuaState::GetTopValue() const
 {
-	return LuaStackValue( m_state, GetTop() );
+	return LuaStackValue( m_stack.InternalState(), GetTop() );
 }
 
 int lua::LuaState::Error( const char* format, ... )
@@ -202,7 +200,7 @@ int lua::LuaState::Error( const char* format, ... )
 	_vsnprintf( buffer, sizeof(buffer), format, args );
 	va_end( args );
 
-	return luaL_error( m_state, "%s", buffer );
+	return luaL_error( m_stack.InternalState(), "%s", buffer );
 }
 
 int lua::LuaState::ArgError( int arg, const char* format, ... )
@@ -214,24 +212,24 @@ int lua::LuaState::ArgError( int arg, const char* format, ... )
 	_vsnprintf( buffer, sizeof(buffer), format, args );
 	va_end( args );
 
-	return luaL_argerror( m_state, arg, buffer );
+	return luaL_argerror( m_stack.InternalState(), arg, buffer );
 }
 
 void lua::LuaState::CloseState( LuaState & luaState )
 {
-	lua_close( luaState.InternalState() );
-	luaState.m_state = NULL;
+	luaState.Close();
 }
 
-lua::LuaStack lua::LuaState::GetStack() const
+lua::LuaStack& lua::LuaState::GetStack()
 {
-	return lua::LuaStack( m_state );
+	return m_stack;
 }
 
 lua::Return::Enum lua::LuaState::Status() const
 {
-	return (Return::Enum)lua_status( m_state );
+	return (Return::Enum)lua_status( m_stack.InternalState() );
 }
+
 
 lua::LuaStackValue::LuaStackValue( lua_State* luaState, int index )
 	: m_state( luaState )
@@ -456,7 +454,12 @@ int lua::LuaStack::GetTop() const
 	return lua_gettop( m_state );
 }
 
+lua_State* lua::LuaStack::InternalState() const
+{
+	return m_state;
+}
 
-
-
-
+void lua::LuaStack::SetInternalState( lua_State* state )
+{
+	m_state = state;
+}

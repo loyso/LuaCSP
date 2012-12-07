@@ -23,7 +23,7 @@ int csp::Operation::PushResults( lua::LuaStack & )
 
 csp::Process& csp::Operation::ThisProcess() const
 {
-	assert( m_pProcess );
+	CORE_ASSERT( m_pProcess );
 	return *m_pProcess;
 }
 
@@ -192,7 +192,7 @@ csp::OpPar::~OpPar()
 {
 	for( int i = 0; i < m_numClosures; ++i )
 	{
-		assert( m_closures[i].refKey == lua::LUA_NO_REF );
+		CORE_ASSERT( m_closures[i].refKey == lua::LUA_NO_REF );
 	}
 
 	delete[] m_closures;
@@ -299,7 +299,7 @@ csp::OpAlt::OpAlt()
 
 csp::OpAlt::~OpAlt()
 {
-	assert( m_processRefKey == lua::LUA_NO_REF );
+	CORE_ASSERT( m_processRefKey == lua::LUA_NO_REF );
 
 	delete m_cases;
 	m_cases = NULL;
@@ -315,13 +315,13 @@ bool csp::OpAlt::Init( lua::LuaStack& args, InitError& initError )
 	return true;
 }
 
-bool csp::OpAlt::CheckArgs( lua::LuaStack &args, InitError &initError ) const
+bool csp::OpAlt::CheckArgs( lua::LuaStack& args, InitError& initError ) const
 {
 	if( (args.NumArgs() & 1) != 0 )
 		return initError.Error( "even number of arguments required. (guard+closure) pairs required" );
 
 	bool nilCase = false;
-	for( int i = 1; i <= args.NumArgs(); i+=2 )
+	for( int i = 1; i <= args.NumArgs(); i += 2 )
 	{
 		lua::LuaStackValue guard = args[i];
 		lua::LuaStackValue closure = args[i+1];
@@ -330,7 +330,7 @@ bool csp::OpAlt::CheckArgs( lua::LuaStack &args, InitError &initError ) const
 			&& !guard.IsNumber() 
 			&& !guard.IsNil() )
 		{
-			return initError.ArgError( i, "channel, number or nil required as a guard");
+			return initError.ArgError( i, "channel, number or nil required as a guard" );
 		}
 
 		if( guard.IsNil() )
@@ -341,19 +341,19 @@ bool csp::OpAlt::CheckArgs( lua::LuaStack &args, InitError &initError ) const
 		}
 
 		if( !closure.IsFunction() )
-			return initError.ArgError( i+1, "closure required");
+			return initError.ArgError( i+1, "closure required" );
 	}
 
 	return true;
 }
 
-void csp::OpAlt::InitCases( lua::LuaStack &args )
+void csp::OpAlt::InitCases( lua::LuaStack& args )
 {
 	m_numCases = args.NumArgs()/2;
 	m_cases = CORE_NEW AltCase [ m_numCases ];
 
 	int initCase = 0;
-	for( int i = 1; i <= args.NumArgs(); i+=2 )
+	for( int i = 1; i <= args.NumArgs(); i += 2 )
 	{
 		lua::LuaStackValue guard = args[i];
 		lua::LuaStackValue closure = args[i+1];
@@ -364,7 +364,7 @@ void csp::OpAlt::InitCases( lua::LuaStack &args )
 		if( IsChannelArg(guard) )
 		{
 			m_cases[ initCase ].m_pChannel = GetChannelArg( guard );
-			assert( m_cases[ initCase ].m_pChannel != NULL );
+			CORE_ASSERT( m_cases[ initCase ].m_pChannel != NULL );
 			guard.PushValue();
 			m_cases[ initCase ].m_channelRefKey = args.RefInRegistry();
 		}
@@ -374,6 +374,7 @@ void csp::OpAlt::InitCases( lua::LuaStack &args )
 		}
 		else if( guard.IsNil() )
 		{
+			CORE_ASSERT( m_nilCase == -1 );
 			m_nilCase = initCase;
 		}
 

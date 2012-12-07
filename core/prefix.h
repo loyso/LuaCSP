@@ -21,3 +21,6 @@
 #else  // NDEBUG
 #	define CORE_NEW new
 #endif
+
+#include <assert.h>
+#define CORE_ASSERT assert

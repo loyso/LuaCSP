@@ -76,6 +76,8 @@ namespace lua
 		int NumArgs() const;
 
 		LuaState State() const;
+		lua_State* InternalState() const;
+		void SetInternalState( lua_State* state );
 
 		void PushNil();
 		void PushCFunction( int (*function)(lua_State* L) );
@@ -119,16 +121,16 @@ namespace lua
         explicit LuaState(lua_State* luaState);
         lua_State* InternalState() const;
 
-        Return::Enum LoadFromMemory(const void* data, size_t size, const char* chunkname);
-		Return::Enum Call(int numArgs, int numResults);
-		Return::Enum Resume(int numArgs, LuaState * pStateFrom);
+        Return::Enum LoadFromMemory( const void* data, size_t size, const char* chunkname );
+		Return::Enum Call( int numArgs, int numResults );
+		Return::Enum Resume( int numArgs, LuaState * pStateFrom );
 
 		void CheckStack() const;		
 
 		int GetTop() const;
 		LuaStackValue GetTopValue() const;
 
-		LuaStack GetStack() const;
+		LuaStack& GetStack();
 		
         // Per-thread user data requires the Lua interpreter to be compiled with LUAI_EXTRASPACE=sizeof(void*)
         static void* GetUserData( lua_State* luaState );
@@ -143,6 +145,6 @@ namespace lua
 		Return::Enum Status() const;
 
     private:
-        lua_State* m_state;
+        LuaStack m_stack;
     };
 }

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stddef.h>
-#include <assert.h>
-
 #include "csp.h"
 #include "process.h"
 
@@ -85,7 +82,7 @@ namespace csp
 			Process process;
 			lua::LuaRef_t refKey;
 		};
-		ParClosure * m_closures;
+		ParClosure* m_closures;
 		int m_numClosures;
 
 		int m_closureToRun;
@@ -102,8 +99,8 @@ namespace csp
 
 	private:
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
-		bool CheckArgs( lua::LuaStack &args, InitError &initError ) const;
-		void InitCases( lua::LuaStack &args );
+		bool CheckArgs( lua::LuaStack& args, InitError& initError ) const;
+		void InitCases( lua::LuaStack& args );
 
 		struct AltCase
 		{

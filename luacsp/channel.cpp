@@ -3,9 +3,6 @@
 #include "channel.h"
 #include "host.h"
 
-#include <stdlib.h>
-#include <assert.h>
-
 namespace csp
 {
 	void PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey );
@@ -42,10 +39,10 @@ int csp::GcObject_Gc( lua_State* luaState )
 {
 	lua::LuaStack args( luaState );
 
-	assert( args.NumArgs() == 1 );
+	CORE_ASSERT( args.NumArgs() == 1 );
 	lua::LuaStackValue userData = args[1];
 
-	assert( userData.IsUserData() );
+	CORE_ASSERT( userData.IsUserData() );
 	GcObject** pGcObject = (GcObject**)userData.GetUserData();
 
 	delete *pGcObject;
@@ -75,7 +72,7 @@ void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatable
 
 	args.PushLightUserData( metatableRegistryKey );
 	lua::LuaStackValue metatable = args.RegistryGet();
-	assert( metatable.IsTable() );
+	CORE_ASSERT( metatable.IsTable() );
 
 	args.SetMetaTable( userData );
 }
@@ -154,11 +151,11 @@ csp::OpChannel::OpChannel()
 
 csp::OpChannel::~OpChannel()
 {
-	assert( m_channelRefKey == lua::LUA_NO_REF );
+	CORE_ASSERT( m_channelRefKey == lua::LUA_NO_REF );
 
 	for( int i = 0; i < m_numArguments; ++i )
 	{
-		assert( m_arguments[i].refKey == lua::LUA_NO_REF );
+		CORE_ASSERT( m_arguments[i].refKey == lua::LUA_NO_REF );
 	}
 
 	delete[] m_arguments;
@@ -209,7 +206,7 @@ void csp::OpChannel::UnrefChannel( lua::LuaStack const& stack )
 
 csp::Channel& csp::OpChannel::ThisChannel()
 {
-	assert( m_pChannel );
+	CORE_ASSERT( m_pChannel );
 	return *m_pChannel;
 }
 
@@ -229,8 +226,8 @@ void csp::OpChannel::UnrefArguments( lua::LuaStack const& stack )
 
 void csp::OpChannel::MoveChannelArguments( ChannelArgument* arguments, int numArguments )
 {
-	assert( m_arguments == NULL );
-	assert( m_numArguments == 0 );
+	CORE_ASSERT( m_arguments == NULL );
+	CORE_ASSERT( m_numArguments == 0 );
 
 	m_arguments = arguments;
 	m_numArguments = numArguments;
@@ -400,8 +397,8 @@ csp::Channel::Channel()
 
 csp::Channel::~Channel()
 {
-	assert( m_pAttachmentIn == NULL );
-	assert( m_pAttachmentOut == NULL );
+	CORE_ASSERT( m_pAttachmentIn == NULL );
+	CORE_ASSERT( m_pAttachmentOut == NULL );
 }
 
 void csp::Channel::SetAttachmentIn( ChannelAttachmentIn_i* pAttachment )
@@ -426,13 +423,13 @@ bool csp::Channel::OutAttached() const
 
 csp::ChannelAttachmentIn_i& csp::Channel::InAttachment() const
 {
-	assert( m_pAttachmentIn );
+	CORE_ASSERT( m_pAttachmentIn );
 	return *m_pAttachmentIn;
 }
 
 csp::ChannelAttachmentOut_i& csp::Channel::OutAttachment() const
 {
-	assert( m_pAttachmentOut );
+	CORE_ASSERT( m_pAttachmentOut );
 	return *m_pAttachmentOut;
 }
 

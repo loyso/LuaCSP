@@ -12,7 +12,7 @@ csp::Process::Process()
 
 csp::Process::~Process()
 {
-	assert( m_operation == NULL );
+	CORE_ASSERT( m_operation == NULL );
 }
 
 lua::LuaState & csp::Process::LuaThread()
@@ -44,19 +44,19 @@ void csp::Process::SwitchCurrentOperation( Operation* pOperation )
 
 csp::Operation& csp::Process::CurrentOperation()
 {
-	assert( m_operation );
+	CORE_ASSERT( m_operation );
 	return *m_operation;
 }
 
 void csp::Process::Work( Host& host, time_t dt )
 {
-	assert( m_operation );
+	CORE_ASSERT( m_operation );
 	WorkResult::Enum result = m_operation->Work( host, dt );
 	
 	if( result == WorkResult::FINISH )
 	{
 		m_operation->SetFinished( true );
-		assert( m_luaThread.Status() == lua::Return::YIELD );
+		CORE_ASSERT( m_luaThread.Status() == lua::Return::YIELD );
 		host.PushEvalStep( *this );
 	}
 }

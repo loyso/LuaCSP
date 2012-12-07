@@ -1,8 +1,5 @@
 #pragma once
 
-#include <assert.h>
-#include <stddef.h>
-
 #include <luacpp/luacpp.h>
 
 #include "csp.h"

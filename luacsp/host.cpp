@@ -2,14 +2,27 @@
 #include "host.h"
 #include "operation.h"
 
+namespace csp
+{
+	static const int CHANNEL_STACK_SIZE = 256;
+}
+
 csp::Host::Host(const lua::LuaState& luaState)
     : m_luaState(luaState)
 	, m_mainProcess()
+	, m_evalStepsStack()
+	, m_evalStepsStackTop( -1 )
 {
+	m_evalStepsStack = CORE_NEW Process*[ CHANNEL_STACK_SIZE ];
+	
+	for( int i = 0; i < CHANNEL_STACK_SIZE; ++i )
+		m_evalStepsStack[i] = NULL;
 }
 
 csp::Host::~Host()
 {
+	delete[] m_evalStepsStack;
+	m_evalStepsStack = NULL;
 }
 
 lua::LuaState& csp::Host::LuaState()
@@ -46,7 +59,7 @@ csp::WorkResult::Enum csp::Host::Main()
 
 void csp::Host::Evaluate()
 {
-	while( !m_evalSteps.empty() )
+	while( !IsEvalsStackEmpty() )
 	{
 		csp::Process& process = PopEvalStep();
 		process.Evaluate( *this );
@@ -65,14 +78,26 @@ csp::WorkResult::Enum csp::Host::Work( time_t dt )
 
 void csp::Host::PushEvalStep( Process& process )
 {
-	m_evalSteps.push( &process );
+	CORE_ASSERT( m_evalStepsStackTop >= -1 && m_evalStepsStackTop < CHANNEL_STACK_SIZE-1 );
+
+	++m_evalStepsStackTop;
+	m_evalStepsStack[ m_evalStepsStackTop ] = &process;
 }
 
 csp::Process& csp::Host::PopEvalStep()
 {
-	Process* pProcess = m_evalSteps.top();
-	assert( pProcess );
-	m_evalSteps.pop();
+	CORE_ASSERT( m_evalStepsStackTop >= 0 && m_evalStepsStackTop < CHANNEL_STACK_SIZE );
+
+	Process* pProcess = m_evalStepsStack[ m_evalStepsStackTop ];
+	CORE_ASSERT( pProcess );
+	m_evalStepsStack[ m_evalStepsStackTop ] = NULL;
+
+	--m_evalStepsStackTop;
 	return *pProcess;
+}
+
+bool csp::Host::IsEvalsStackEmpty() const
+{
+	return m_evalStepsStackTop < 0;
 }
 
