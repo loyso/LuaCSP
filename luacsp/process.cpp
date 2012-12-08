@@ -62,10 +62,8 @@ void csp::Process::Work( Host& host, time_t dt )
 }
 
 
-csp::WorkResult::Enum csp::Process::Evaluate( Host& host )
+csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 {
-	int numArgs = 0;
-
 	if( m_operation )
 	{
 		WorkResult::Enum result = m_operation->IsFinished()

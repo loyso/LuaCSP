@@ -373,6 +373,23 @@ void lua::LuaStack::UnrefInRegistry( LuaRef_t key ) const
 	luaL_unref( m_state, LUA_REGISTRYINDEX, key );
 }
 
+int lua::LuaStack::NumRegistryReferences() const
+{
+	int numRefs = 0;
+	
+	int len = (int)lua_rawlen( m_state, LUA_REGISTRYINDEX );
+	for( int i = 1; i <= len; ++i )
+	{
+		lua_rawgeti( m_state, LUA_REGISTRYINDEX, i );
+		if( !lua_isnil( m_state, -1 ) && !lua_isnumber( m_state, -1 ) )
+			numRefs++;
+		lua_pop( m_state, 1 );
+	}
+
+	static const int numPredefinedRefs = 2; // LUA_RIDX_MAINTHREAD and LUA_RIDX_GLOBALS
+	return numRefs - numPredefinedRefs; 
+}
+
 lua::LuaState lua::LuaStack::NewThread()
 {
 	return LuaState( lua_newthread(m_state) );
@@ -463,3 +480,4 @@ void lua::LuaStack::SetInternalState( lua_State* state )
 {
 	m_state = state;
 }
+

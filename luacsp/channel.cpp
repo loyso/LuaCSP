@@ -27,14 +27,6 @@ namespace csp
 	};
 }
 
-csp::GcObject::GcObject()
-{
-}
-
-csp::GcObject::~GcObject()
-{
-}
-
 int csp::GcObject_Gc( lua_State* luaState )
 {
 	lua::LuaStack args( luaState );
@@ -314,7 +306,7 @@ void csp::OpChannelOut::MoveChannelArguments()
 	Channel& channel = ThisChannel();
 	ChannelAttachmentIn_i& in = channel.InAttachment();
 	
-	in.MoveChannelArguments( Arguments(), NumArguments() );
+	in.MoveChannelArguments( channel, Arguments(), NumArguments() );
 	ArgumentsMoved();	
 
 	channel.SetAttachmentOut( NULL );
@@ -368,7 +360,7 @@ csp::Process& csp::OpChannelIn::ProcessToEvaluate()
 	return ThisProcess();
 }
 
-void csp::OpChannelIn::MoveChannelArguments( ChannelArgument* arguments, int numArguments )
+void csp::OpChannelIn::MoveChannelArguments( Channel&, ChannelArgument* arguments, int numArguments )
 {
 	OpChannel::MoveChannelArguments( arguments, numArguments );
 	ThisChannel().SetAttachmentIn( NULL );

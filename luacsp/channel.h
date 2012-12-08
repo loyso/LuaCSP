@@ -22,28 +22,10 @@ namespace csp
 
 namespace csp
 {
-	class GcObject
+	struct ChannelArgument
 	{
-	public:
-		GcObject();
-		virtual ~GcObject();
+		lua::LuaRef_t refKey;
 	};
-
-	struct ChannelAttachment_i
-	{
-		virtual Process& ProcessToEvaluate() = 0;
-	};
-
-	struct ChannelAttachmentIn_i : ChannelAttachment_i
-	{
-		virtual void MoveChannelArguments( ChannelArgument* arguments, int numArguments ) = 0;
-	};
-
-	struct ChannelAttachmentOut_i : ChannelAttachment_i
-	{
-		virtual void MoveChannelArguments() = 0;
-	};
-
 
 	class Channel : public GcObject
 	{
@@ -63,11 +45,6 @@ namespace csp
 	private:
 		ChannelAttachmentIn_i* m_pAttachmentIn;
 		ChannelAttachmentOut_i* m_pAttachmentOut;
-	};
-
-	struct ChannelArgument
-	{
-		lua::LuaRef_t refKey;
 	};
 
 	class OpChannel : public Operation
@@ -116,7 +93,7 @@ namespace csp
 		virtual int PushResults( lua::LuaStack & luaStack );
 		
 		virtual Process& ProcessToEvaluate();
-		virtual void MoveChannelArguments( ChannelArgument* arguments, int numArguments );
+		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );
 	};
 
 	class OpChannelOut : public OpChannel, ChannelAttachmentOut_i

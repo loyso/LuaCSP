@@ -88,7 +88,7 @@ namespace csp
 		int m_closureToRun;
 	};
 
-	class OpAlt : public Operation
+	class OpAlt : public Operation, ChannelAttachmentIn_i
 	{
 	public:
 		OpAlt();
@@ -101,6 +101,16 @@ namespace csp
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		bool CheckArgs( lua::LuaStack& args, InitError& initError ) const;
 		void InitCases( lua::LuaStack& args );
+		
+		void UnrefChannels( lua::LuaStack const& stack );
+		void UnrefArguments( lua::LuaStack const& stack );
+		void DetachChannels() const;
+
+		void StartTriggeredProcess( Host& host );
+		void SelectProcessToTrigger( Host& host );
+
+		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );
+		virtual Process& ProcessToEvaluate();
 
 		struct AltCase
 		{
@@ -115,10 +125,15 @@ namespace csp
 		AltCase* m_cases;
 		int m_numCases;
 		
-		int m_caseTriggered;
-		int m_nilCase;
+		AltCase* m_pCaseTriggered;
+		AltCase* m_pNilCase;
+
 		Process m_process;
 		lua::LuaRef_t m_processRefKey;
+
+		ChannelArgument* m_arguments;
+		int m_numArguments;
+		bool m_argumentsMoved;
 	};
 
 

@@ -46,3 +46,12 @@ void csp::UnregisterFunctions( lua::LuaState & state, lua::LuaStackValue & value
 }
 
 
+csp::GcObject::GcObject()
+{
+}
+
+csp::GcObject::~GcObject()
+{
+}
+
+

@@ -91,6 +91,7 @@ namespace lua
 		LuaRef_t RefInRegistry() const;
 		void UnrefInRegistry( LuaRef_t key ) const;
 		void PushRegistryReferenced( LuaRef_t key ) const;
+		int NumRegistryReferences() const;
 
 		void RegistrySet();
 		lua::LuaStackValue RegistryGet();

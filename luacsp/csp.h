@@ -10,8 +10,15 @@ namespace lua
 
 namespace csp
 {
-    class Host;
+	class Host;
+	class Process;
+	class Channel;
 
+	struct ChannelArgument;
+}
+
+namespace csp
+{
 	typedef float time_t;
 
 	namespace WorkResult
@@ -22,6 +29,28 @@ namespace csp
 			, YIELD
 		};
 	}
+
+	class GcObject
+	{
+	public:
+		GcObject();
+		virtual ~GcObject();
+	};
+
+	struct ChannelAttachment_i
+	{
+		virtual Process& ProcessToEvaluate() = 0;
+	};
+
+	struct ChannelAttachmentIn_i : ChannelAttachment_i
+	{
+		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments ) = 0;
+	};
+
+	struct ChannelAttachmentOut_i : ChannelAttachment_i
+	{
+		virtual void MoveChannelArguments() = 0;
+	};
 
 	struct FunctionRegistration
 	{

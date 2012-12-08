@@ -28,6 +28,7 @@ namespace csp
 		bool IsEvalsStackEmpty() const;
 
     private:
+		void ReportLeaks();
 		void Evaluate();
 
         lua::LuaState m_luaState;
