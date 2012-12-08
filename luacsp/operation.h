@@ -33,6 +33,8 @@ namespace csp
 		bool IsFinished() const;
 		void SetFinished( bool finished );
 
+		virtual void DebugCheck( Host& host );
+
 	protected:
 		Process& ThisProcess() const;
 

@@ -102,6 +102,7 @@ end
 
 function testParMix()
 	log("before\n")
+	local ch = Channel()
 	PAR(
 		function()
 			log("p1{\n")
@@ -112,6 +113,7 @@ function testParMix()
 				end,
 				function()
 					log("p1b{\n")
+					ch:IN()
 					log("p1b}\n")
 				end
 			)
@@ -119,7 +121,20 @@ function testParMix()
 		end,
 		function()
 			log("p2{\n")
+			ch:OUT()
 			log("p2}\n")
+		end,
+		function()
+			log("p3{}\n")
+		end,
+		function()
+			log("p4{}\n")
+		end,
+		function()
+			log("p5{}\n")
+		end,
+		function()
+			log("p6{}\n")
 		end
 	)
 	log("after\n")

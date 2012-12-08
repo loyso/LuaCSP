@@ -85,6 +85,10 @@ csp::WorkResult::Enum csp::Operation::Evaluate( Host& )
 	return WorkResult::YIELD;
 }
 
+void csp::Operation::DebugCheck( Host& )
+{
+}
+
 
 csp::OpSleep::OpSleep()
 	: m_seconds()
@@ -236,26 +240,20 @@ csp::WorkResult::Enum csp::OpPar::Evaluate( Host& host )
 
 	if( m_closureToRun < m_numClosures )
 	{
+		finished = false;
+
 		ParClosure& closure = m_closures[ m_closureToRun++ ];
 
 		if( m_closureToRun < m_numClosures )
-		{
 			host.PushEvalStep( ThisProcess() );
-			finished = false;
-		}
 
-		WorkResult::Enum result = closure.process.StartEvaluation( host, 0 );
-		if ( result == WorkResult::FINISH && m_closureToRun == m_numClosures )
-		{
-			host.PushEvalStep( ThisProcess() );
-			finished = false;
-		}
+		closure.process.StartEvaluation( host, 0 );
 	}
 
 	if ( !CheckFinished() )
 		finished = false;
 
-	if (finished && !IsFinished())
+	if ( finished )
 		SetFinished( true );
 
 	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
@@ -493,8 +491,7 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 		{
 			m_argumentsMoved = false;
 
-			if ( StartTriggeredProcess( host ) == WorkResult::FINISH )
-				host.PushEvalStep( ThisProcess() );
+			StartTriggeredProcess( host );
 
 			lua::LuaStack& stack = host.LuaState().GetStack();
 			UnrefArguments( stack );

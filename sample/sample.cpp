@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -58,6 +59,10 @@ int main(int argc, const char* argv[])
 
     csp::Shutdown(host);
 	core::ShutdownCore();
+
+	std::cout << std::endl << "Press Enter to continue...";
+	std::string input;
+	std::getline( std::cin, input );
 
 	return 0;
 }

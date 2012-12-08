@@ -67,17 +67,12 @@ csp::WorkResult::Enum csp::Process::StartEvaluation( Host& host, int numArgs )
 	CORE_ASSERT( LuaThread().Status() == lua::Return::OK );
 	CORE_ASSERT( LuaThread().GetStack()[-numArgs-1].IsFunction() );
 
-	WorkResult::Enum result = Resume( numArgs );
-
-	if ( result == WorkResult::YIELD && m_operation )
-		host.PushEvalStep( *this );
-	
-	return result;
+	return Evaluate( host, numArgs );
 }
 
 csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 {
-	if( LuaThread().Status() != lua::Return::YIELD )
+	if( LuaThread().Status() != lua::Return::YIELD && LuaThread().Status() != lua::Return::OK )
 		return WorkResult::FINISH;
 
 	if( m_operation )
@@ -90,6 +85,7 @@ csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 		{
 			lua::LuaStack luaStack = m_luaThread.GetStack();
 			numArgs = m_operation->PushResults( luaStack );
+			m_operation->DebugCheck( host );
 			SwitchCurrentOperation( NULL );
 		}
 		else
@@ -105,6 +101,7 @@ csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 		if( host.GetTopProcess() != m_parentProcess )
 			host.PushEvalStep( *m_parentProcess );
 	}
+
 	return result;
 }
 

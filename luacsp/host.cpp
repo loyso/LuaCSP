@@ -56,7 +56,7 @@ csp::WorkResult::Enum csp::Host::Main()
 
 	m_mainProcess.StartEvaluation( *this, 0 );
 	Evaluate();
-	return WorkResult::YIELD;
+	return m_mainProcess.IsRunning() ? WorkResult::YIELD : WorkResult::FINISH;
 }
 
 void csp::Host::Evaluate()
@@ -82,11 +82,6 @@ void csp::Host::PushEvalStep( Process& process )
 {
 	CORE_ASSERT( m_evalStepsStackTop >= 0 && m_evalStepsStackTop < CHANNEL_STACK_SIZE );
 
-#ifdef _DEBUG
-	for( int i = 0; i < m_evalStepsStackTop; ++i )
-		CORE_ASSERT( m_evalStepsStack[i] != &process );
-#endif
-
 	m_evalStepsStack[ m_evalStepsStackTop ] = &process;
 	++m_evalStepsStackTop;
 }
@@ -103,14 +98,16 @@ csp::Process& csp::Host::PopEvalStep()
 	return *pProcess;
 }
 
-csp::Process* csp::Host::GetTopProcess() const
-{
-	return m_evalStepsStackTop > 0 ? m_evalStepsStack[ m_evalStepsStackTop - 1] : NULL;
-}
-
 bool csp::Host::IsEvalsStackEmpty() const
 {
 	return m_evalStepsStackTop <= 0;
+}
+
+csp::Process* csp::Host::GetTopProcess() const
+{
+	CORE_ASSERT( m_evalStepsStackTop >= 0 && m_evalStepsStackTop < CHANNEL_STACK_SIZE );
+
+	return m_evalStepsStackTop > 0 ? m_evalStepsStack[ m_evalStepsStackTop-1 ] : NULL;
 }
 
 
