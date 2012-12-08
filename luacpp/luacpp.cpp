@@ -230,6 +230,26 @@ lua::Return::Enum lua::LuaState::Status() const
 	return (Return::Enum)lua_status( m_stack.InternalState() );
 }
 
+void lua::LuaState::ReportRefLeaks() const
+{
+	lua_State* state = m_stack.InternalState();
+
+	int len = (int)lua_rawlen( state, LUA_REGISTRYINDEX );
+	for( int i = 1; i <= len; ++i )
+	{
+		if( i == LUA_RIDX_MAINTHREAD || i == LUA_RIDX_GLOBALS )
+			continue;
+
+		lua_rawgeti( state, LUA_REGISTRYINDEX, i );
+		if( !lua_isnil( state, -1 ) && !lua_isnumber( state, -1 ) )
+		{
+			int luaType = lua_type( state, -1 );
+			Print( "Lua ref leak: %d -> (%s)\n", i, lua_typename( state, luaType ) );
+		}
+		lua_pop( state, 1 );
+	}
+}
+
 
 lua::LuaStackValue::LuaStackValue( lua_State* luaState, int index )
 	: m_state( luaState )
@@ -365,29 +385,13 @@ void lua::LuaStack::PushRegistryReferenced( LuaRef_t key ) const
 
 lua::LuaRef_t lua::LuaStack::RefInRegistry() const
 {
-	return luaL_ref( m_state, LUA_REGISTRYINDEX );
+	lua::LuaRef_t key = luaL_ref( m_state, LUA_REGISTRYINDEX );
+	return key;
 }
 
 void lua::LuaStack::UnrefInRegistry( LuaRef_t key ) const
 {
 	luaL_unref( m_state, LUA_REGISTRYINDEX, key );
-}
-
-int lua::LuaStack::NumRegistryReferences() const
-{
-	int numRefs = 0;
-	
-	int len = (int)lua_rawlen( m_state, LUA_REGISTRYINDEX );
-	for( int i = 1; i <= len; ++i )
-	{
-		lua_rawgeti( m_state, LUA_REGISTRYINDEX, i );
-		if( !lua_isnil( m_state, -1 ) && !lua_isnumber( m_state, -1 ) )
-			numRefs++;
-		lua_pop( m_state, 1 );
-	}
-
-	static const int numPredefinedRefs = 2; // LUA_RIDX_MAINTHREAD and LUA_RIDX_GLOBALS
-	return numRefs - numPredefinedRefs; 
 }
 
 lua::LuaState lua::LuaStack::NewThread()

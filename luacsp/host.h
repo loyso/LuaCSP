@@ -25,10 +25,10 @@ namespace csp
 
 		void PushEvalStep( Process& process );
 		Process& PopEvalStep();
+		Process* GetTopProcess() const;
 		bool IsEvalsStackEmpty() const;
 
     private:
-		void ReportLeaks();
 		void Evaluate();
 
         lua::LuaState m_luaState;

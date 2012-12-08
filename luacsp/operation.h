@@ -104,9 +104,10 @@ namespace csp
 		
 		void UnrefChannels( lua::LuaStack const& stack );
 		void UnrefArguments( lua::LuaStack const& stack );
+		void UnrefClosures( lua::LuaStack const& stack );
 		void DetachChannels() const;
 
-		void StartTriggeredProcess( Host& host );
+		WorkResult::Enum StartTriggeredProcess( Host& host );
 		void SelectProcessToTrigger( Host& host );
 
 		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );

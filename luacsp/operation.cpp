@@ -244,7 +244,12 @@ csp::WorkResult::Enum csp::OpPar::Evaluate( Host& host )
 			finished = false;
 		}
 
-		closure.process.Evaluate( host, 0 );
+		WorkResult::Enum result = closure.process.StartEvaluation( host, 0 );
+		if ( result == WorkResult::FINISH && m_closureToRun == m_numClosures )
+		{
+			host.PushEvalStep( ThisProcess() );
+			finished = false;
+		}
 	}
 
 	if ( !CheckFinished() )
@@ -418,6 +423,19 @@ void csp::OpAlt::UnrefChannels( lua::LuaStack const& stack )
 	}
 }
 
+void csp::OpAlt::UnrefClosures( lua::LuaStack const& stack )
+{
+	for( int i = 0; i < m_numCases; ++i )
+	{
+		AltCase* pCase = m_cases + i;
+		if( pCase->m_closureRefKey != lua::LUA_NO_REF )
+		{
+			stack.UnrefInRegistry( pCase->m_closureRefKey );
+			pCase->m_closureRefKey = lua::LUA_NO_REF;
+		}
+	}
+}
+
 void csp::OpAlt::SelectProcessToTrigger( Host& host )
 {
 	CORE_ASSERT( m_pCaseTriggered == NULL );
@@ -438,7 +456,7 @@ void csp::OpAlt::SelectProcessToTrigger( Host& host )
 	}
 }
 
-void csp::OpAlt::StartTriggeredProcess( Host& host )
+csp::WorkResult::Enum csp::OpAlt::StartTriggeredProcess( Host& host )
 {
 	CORE_ASSERT( m_pCaseTriggered );
 
@@ -457,10 +475,9 @@ void csp::OpAlt::StartTriggeredProcess( Host& host )
 	for( int i = 0; i < m_numArguments; ++i )
 		threadStack.PushRegistryReferenced( m_arguments[i].refKey );
 
-	m_process.Evaluate( host, m_numArguments );
-
-	stack.UnrefInRegistry( m_pCaseTriggered->m_closureRefKey );
-	m_pCaseTriggered->m_closureRefKey = lua::LUA_NO_REF;
+	WorkResult::Enum result = m_process.StartEvaluation( host, m_numArguments );
+	UnrefClosures( stack );
+	return result;
 }
 
 
@@ -476,7 +493,8 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 		{
 			m_argumentsMoved = false;
 
-			StartTriggeredProcess( host );
+			if ( StartTriggeredProcess( host ) == WorkResult::FINISH )
+				host.PushEvalStep( ThisProcess() );
 
 			lua::LuaStack& stack = host.LuaState().GetStack();
 			UnrefArguments( stack );

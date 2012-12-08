@@ -1,10 +1,13 @@
 
 function main()
 	log("main begin\n")
-	-- testInOut()
-	-- testPar()
+	testInOut()
+	testPar()
+	testEmptyPar()
+	testEmptyParPar()
+	testParMix()
 	testAlt1()
-	-- testAlt2()
+	testAlt2()
 	log("main end\n")
 end
 
@@ -57,10 +60,76 @@ function testPar()
 	log("after\n")
 end
 
+function testEmptyPar()
+	log("before\n")
+	PAR(
+		function()
+			log("p1{\n")
+			log("p1}\n")
+		end,
+		function()
+			log("p2{\n")
+			log("p2}\n")
+		end
+	)
+	log("after\n")
+end
+
+function testEmptyParPar()
+	log("before\n")
+	PAR(
+		function()
+			log("p1{\n")
+			log("p1}\n")
+		end,
+		function()
+			log("p2{\n")
+			PAR(
+				function()
+					log("p2a{\n")
+					log("p2a}\n")
+				end,
+				function()
+					log("p2b{\n")
+					log("p2b}\n")
+				end
+			)
+			log("p2}\n")
+		end
+	)
+	log("after\n")
+end
+
+function testParMix()
+	log("before\n")
+	PAR(
+		function()
+			log("p1{\n")
+			PAR(
+				function()
+					log("p1a{\n")
+					log("p1a}\n")
+				end,
+				function()
+					log("p1b{\n")
+					log("p1b}\n")
+				end
+			)
+			log("p1}\n")
+		end,
+		function()
+			log("p2{\n")
+			log("p2}\n")
+		end
+	)
+	log("after\n")
+end
+
 function testAlt1()
 	log("before\n")
 	local ch1 = Channel()
 	local ch2 = Channel()
+	local ch3 = Channel()
 	PAR(
 		function()
 			log("p1{\n")
@@ -72,12 +141,16 @@ function testAlt1()
 				ch2, function( arg1, arg2 )
 					log("case2", arg1, arg2, "\n" )
 				end
+				,
+				ch3, function( arg1, arg2 )
+					log("case3", arg1, arg2, "\n" )
+				end
 			)
 			log("p1}\n")
 		end,
 		function()
 			log("p2{\n")
-			ch1:OUT( "hi", true )
+			ch2:OUT( "hi", true )
 			log("p2}\n")
 		end
 	)

@@ -39,7 +39,7 @@ void csp::Host::Initialize()
 
 void csp::Host::Shutdown()
 {
-	ReportLeaks();
+	m_luaState.ReportRefLeaks();
 
 	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
 	UnregisterStandardOperations( m_luaState, globals );
@@ -53,8 +53,8 @@ csp::WorkResult::Enum csp::Host::Main()
 	lua::LuaStackValue stackValue = m_mainProcess.LuaThread().GetStack().PushGlobalValue("main");
 	if ( !stackValue.IsFunction() || stackValue.IsCFunction() )
 		return WorkResult::FINISH;
-	
-	PushEvalStep( m_mainProcess );
+
+	m_mainProcess.StartEvaluation( *this, 0 );
 	Evaluate();
 	return WorkResult::YIELD;
 }
@@ -82,6 +82,11 @@ void csp::Host::PushEvalStep( Process& process )
 {
 	CORE_ASSERT( m_evalStepsStackTop >= 0 && m_evalStepsStackTop < CHANNEL_STACK_SIZE );
 
+#ifdef _DEBUG
+	for( int i = 0; i < m_evalStepsStackTop; ++i )
+		CORE_ASSERT( m_evalStepsStack[i] != &process );
+#endif
+
 	m_evalStepsStack[ m_evalStepsStackTop ] = &process;
 	++m_evalStepsStackTop;
 }
@@ -98,15 +103,15 @@ csp::Process& csp::Host::PopEvalStep()
 	return *pProcess;
 }
 
+csp::Process* csp::Host::GetTopProcess() const
+{
+	return m_evalStepsStackTop > 0 ? m_evalStepsStack[ m_evalStepsStackTop - 1] : NULL;
+}
+
 bool csp::Host::IsEvalsStackEmpty() const
 {
 	return m_evalStepsStackTop <= 0;
 }
 
-void csp::Host::ReportLeaks()
-{
-	int numLuaRefs = m_luaState.GetStack().NumRegistryReferences();
-	if ( numLuaRefs > 0 )
-		lua::Print("Potential memory leak: number of LuaRef entries is %d\n", numLuaRefs );
-}
+
 

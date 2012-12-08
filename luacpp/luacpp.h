@@ -91,7 +91,6 @@ namespace lua
 		LuaRef_t RefInRegistry() const;
 		void UnrefInRegistry( LuaRef_t key ) const;
 		void PushRegistryReferenced( LuaRef_t key ) const;
-		int NumRegistryReferences() const;
 
 		void RegistrySet();
 		lua::LuaStackValue RegistryGet();
@@ -145,6 +144,7 @@ namespace lua
 
 		Return::Enum Status() const;
 
+		void ReportRefLeaks() const;
     private:
         LuaStack m_stack;
     };
