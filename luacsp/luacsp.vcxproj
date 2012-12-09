@@ -16,6 +16,7 @@
     <ClCompile Include="host.cpp" />
     <ClCompile Include="operation.cpp" />
     <ClCompile Include="op_alt.cpp" />
+    <ClCompile Include="op_par.cpp" />
     <ClCompile Include="process.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +25,7 @@
     <ClInclude Include="host.h" />
     <ClInclude Include="operation.h" />
     <ClInclude Include="op_alt.h" />
+    <ClInclude Include="op_par.h" />
     <ClInclude Include="process.h" />
   </ItemGroup>
   <ItemGroup>
