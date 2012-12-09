@@ -50,7 +50,9 @@ csp::Operation& csp::Process::CurrentOperation()
 
 void csp::Process::Work( Host& host, time_t dt )
 {
-	CORE_ASSERT( m_operation );
+	if( m_operation == NULL )
+		return;
+
 	WorkResult::Enum result = m_operation->Work( host, dt );
 	
 	if( result == WorkResult::FINISH )

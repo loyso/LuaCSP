@@ -54,7 +54,7 @@ bool csp::OpAlt::CheckArgs( lua::LuaStack& args, InitError& initError ) const
 		if( IsChannelArg(guard) && ( pChannel = GetChannelArg(guard) ) != NULL ) 
 		{
 			if( pChannel->InAttached() )
-				return initError.ArgError( i, "channel is in output operation already" );
+				return initError.ArgError( i, "channel is in input operation already" );
 		}
 		else if( guard.IsNumber() )
 		{
@@ -139,22 +139,34 @@ void csp::OpAlt::UnrefClosures( lua::LuaStack const& stack )
 {
 	for( int i = 0; i < m_numCases; ++i )
 	{
-		AltCase* pCase = m_cases + i;
-		if( pCase->m_closureRefKey != lua::LUA_NO_REF )
+		AltCase& altCase = m_cases[ i ];
+		if( altCase.m_closureRefKey != lua::LUA_NO_REF )
 		{
-			stack.UnrefInRegistry( pCase->m_closureRefKey );
-			pCase->m_closureRefKey = lua::LUA_NO_REF;
+			stack.UnrefInRegistry( altCase.m_closureRefKey );
+			altCase.m_closureRefKey = lua::LUA_NO_REF;
 		}
 	}
 }
 
-void csp::OpAlt::SelectProcessToTrigger( Host& host )
+void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 {
 	CORE_ASSERT( m_pCaseTriggered == NULL );
 
 	for( int i = 0; i < m_numCases; ++i )
 	{
-		Channel* pChannel = m_cases[i].m_pChannel;
+		AltCase& altCase = m_cases[ i ];
+		if( m_pNilCase == &altCase )
+		{
+			m_pCaseTriggered = m_pNilCase;
+
+			m_argumentsMoved = true;
+			DetachChannels();
+
+			host.PushEvalStep( ThisProcess() );
+			break;
+		}
+
+		Channel* pChannel = altCase.m_pChannel;
 		if( pChannel && pChannel->OutAttached() )
 		{
 			ChannelAttachmentOut_i& out = pChannel->OutAttachment();
@@ -162,9 +174,41 @@ void csp::OpAlt::SelectProcessToTrigger( Host& host )
 
 			host.PushEvalStep( out.ProcessToEvaluate() );
 			host.PushEvalStep( ThisProcess() );
-
 			break;
 		}
+	}
+}
+
+void csp::OpAlt::SelectTimeProcessToTrigger( Host& host )
+{
+	CORE_ASSERT( m_pCaseTriggered == NULL );
+
+	time_t time = host.Time();
+
+	for( int i = 0; i < m_numCases; ++i )
+	{
+		AltCase& altCase = m_cases[ i ];
+		if( m_pNilCase == &altCase )
+			continue;
+
+		if( altCase.m_pChannel == NULL && altCase.m_time > time )
+		{
+			if( m_pCaseTriggered )
+			{
+				if( altCase.m_time < m_pCaseTriggered->m_time )
+					m_pCaseTriggered = &altCase;
+			}
+			else
+				m_pCaseTriggered = &altCase;
+		}
+	}
+
+	if( m_pCaseTriggered )
+	{
+		m_argumentsMoved = true;
+		DetachChannels();
+
+		host.PushEvalStep( ThisProcess() );
 	}
 }
 
@@ -197,7 +241,7 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 {
 	if( m_pCaseTriggered == NULL )
 	{
-		SelectProcessToTrigger( host );
+		SelectChannelProcessToTrigger( host );
 	}
 	else
 	{
@@ -227,11 +271,13 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 
 csp::WorkResult::Enum csp::OpAlt::Work( Host& host, time_t dt )
 {
-	if( m_pCaseTriggered != NULL )
+	if( m_pCaseTriggered )
 	{
 		if( m_process.IsRunning() )
 			m_process.Work( host, dt );
 	}
+	else
+		SelectTimeProcessToTrigger( host );
 
 	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
 }
@@ -254,8 +300,8 @@ void csp::OpAlt::MoveChannelArguments( Channel& channel, ChannelArgument* argume
 
 	m_arguments = arguments;
 	m_numArguments = numArguments;
+	
 	m_argumentsMoved = true;
-
 	DetachChannels();
 }
 

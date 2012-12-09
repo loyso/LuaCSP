@@ -41,6 +41,7 @@ namespace lua
 		bool IsString() const;
 		bool IsBoolean() const;
 		bool IsUserData() const;
+		bool IsLightUserData() const;
 		bool IsTable() const;
 
 		LuaNumber_t GetNumber() const;
@@ -53,6 +54,7 @@ namespace lua
 
 		bool GetBoolean() const;
 		void* GetUserData() const;
+		void* GetLightUserData() const;
 
 		int ArgError( const char* errMsg );
 
@@ -80,8 +82,13 @@ namespace lua
 		void SetInternalState( lua_State* state );
 
 		void PushNil();
+		void PushNumber( lua::LuaNumber_t number );
+		void PushInteger( int number );
+		void PushBoolean( bool value );
+		void PushString( const char* str );
+
 		void PushCFunction( int (*function)(lua_State* L) );
-		void PushLightUserData( void* userData );
+		void PushLightUserData( const void* userData );
 		LuaStackValue PushTable( int narr=0, int nrec=0 );
 		void* PushUserData( size_t size );
 
@@ -94,6 +101,9 @@ namespace lua
 
 		void RegistrySet();
 		lua::LuaStackValue RegistryGet();
+
+		void RegistryPtrSet( const void* ptr );
+		lua::LuaStackValue RegistryPtrGet( const void* ptr );
 
 		LuaStackValue GetField(LuaStackValue & value, const char * key) const;
 		void SetField(LuaStackValue & value, const char * key);

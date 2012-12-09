@@ -347,6 +347,16 @@ bool lua::LuaStackValue::IsTable() const
 	return !!lua_istable( m_state, m_index );
 }
 
+bool lua::LuaStackValue::IsLightUserData() const
+{
+	return !!lua_islightuserdata( m_state, m_index );
+}
+
+void* lua::LuaStackValue::GetLightUserData() const
+{
+	return lua_touserdata( m_state, m_index );
+}
+
 lua::LuaStack::LuaStack( lua_State* luaState )
 	: m_state( luaState )
 {
@@ -370,6 +380,26 @@ lua::LuaState lua::LuaStack::State() const
 void lua::LuaStack::PushNil()
 {
 	lua_pushnil(m_state);
+}
+
+void lua::LuaStack::PushNumber( lua::LuaNumber_t number )
+{
+	lua_pushnumber( m_state, number );
+}
+
+void lua::LuaStack::PushInteger( int number )
+{
+	lua_pushinteger( m_state, number );
+}
+
+void lua::LuaStack::PushBoolean( bool value )
+{
+	lua_pushboolean( m_state, value );
+}
+
+void lua::LuaStack::PushString( const char* str )
+{
+	lua_pushstring( m_state, str );
 }
 
 void lua::LuaStack::PushCFunction( int (*function)(lua_State* L) )
@@ -409,9 +439,9 @@ void lua::LuaStack::Pop( int numValues )
 	lua_pop(m_state, numValues);
 }
 
-void lua::LuaStack::PushLightUserData( void* userData )
+void lua::LuaStack::PushLightUserData( const void* userData )
 {
-	lua_pushlightuserdata( m_state, userData );
+	lua_pushlightuserdata( m_state, const_cast< void* >( userData ) );
 }
 
 void* lua::LuaStack::PushUserData( size_t size )
@@ -483,5 +513,16 @@ lua_State* lua::LuaStack::InternalState() const
 void lua::LuaStack::SetInternalState( lua_State* state )
 {
 	m_state = state;
+}
+
+void lua::LuaStack::RegistryPtrSet( const void* ptr )
+{
+	lua_rawsetp( m_state, LUA_REGISTRYINDEX, ptr );
+}
+
+lua::LuaStackValue lua::LuaStack::RegistryPtrGet( const void* ptr )
+{
+	lua_rawgetp( m_state, LUA_REGISTRYINDEX, ptr );
+	return GetTopValue();
 }
 

@@ -24,7 +24,8 @@ namespace csp
 		void DetachChannels() const;
 
 		WorkResult::Enum StartTriggeredProcess( Host& host );
-		void SelectProcessToTrigger( Host& host );
+		void SelectChannelProcessToTrigger( Host& host );
+		void SelectTimeProcessToTrigger( Host& host );
 
 		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );
 		virtual Process& ProcessToEvaluate();

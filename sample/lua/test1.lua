@@ -8,6 +8,7 @@ function main()
 	testParMix()
 	testAlt1()
 	testAlt2()
+	testAltTime()
 	log("main end\n")
 end
 
@@ -197,4 +198,50 @@ function testAlt2()
 		end
 	)
 	log("after\n")
+end
+
+function testAltTime()
+	log("testAltTime begin\n")
+	local ch1 = Channel()
+
+	log("alt polling{\n")
+	ALT(
+		ch1, function()
+			log("polling case ch\n" )
+		end
+		,
+		nil, function()
+			log("polling case nil\n" )
+		end
+	)
+	log("alt polling}\n")
+
+	PAR(
+		function()
+			log("p1{\n")
+			ALT(
+				time() + 0.8, function()
+					log("p1 case 0.8\n" )
+				end,
+				time() + 0.4, function()
+					log("p1 case 0.4\n" )
+				end
+			)
+			log("p1}\n")
+		end,
+		function()
+			log("p2{\n")
+			ALT(
+				ch1, function()
+					log("p2 case ch\n" )
+				end
+				,
+				time() + 0.1, function()
+					log("p2 case 0.1\n" )
+				end
+			)
+			log("p2}\n")
+		end
+	)
+	log("testAltTime end\n")
 end

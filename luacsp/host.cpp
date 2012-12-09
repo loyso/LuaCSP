@@ -5,6 +5,7 @@
 namespace csp
 {
 	static const int CHANNEL_STACK_SIZE = 256;
+	static const char HOST_IDENTITY_KEY = 0;
 }
 
 csp::Host::Host(const lua::LuaState& luaState)
@@ -12,6 +13,8 @@ csp::Host::Host(const lua::LuaState& luaState)
 	, m_mainProcess()
 	, m_evalStepsStack()
 	, m_evalStepsStackTop( 0 )
+	, m_time( 0 )
+	, m_tick( 0 )
 {
 	m_evalStepsStack = CORE_NEW Process*[ CHANNEL_STACK_SIZE ];
 	
@@ -30,19 +33,39 @@ lua::LuaState& csp::Host::LuaState()
     return m_luaState;
 }
 
+csp::Host& csp::Host::GetHost( lua_State* luaState )
+{
+	lua::LuaStack stack( luaState );
+
+	lua::LuaStackValue value = stack.RegistryPtrGet( &HOST_IDENTITY_KEY );
+	CORE_ASSERT( value.IsLightUserData() );
+
+	Host* pHost = static_cast< Host* >( value.GetLightUserData() );
+	CORE_ASSERT( pHost );
+
+	stack.Pop(1);
+	return *pHost;
+}
+
 void csp::Host::Initialize()
 {
-	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
+	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();	
 	RegisterStandardOperations( m_luaState, globals );
 	m_luaState.GetStack().Pop(1);
+
+	m_luaState.GetStack().PushLightUserData( this );
+	m_luaState.GetStack().RegistryPtrSet( &HOST_IDENTITY_KEY );
 }
 
 void csp::Host::Shutdown()
 {
 	m_luaState.ReportRefLeaks();
 
-	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
-	UnregisterStandardOperations( m_luaState, globals );
+	m_luaState.GetStack().PushNil();
+	m_luaState.GetStack().RegistryPtrSet( &HOST_IDENTITY_KEY );
+
+	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();	
+	UnregisterStandardOperations( m_luaState, globals );	
 	m_luaState.GetStack().Pop(1);
 }
 
@@ -73,8 +96,12 @@ csp::WorkResult::Enum csp::Host::Work( time_t dt )
 	if( !m_mainProcess.IsRunning() )
 		return WorkResult::FINISH;
 
+	m_time += dt;
+	m_tick++;
+
 	m_mainProcess.Work( *this, dt );
 	Evaluate();
+
 	return m_mainProcess.IsRunning() ? WorkResult::YIELD : WorkResult::FINISH;
 }
 
@@ -108,6 +135,16 @@ csp::Process* csp::Host::GetTopProcess() const
 	CORE_ASSERT( m_evalStepsStackTop >= 0 && m_evalStepsStackTop < CHANNEL_STACK_SIZE );
 
 	return m_evalStepsStackTop > 0 ? m_evalStepsStack[ m_evalStepsStackTop-1 ] : NULL;
+}
+
+csp::time_t csp::Host::Time() const
+{
+	return m_time;
+}
+
+unsigned int csp::Host::Tick() const
+{
+	return m_tick;
 }
 
 

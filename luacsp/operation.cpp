@@ -122,6 +122,8 @@ namespace operations
 namespace helpers
 {
 	int log( lua_State* luaState );
+	int time( lua_State* luaState );
+	int tick( lua_State* luaState );
 }
 
 int helpers::log( lua_State* luaState )
@@ -147,6 +149,24 @@ int helpers::log( lua_State* luaState )
 	return 0;
 }
 
+int helpers::time( lua_State* luaState )
+{
+	lua::LuaStack stack( luaState );
+
+	csp::Host& host = csp::Host::GetHost( luaState );
+	stack.PushNumber( host.Time() );
+	return 1;
+}
+
+int helpers::tick( lua_State* luaState )
+{
+	lua::LuaStack stack( luaState );
+
+	csp::Host& host = csp::Host::GetHost( luaState );
+	stack.PushInteger( host.Tick() );
+	return 1;
+}
+
 int operations::SLEEP( lua_State* luaState )
 {
 	csp::OpSleep* pSleep = CORE_NEW csp::OpSleep();
@@ -165,10 +185,17 @@ int operations::ALT( lua_State* luaState )
 	return pAlt->Initialize( luaState );
 }
 
-const csp::FunctionRegistration operationDescriptions[] =
+const csp::FunctionRegistration helpersDescriptions[] =
 {
 	  "log", helpers::log
-	, "SLEEP", operations::SLEEP
+	, "time", helpers::time
+	, "tick", helpers::tick
+	, NULL, NULL
+};
+
+const csp::FunctionRegistration operationDescriptions[] =
+{
+	  "SLEEP", operations::SLEEP
 	, "PAR", operations::PAR
 	, "ALT", operations::ALT
 	, NULL, NULL
@@ -176,6 +203,7 @@ const csp::FunctionRegistration operationDescriptions[] =
 
 void csp::RegisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value )
 {
+	RegisterFunctions( state, value, helpersDescriptions );
 	RegisterFunctions( state, value, operationDescriptions );
 	InitializeChannels( state );
 }
@@ -184,6 +212,7 @@ void csp::UnregisterStandardOperations( lua::LuaState & state, lua::LuaStackValu
 {
 	ShutdownChannels( state );
 	UnregisterFunctions( state, value, operationDescriptions );
+	UnregisterFunctions( state, value, helpersDescriptions );
 }
 
 csp::OpPar::OpPar()

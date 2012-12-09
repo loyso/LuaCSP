@@ -18,10 +18,15 @@ namespace csp
         void Initialize();
         void Shutdown();
 
+		static Host& GetHost( lua_State* luaState );
+
         WorkResult::Enum Main();
 		WorkResult::Enum Work( time_t dt );
 
         lua::LuaState& LuaState();
+		
+		time_t Time() const;
+		unsigned int Tick() const;
 
 		void PushEvalStep( Process& process );
 		Process& PopEvalStep();
@@ -36,5 +41,8 @@ namespace csp
 
 		Process** m_evalStepsStack;
 		int m_evalStepsStackTop;
+
+		unsigned int m_tick;
+		time_t m_time;
     };
 }
