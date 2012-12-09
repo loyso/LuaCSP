@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 struct lua_State;
 
 namespace lua
@@ -24,8 +26,20 @@ namespace lua
     };
 
 	int Print(const char* fmt, ...);
+	void* LuaDefaultAlloc( void* ud, void* ptr, size_t osize, size_t nsize );
 
 	class LuaState;
 	class LuaStack;
 	class LuaStackValue;
+
+	class LuaReader
+	{
+	public:
+		LuaReader( const void* data, size_t size );
+		static const char* Read( lua_State *L, void *data, size_t *size );
+
+	private:
+		const uint8_t* m_Data;
+		size_t m_Size;
+	};
 }

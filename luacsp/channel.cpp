@@ -29,111 +29,6 @@ namespace csp
 	};
 }
 
-int csp::GcObject_Gc( lua_State* luaState )
-{
-	lua::LuaStack args( luaState );
-
-	CORE_ASSERT( args.NumArgs() == 1 );
-	lua::LuaStackValue userData = args[1];
-
-	CORE_ASSERT( userData.IsUserData() );
-	GcObject** pGcObject = (GcObject**)userData.GetUserData();
-
-	delete *pGcObject;
-	*pGcObject = NULL;
-	return 0;
-}
-
-int csp::Channel_IN( lua_State* luaState )
-{
-	OpChannelIn* pIn = CORE_NEW OpChannelIn();
-	return pIn->Initialize( luaState );
-}
-
-int csp::Channel_OUT( lua_State* luaState )
-{
-	OpChannelOut* pOut = CORE_NEW OpChannelOut();
-	return pOut->Initialize( luaState );
-}
-
-void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey )
-{
-	lua::LuaStack args( luaState );
-
-	GcObject** ppGcObject = (GcObject**)args.PushUserData( sizeof(GcObject*) );
-	*ppGcObject = &gcObject;
-	lua::LuaStackValue userData = args.GetTopValue();
-
-	args.PushLightUserData( metatableRegistryKey );
-	lua::LuaStackValue metatable = args.RegistryGet();
-	CORE_ASSERT( metatable.IsTable() );
-
-	args.SetMetaTable( userData );
-}
-
-void csp::PushChannel( lua_State* luaState, Channel& ch )
-{
-	PushGcObject( luaState, ch, (void*)channelFunctions );
-}
-
-
-bool csp::IsChannelArg( lua::LuaStackValue const& value )
-{
-	return value.IsUserData(); //TODO: add more checks.
-}
-
-
-csp::Channel* csp::GetChannelArg( lua::LuaStackValue const& value )
-{
-	if( !value.IsUserData() )
-		return NULL;
-
-	GcObject** pGcObject = (GcObject**)value.GetUserData();
-	Channel* pChannel = static_cast< Channel* >( *pGcObject ); //TODO: add more type checks.
-	return pChannel;
-}
-
-
-int csp::channel( lua_State* luaState )
-{
-	csp::Channel* pChannel = CORE_NEW csp::Channel();
-	csp::PushChannel( luaState, *pChannel );
-	return 1;
-}
-
-void csp::InitializeChannels( lua::LuaState& state )
-{
-	lua::LuaStack stack = state.GetStack();
-	
-	stack.PushLightUserData( (void*)channelFunctions );
-	lua::LuaStackValue metaTable = stack.PushTable();
-
-	metaTable.PushValue();
-	stack.SetField( metaTable, "__index" );
-	RegisterFunctions( state, metaTable, channelFunctions );
-
-	stack.RegistrySet();
-
-	lua::LuaStackValue globals = stack.PushGlobalTable();
-	RegisterFunctions( state, globals, channelGlobals );
-	stack.Pop(1);
-}
-
-void csp::ShutdownChannels( lua::LuaState& state )
-{
-	lua::LuaStack stack = state.GetStack();
-
-	stack.PushLightUserData( (void*)channelFunctions );
-	stack.PushNil();
-
-	stack.RegistrySet();
-
-	lua::LuaStackValue globals = stack.PushGlobalTable();
-	UnregisterFunctions( state, globals, channelGlobals );
-	stack.Pop(1);
-}
-
-
 csp::OpChannel::OpChannel()
 	: m_pChannel()
 	, m_channelRefKey( lua::LUA_NO_REF )
@@ -427,3 +322,105 @@ csp::ChannelAttachmentOut_i& csp::Channel::OutAttachment() const
 	return *m_pAttachmentOut;
 }
 
+
+int csp::GcObject_Gc( lua_State* luaState )
+{
+	lua::LuaStack args( luaState );
+
+	CORE_ASSERT( args.NumArgs() == 1 );
+	lua::LuaStackValue userData = args[1];
+
+	CORE_ASSERT( userData.IsUserData() );
+	GcObject** pGcObject = (GcObject**)userData.GetUserData();
+
+	delete *pGcObject;
+	*pGcObject = NULL;
+	return 0;
+}
+
+int csp::Channel_IN( lua_State* luaState )
+{
+	OpChannelIn* pIn = CORE_NEW OpChannelIn();
+	return pIn->Initialize( luaState );
+}
+
+int csp::Channel_OUT( lua_State* luaState )
+{
+	OpChannelOut* pOut = CORE_NEW OpChannelOut();
+	return pOut->Initialize( luaState );
+}
+
+void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey )
+{
+	lua::LuaStack args( luaState );
+
+	GcObject** ppGcObject = (GcObject**)args.PushUserData( sizeof(GcObject*) );
+	*ppGcObject = &gcObject;
+	lua::LuaStackValue userData = args.GetTopValue();
+
+	args.PushLightUserData( metatableRegistryKey );
+	lua::LuaStackValue metatable = args.RegistryGet();
+	CORE_ASSERT( metatable.IsTable() );
+
+	args.SetMetaTable( userData );
+}
+
+void csp::PushChannel( lua_State* luaState, Channel& ch )
+{
+	PushGcObject( luaState, ch, (void*)channelFunctions );
+}
+
+bool csp::IsChannelArg( lua::LuaStackValue const& value )
+{
+	return value.IsUserData(); //TODO: add more checks.
+}
+
+csp::Channel* csp::GetChannelArg( lua::LuaStackValue const& value )
+{
+	if( !value.IsUserData() )
+		return NULL;
+
+	GcObject** pGcObject = (GcObject**)value.GetUserData();
+	Channel* pChannel = static_cast< Channel* >( *pGcObject ); //TODO: add more type checks.
+	return pChannel;
+}
+
+
+int csp::channel( lua_State* luaState )
+{
+	csp::Channel* pChannel = CORE_NEW csp::Channel();
+	csp::PushChannel( luaState, *pChannel );
+	return 1;
+}
+
+void csp::InitializeChannels( lua::LuaState& state )
+{
+	lua::LuaStack stack = state.GetStack();
+
+	stack.PushLightUserData( (void*)channelFunctions );
+	lua::LuaStackValue metaTable = stack.PushTable();
+
+	metaTable.PushValue();
+	stack.SetField( metaTable, "__index" );
+	RegisterFunctions( state, metaTable, channelFunctions );
+
+	stack.RegistrySet();
+
+	lua::LuaStackValue globals = stack.PushGlobalTable();
+	RegisterFunctions( state, globals, channelGlobals );
+	stack.Pop(1);
+}
+
+void csp::ShutdownChannels( lua::LuaState& state )
+{
+	lua::LuaStack stack = state.GetStack();
+
+	stack.PushLightUserData( (void*)channelFunctions );
+	stack.PushNil();
+
+	stack.RegistrySet();
+
+	lua::LuaStackValue globals = stack.PushGlobalTable();
+	UnregisterFunctions( state, globals, channelGlobals );
+	stack.Pop(1);
+}
