@@ -1,7 +1,9 @@
-
 #include "process.h"
+
 #include "operation.h"
 #include "host.h"
+
+#include <luacpp/luastackvalue.h>
 
 csp::Process::Process()
 	: m_luaThread()

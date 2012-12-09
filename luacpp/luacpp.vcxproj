@@ -90,9 +90,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="luacpp.cpp" />
+    <ClCompile Include="luastack.cpp" />
+    <ClCompile Include="luastackvalue.cpp" />
+    <ClCompile Include="luastate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="luacpp.h" />
+    <ClInclude Include="luastack.h" />
+    <ClInclude Include="luastackvalue.h" />
+    <ClInclude Include="luastate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

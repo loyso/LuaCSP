@@ -2,8 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="luacpp.cpp" />
+    <ClCompile Include="luastack.cpp" />
+    <ClCompile Include="luastate.cpp" />
+    <ClCompile Include="luastackvalue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="luacpp.h" />
+    <ClInclude Include="luastack.h" />
+    <ClInclude Include="luastate.h" />
+    <ClInclude Include="luastackvalue.h" />
   </ItemGroup>
 </Project>

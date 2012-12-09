@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="channel.cpp" />
     <ClCompile Include="csp.cpp" />
+    <ClCompile Include="helpers.cpp" />
     <ClCompile Include="host.cpp" />
     <ClCompile Include="operation.cpp" />
     <ClCompile Include="op_alt.cpp" />
@@ -22,6 +23,7 @@
   <ItemGroup>
     <ClInclude Include="channel.h" />
     <ClInclude Include="csp.h" />
+    <ClInclude Include="helpers.h" />
     <ClInclude Include="host.h" />
     <ClInclude Include="operation.h" />
     <ClInclude Include="op_alt.h" />

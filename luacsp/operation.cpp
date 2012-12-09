@@ -1,6 +1,8 @@
-#include <luacpp/luacpp.h>
-
 #include "operation.h"
+
+#include <luacpp/luacpp.h>
+#include <luacpp/luastackvalue.h>
+
 #include "op_alt.h"
 #include "op_par.h"
 
@@ -58,21 +60,6 @@ bool csp::Operation::Init( lua::LuaStack &, InitError& )
 	return true;
 }
 
-
-bool csp::Operation::InitError::ArgError( int arg, const char* message )
-{
-	errorArg = arg;
-	errorMessage = message;
-	return false;
-}
-
-bool csp::Operation::InitError::Error( const char* message )
-{
-	errorArg = 0;
-	errorMessage = message;
-	return false;
-}
-
 bool csp::Operation::IsFinished() const
 {
 	return m_finished;
@@ -90,6 +77,21 @@ csp::WorkResult::Enum csp::Operation::Evaluate( Host& )
 
 void csp::Operation::DebugCheck( Host& )
 {
+}
+
+
+bool csp::Operation::InitError::ArgError( int arg, const char* message )
+{
+	errorArg = arg;
+	errorMessage = message;
+	return false;
+}
+
+bool csp::Operation::InitError::Error( const char* message )
+{
+	errorArg = 0;
+	errorMessage = message;
+	return false;
 }
 
 
@@ -113,59 +115,12 @@ csp::WorkResult::Enum csp::OpSleep::Work( Host&, time_t dt )
 	return m_seconds > 0 ? WorkResult::YIELD : WorkResult::FINISH;
 }
 
+
 namespace operations
 {
 	int SLEEP( lua_State* luaState );
 	int PAR( lua_State* luaState );
 	int ALT( lua_State* luaState );
-}
-
-namespace helpers
-{
-	int log( lua_State* luaState );
-	int time( lua_State* luaState );
-	int tick( lua_State* luaState );
-}
-
-int helpers::log( lua_State* luaState )
-{
-	lua::LuaStack args( luaState );
-
-	for( int i = 1; i <= args.NumArgs(); ++i )
-	{
-		lua::LuaStackValue arg = args[i];
-		if( arg.IsNil() )
-			lua::Print( "nil" );
-		else if( arg.IsBoolean() )
-			lua::Print( arg.GetBoolean() ? "true" : "false" );
-		else if( arg.IsNumber() )
-			lua::Print( "%.5f", arg.GetNumber() );
-		else if( arg.IsString() )
-			lua::Print( arg.GetString() );
-
-		if( i < args.NumArgs() )
-			lua::Print(" ");
-	}
-
-	return 0;
-}
-
-int helpers::time( lua_State* luaState )
-{
-	lua::LuaStack stack( luaState );
-
-	csp::Host& host = csp::Host::GetHost( luaState );
-	stack.PushNumber( host.Time() );
-	return 1;
-}
-
-int helpers::tick( lua_State* luaState )
-{
-	lua::LuaStack stack( luaState );
-
-	csp::Host& host = csp::Host::GetHost( luaState );
-	stack.PushInteger( host.Tick() );
-	return 1;
 }
 
 int operations::SLEEP( lua_State* luaState )
@@ -186,14 +141,6 @@ int operations::ALT( lua_State* luaState )
 	return pAlt->Initialize( luaState );
 }
 
-const csp::FunctionRegistration helpersDescriptions[] =
-{
-	  "log", helpers::log
-	, "time", helpers::time
-	, "tick", helpers::tick
-	, NULL, NULL
-};
-
 const csp::FunctionRegistration operationDescriptions[] =
 {
 	  "SLEEP", operations::SLEEP
@@ -204,7 +151,6 @@ const csp::FunctionRegistration operationDescriptions[] =
 
 void csp::RegisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value )
 {
-	RegisterFunctions( state, value, helpersDescriptions );
 	RegisterFunctions( state, value, operationDescriptions );
 	InitializeChannels( state );
 }
@@ -213,5 +159,4 @@ void csp::UnregisterStandardOperations( lua::LuaState & state, lua::LuaStackValu
 {
 	ShutdownChannels( state );
 	UnregisterFunctions( state, value, operationDescriptions );
-	UnregisterFunctions( state, value, helpersDescriptions );
 }

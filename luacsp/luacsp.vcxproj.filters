@@ -8,6 +8,7 @@
     <ClCompile Include="channel.cpp" />
     <ClCompile Include="op_alt.cpp" />
     <ClCompile Include="op_par.cpp" />
+    <ClCompile Include="helpers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csp.h" />
@@ -17,5 +18,6 @@
     <ClInclude Include="channel.h" />
     <ClInclude Include="op_alt.h" />
     <ClInclude Include="op_par.h" />
+    <ClInclude Include="helpers.h" />
   </ItemGroup>
 </Project>

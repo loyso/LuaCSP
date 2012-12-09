@@ -1,6 +1,9 @@
-
 #include "host.h"
+
+#include <luacpp/luastackvalue.h>
+
 #include "operation.h"
+#include "helpers.h"
 
 namespace csp
 {
@@ -50,6 +53,7 @@ csp::Host& csp::Host::GetHost( lua_State* luaState )
 void csp::Host::Initialize()
 {
 	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();	
+	RegisterStandardHelpers( m_luaState, globals );
 	RegisterStandardOperations( m_luaState, globals );
 	m_luaState.GetStack().Pop(1);
 
@@ -66,6 +70,7 @@ void csp::Host::Shutdown()
 
 	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();	
 	UnregisterStandardOperations( m_luaState, globals );	
+	UnregisterStandardHelpers( m_luaState, globals );	
 	m_luaState.GetStack().Pop(1);
 }
 
@@ -146,6 +151,3 @@ unsigned int csp::Host::Tick() const
 {
 	return m_tick;
 }
-
-
-

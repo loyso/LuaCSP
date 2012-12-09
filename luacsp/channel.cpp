@@ -1,6 +1,8 @@
-#include <luacpp/luacpp.h>
-
 #include "channel.h"
+
+#include <luacpp/luacpp.h>
+#include <luacpp/luastackvalue.h>
+
 #include "host.h"
 
 namespace csp

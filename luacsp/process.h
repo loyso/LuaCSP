@@ -1,6 +1,6 @@
 #pragma once
 
-#include <luacpp/luacpp.h>
+#include <luacpp/luastate.h>
 
 #include "csp.h"
 

@@ -1,5 +1,7 @@
 #include "op_alt.h"
 
+#include <luacpp/luastackvalue.h>
+
 #include "process.h"
 #include "operation.h"
 #include "host.h"

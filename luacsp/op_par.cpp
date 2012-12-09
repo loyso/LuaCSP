@@ -1,5 +1,7 @@
 #include "op_par.h"
 
+#include <luacpp/luastackvalue.h>
+
 #include "host.h"
 
 csp::OpPar::OpPar()
