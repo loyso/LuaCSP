@@ -45,7 +45,7 @@ int main(int argc, const char* argv[])
 			if( valueCall == lua::Return::OK )
 			{
 				csp::WorkResult::Enum mainCall = host.Main();
-				const float dt = 0.01f;
+				const float dt = 1.0f/30.0f;
 				while( mainCall == lua::Return::YIELD )
 				{
 					Sleep( (unsigned int)(dt * 1000.0) );
@@ -59,10 +59,6 @@ int main(int argc, const char* argv[])
 
     csp::Shutdown(host);
 	core::ShutdownCore();
-
-	std::cout << std::endl << "Press Enter to continue...";
-	std::string input;
-	std::getline( std::cin, input );
 
 	return 0;
 }

@@ -17,7 +17,7 @@ function testInOut()
 		function()
 			log("send1{\n")
 			ch:OUT("hi", 1, true)
-			SLEEP(3)
+			SLEEP(0)
 			ch:OUT()
 			log("send1}\n")
 		end,
@@ -36,7 +36,7 @@ function testPar()
 	PAR(
 		function()
 			log("p1{\n")
-			SLEEP(3)
+			SLEEP(0)
 			log("p1}\n")
 		end,
 		function()
@@ -44,19 +44,19 @@ function testPar()
 			PAR(
 				function()
 					log("p2a{\n")
-					SLEEP(2)
+					SLEEP(0)
 					log("p2a}\n")
 				end,
 				function()
 					log("p2b{\n")
-					SLEEP(1)
+					SLEEP(0)
 					log("p2b}\n")
 				end
 			)
 			log("p2}\n")
 		end
 	)
-	SLEEP(3)
+	SLEEP(0)
 	log("after\n")
 end
 
@@ -165,7 +165,7 @@ function testAlt1()
 		end,
 		function()
 			log("p2{\n")
-			ch2:OUT( "hi", true )
+			ch3:OUT( "hi", true )
 			log("p2}\n")
 		end
 	)

@@ -6,6 +6,7 @@
     <ClCompile Include="operation.cpp" />
     <ClCompile Include="process.cpp" />
     <ClCompile Include="channel.cpp" />
+    <ClCompile Include="op_alt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csp.h" />
@@ -13,5 +14,6 @@
     <ClInclude Include="process.h" />
     <ClInclude Include="operation.h" />
     <ClInclude Include="channel.h" />
+    <ClInclude Include="op_alt.h" />
   </ItemGroup>
 </Project>
