@@ -89,8 +89,7 @@ csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 		{
 			lua::LuaStack luaStack = m_luaThread.GetStack();
 			numArgs = m_operation->PushResults( luaStack );
-			m_operation->DebugCheck( host );
-			SwitchCurrentOperation( NULL );
+			DeleteOperation( host );
 		}
 		else
 			return WorkResult::YIELD;
@@ -117,6 +116,28 @@ csp::WorkResult::Enum csp::Process::Resume( int numArgs )
 		return WorkResult::YIELD;
 
 	return WorkResult::FINISH;
+}
+
+void csp::Process::DoTerminate( Host& host )
+{
+	Terminate( host );
+}
+
+void csp::Process::Terminate( Host& host )
+{
+	if( m_operation )
+	{
+		m_operation->DoTerminate( host );
+		DeleteOperation( host );
+	}
+}
+
+void csp::Process::DeleteOperation( Host& host )
+{
+	CORE_ASSERT( m_operation );
+
+	m_operation->DebugCheck( host );
+	SwitchCurrentOperation( NULL );
 }
 
 bool csp::Process::IsRunning() const

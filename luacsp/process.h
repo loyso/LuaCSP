@@ -28,12 +28,16 @@ namespace csp
 		WorkResult::Enum StartEvaluation( Host& host, int numArgs );
 		WorkResult::Enum Evaluate( Host& host, int numArgs );
 
+		void DoTerminate( Host& host );
+		void Terminate( Host& host );
+
 		void SwitchCurrentOperation( Operation* pOperation );
 		bool IsRunning() const;
 
     private:
 		Operation& CurrentOperation();
 		WorkResult::Enum Resume( int numArgs );
+		void DeleteOperation( Host& host );
 
 		lua::LuaState m_luaThread;
 		Process* m_parentProcess;

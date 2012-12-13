@@ -9,6 +9,7 @@ function main()
 	testAlt1()
 	testAlt2()
 	testAltTime()
+	testTermination()
 	log("main end\n")
 end
 
@@ -244,4 +245,21 @@ function testAltTime()
 		end
 	)
 	log("testAltTime end\n")
+end
+
+function testTermination()
+	PARWHILE(
+		function()
+			log("a short while{\n")
+			SLEEP(0)
+			log("a short while}\n")
+		end,
+		function()
+			log("secondary p{\n")
+			SLEEP(0)
+			log("secondary in progress\n")
+			SLEEP(0)
+			log("secondary p}\n")
+		end
+	)
 end

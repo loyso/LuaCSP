@@ -142,6 +142,14 @@ csp::Process* csp::Host::GetTopProcess() const
 	return m_evalStepsStackTop > 0 ? m_evalStepsStack[ m_evalStepsStackTop-1 ] : NULL;
 }
 
+void csp::Host::DebugCheckDeletion( const Process& process ) const
+{
+	for( int i = 0; i < m_evalStepsStackTop; ++i )
+	{
+		CORE_ASSERT( &process != m_evalStepsStack[i] );
+	}
+}
+
 csp::time_t csp::Host::Time() const
 {
 	return m_time;
@@ -150,4 +158,10 @@ csp::time_t csp::Host::Time() const
 unsigned int csp::Host::Tick() const
 {
 	return m_tick;
+}
+
+void csp::Host::TerminateMain()
+{
+	if( m_mainProcess.IsRunning() )
+		m_mainProcess.DoTerminate( *this );
 }

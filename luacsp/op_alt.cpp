@@ -150,6 +150,15 @@ void csp::OpAlt::UnrefClosures( lua::LuaStack const& stack )
 	}
 }
 
+void csp::OpAlt::UnrefProcess( lua::LuaStack const& stack )
+{
+	if( m_processRefKey != lua::LUA_NO_REF )
+	{
+		stack.UnrefInRegistry( m_processRefKey );
+		m_processRefKey = lua::LUA_NO_REF;
+	}
+}
+
 void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 {
 	CORE_ASSERT( m_pCaseTriggered == NULL );
@@ -247,13 +256,14 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 	}
 	else
 	{
+		lua::LuaStack& stack = host.LuaState().GetStack();
+
 		if( m_argumentsMoved )
 		{
 			m_argumentsMoved = false;
 
 			StartTriggeredProcess( host );
 
-			lua::LuaStack& stack = host.LuaState().GetStack();
 			UnrefArguments( stack );
 			UnrefChannels( stack );			
 		}
@@ -262,8 +272,7 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 		}
 		else if( m_processRefKey != lua::LUA_NO_REF )
 		{
-			ThisProcess().LuaThread().GetStack().UnrefInRegistry( m_processRefKey );
-			m_processRefKey = lua::LUA_NO_REF;
+			UnrefProcess( stack );
 			return WorkResult::FINISH;
 		}
 	}
@@ -319,6 +328,24 @@ void csp::OpAlt::DetachChannels() const
 		if( m_cases[i].m_pChannel )
 			m_cases[i].m_pChannel->SetAttachmentIn( NULL );
 	}
+}
+
+void csp::OpAlt::DebugCheck( Host& host ) const
+{
+	host.DebugCheckDeletion( m_process );
+}
+
+void csp::OpAlt::Terminate( Host& host )
+{
+	lua::LuaStack stack = host.LuaState().GetStack();
+
+	m_process.Terminate( host );
+
+	DetachChannels();
+	UnrefChannels( stack );
+	UnrefArguments( stack );
+	UnrefClosures( stack );
+	UnrefProcess( stack );
 }
 
 csp::OpAlt::AltCase::AltCase()

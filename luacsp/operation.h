@@ -23,7 +23,8 @@ namespace csp
 		Operation();
 		virtual ~Operation();
 
-		int Initialize( lua_State* luaState );
+		int DoInit( lua_State* luaState );
+		void DoTerminate( Host& host );
 
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual WorkResult::Enum Work( Host& host, time_t dt ) = 0;
@@ -33,7 +34,7 @@ namespace csp
 		bool IsFinished() const;
 		void SetFinished( bool finished );
 
-		virtual void DebugCheck( Host& host );
+		virtual void DebugCheck( Host& host ) const;
 
 	protected:
 		Process& ThisProcess() const;
@@ -49,6 +50,7 @@ namespace csp
 
     private:
 		virtual bool Init( lua::LuaStack & args, InitError& initError );
+		virtual void Terminate( Host& host );
 
 		Process* m_pProcess;
 		bool m_finished;

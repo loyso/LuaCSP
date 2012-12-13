@@ -147,6 +147,13 @@ bool csp::OpChannel::HaveArgumentsMoved() const
 	return m_argumentsMoved;
 }
 
+void csp::OpChannel::Terminate( Host& host )
+{
+	lua::LuaStack& stack = host.LuaState().GetStack();
+	UnrefChannel( stack );
+	UnrefArguments( stack );
+}
+
 
 csp::OpChannelOut::OpChannelOut()
 {
@@ -207,6 +214,12 @@ void csp::OpChannelOut::MoveChannelArguments()
 	ArgumentsMoved();	
 
 	channel.SetAttachmentOut( NULL );
+}
+
+void csp::OpChannelOut::Terminate( Host& host )
+{
+	ThisChannel().SetAttachmentOut( NULL );
+	OpChannel::Terminate( host );
 }
 
 
@@ -277,6 +290,12 @@ int csp::OpChannelIn::PushResults( lua::LuaStack & luaStack )
 	return numArguments;
 }
 
+void csp::OpChannelIn::Terminate( Host& host )
+{
+	ThisChannel().SetAttachmentIn( NULL );
+	OpChannel::Terminate( host );
+}
+
 
 csp::Channel::Channel()
 	: m_pAttachmentIn()
@@ -341,13 +360,13 @@ int csp::GcObject_Gc( lua_State* luaState )
 int csp::Channel_IN( lua_State* luaState )
 {
 	OpChannelIn* pIn = CORE_NEW OpChannelIn();
-	return pIn->Initialize( luaState );
+	return pIn->DoInit( luaState );
 }
 
 int csp::Channel_OUT( lua_State* luaState )
 {
 	OpChannelOut* pOut = CORE_NEW OpChannelOut();
-	return pOut->Initialize( luaState );
+	return pOut->DoInit( luaState );
 }
 
 void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey )

@@ -108,3 +108,56 @@ bool csp::OpPar::CheckFinished()
 	}
 	return finished;
 }
+
+void csp::OpPar::DebugCheck( Host& host ) const
+{
+	for( int i = 0; i < m_closureToRun; ++i )
+	{
+		Process& process = m_closures[ i ].process;
+		host.DebugCheckDeletion( process );
+	}
+}
+
+void csp::OpPar::UnrefClosures()
+{
+	for( int i = 0; i < m_numClosures; ++i )
+	{
+		if( m_closures[ i ].refKey != lua::LUA_NO_REF )
+		{
+			ThisProcess().LuaThread().GetStack().UnrefInRegistry( m_closures[ i ].refKey );
+			m_closures[ i ].refKey = lua::LUA_NO_REF;
+		}
+	}
+}
+
+void csp::OpPar::Terminate( Host& host )
+{
+	for( int i = 0; i < m_numClosures; ++i )
+	{
+		m_closures[ i ].process.Terminate( host );
+	}
+	UnrefClosures();
+}
+
+
+csp::WorkResult::Enum csp::OpParWhile::Evaluate( Host& host )
+{
+	if( m_numClosures < 1 )
+		return WorkResult::FINISH;
+
+	if( m_closureToRun > 0 )
+	{
+		if( !m_closures[ 0 ].process.IsRunning() )
+		{
+			DoTerminate( host );
+			return WorkResult::FINISH;
+		}
+	}
+
+	return OpPar::Evaluate( host );
+}
+
+void csp::OpParWhile::DoTerminate( Host& host )
+{
+	Terminate( host );
+}

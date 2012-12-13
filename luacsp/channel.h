@@ -72,6 +72,8 @@ namespace csp
 		int NumArguments() const;
 		bool HaveArgumentsMoved() const;
 
+		virtual void Terminate( Host& host );
+
 	private:
 		lua::LuaRef_t m_channelRefKey;
 		Channel* m_pChannel;
@@ -90,6 +92,7 @@ namespace csp
 	private:
 		virtual bool Init( lua::LuaStack & args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
+		virtual void Terminate( Host& host );
 		virtual int PushResults( lua::LuaStack & luaStack );
 		
 		virtual Process& ProcessToEvaluate();
@@ -105,6 +108,7 @@ namespace csp
 	private:
 		virtual bool Init( lua::LuaStack & args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
+		virtual void Terminate( Host& host );
 
 		virtual Process& ProcessToEvaluate();
 		virtual void MoveChannelArguments();

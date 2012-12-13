@@ -21,6 +21,7 @@ namespace csp
 		static Host& GetHost( lua_State* luaState );
 
         WorkResult::Enum Main();
+		void TerminateMain();
 		WorkResult::Enum Work( time_t dt );
 
         lua::LuaState& LuaState();
@@ -32,6 +33,8 @@ namespace csp
 		Process& PopEvalStep();
 		Process* GetTopProcess() const;
 		bool IsEvalsStackEmpty() const;
+
+		void DebugCheckDeletion( const Process& process ) const;
 
     private:
 		void Evaluate();

@@ -32,7 +32,7 @@ csp::Process& csp::Operation::ThisProcess() const
 	return *m_pProcess;
 }
 
-int csp::Operation::Initialize( lua_State* luaState )
+int csp::Operation::DoInit( lua_State* luaState )
 {
 	lua::LuaState state( luaState );
 
@@ -75,10 +75,18 @@ csp::WorkResult::Enum csp::Operation::Evaluate( Host& )
 	return WorkResult::YIELD;
 }
 
-void csp::Operation::DebugCheck( Host& )
+void csp::Operation::DebugCheck( Host& ) const
 {
 }
 
+void csp::Operation::DoTerminate( Host& host )
+{
+	Terminate( host );
+}
+
+void csp::Operation::Terminate( Host& )
+{
+}
 
 bool csp::Operation::InitError::ArgError( int arg, const char* message )
 {
@@ -120,31 +128,39 @@ namespace operations
 {
 	int SLEEP( lua_State* luaState );
 	int PAR( lua_State* luaState );
+	int PARWHILE( lua_State* luaState );
 	int ALT( lua_State* luaState );
 }
 
 int operations::SLEEP( lua_State* luaState )
 {
 	csp::OpSleep* pSleep = CORE_NEW csp::OpSleep();
-	return pSleep->Initialize( luaState );
+	return pSleep->DoInit( luaState );
 }
 
 int operations::PAR( lua_State* luaState )
 {
 	csp::OpPar* pPar = CORE_NEW csp::OpPar();
-	return pPar->Initialize( luaState );
+	return pPar->DoInit( luaState );
+}
+
+int operations::PARWHILE( lua_State* luaState )
+{
+	csp::OpParWhile* pPar = CORE_NEW csp::OpParWhile();
+	return pPar->DoInit( luaState );
 }
 
 int operations::ALT( lua_State* luaState )
 {
 	csp::OpAlt* pAlt = CORE_NEW csp::OpAlt();
-	return pAlt->Initialize( luaState );
+	return pAlt->DoInit( luaState );
 }
 
 const csp::FunctionRegistration operationDescriptions[] =
 {
 	  "SLEEP", operations::SLEEP
 	, "PAR", operations::PAR
+	, "PARWHILE", operations::PARWHILE
 	, "ALT", operations::ALT
 	, NULL, NULL
 };
