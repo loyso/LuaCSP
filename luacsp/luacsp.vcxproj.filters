@@ -9,6 +9,7 @@
     <ClCompile Include="op_alt.cpp" />
     <ClCompile Include="op_par.cpp" />
     <ClCompile Include="helpers.cpp" />
+    <ClCompile Include="swarm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csp.h" />
@@ -19,5 +20,6 @@
     <ClInclude Include="op_alt.h" />
     <ClInclude Include="op_par.h" />
     <ClInclude Include="helpers.h" />
+    <ClInclude Include="swarm.h" />
   </ItemGroup>
 </Project>

@@ -6,10 +6,10 @@ struct lua_State;
 
 namespace lua
 {
-	typedef float LuaNumber_t; // must be correspondent to lua_Number in luaconf.h
+	typedef float LuaNumber_t; // must match lua_Number in luaconf.h
 
 	typedef int LuaRef_t;
-	const LuaRef_t LUA_NO_REF = -2; // LUA_NOREF
+	const LuaRef_t LUA_NO_REF = -2; // matches LUA_NOREF
 
     namespace Return
     {
@@ -36,10 +36,10 @@ namespace lua
 	{
 	public:
 		LuaReader( const void* data, size_t size );
-		static const char* Read( lua_State *L, void *data, size_t *size );
+		static const char* Read( lua_State* luaState, void* data, size_t* size );
 
 	private:
-		const uint8_t* m_Data;
-		size_t m_Size;
+		const uint8_t* m_pData;
+		size_t m_size;
 	};
 }

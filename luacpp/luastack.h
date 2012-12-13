@@ -52,6 +52,9 @@ namespace lua
 
 		void Pop(int numValues);
 
+		int Error( const char* format, ... );
+		int ArgError( int arg, const char* format, ... );
+
 	private:
 		lua_State* m_state;
 	};

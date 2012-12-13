@@ -19,6 +19,7 @@
     <ClCompile Include="op_alt.cpp" />
     <ClCompile Include="op_par.cpp" />
     <ClCompile Include="process.cpp" />
+    <ClCompile Include="swarm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="channel.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="op_alt.h" />
     <ClInclude Include="op_par.h" />
     <ClInclude Include="process.h" />
+    <ClInclude Include="swarm.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\luacpp\luacpp.vcxproj">

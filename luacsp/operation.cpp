@@ -8,7 +8,6 @@
 
 #include "process.h"
 #include "host.h"
-#include "channel.h"
 
 csp::Operation::Operation()
 	: m_pProcess()
@@ -40,7 +39,7 @@ int csp::Operation::DoInit( lua_State* luaState )
 	if( m_pProcess == NULL )
 	{
 		delete this;
-		return state.Error("not in CSP process");
+		return state.GetStack().Error("not in CSP process");
 	}
 
 	lua::LuaStack args( luaState );
@@ -48,7 +47,7 @@ int csp::Operation::DoInit( lua_State* luaState )
 	if ( !Init( args, initError ) )
 	{
 		delete this;
-		return state.ArgError( initError.errorArg, initError.errorMessage );
+		return state.GetStack().ArgError( initError.errorArg, initError.errorMessage );
 	}
 
 	m_pProcess->SwitchCurrentOperation( this );
@@ -172,11 +171,9 @@ const csp::FunctionRegistration operationDescriptions[] =
 void csp::RegisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value )
 {
 	RegisterFunctions( state, value, operationDescriptions );
-	InitializeChannels( state );
 }
 
 void csp::UnregisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value )
 {
-	ShutdownChannels( state );
 	UnregisterFunctions( state, value, operationDescriptions );
 }

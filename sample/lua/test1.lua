@@ -11,6 +11,7 @@ function main()
 	testAltTime()
 	testTermination()
 	testTermination2()
+	testSwarm()
 	log("main end\n")
 end
 
@@ -314,4 +315,54 @@ function testTermination2()
 		end
 	)
 	log("testTermination2 end\n")
+end
+
+function testSwarm()
+	log("testSwarm begin\n")
+	local swarm = Swarm()
+	local ch = Channel()
+	PARWHILE(
+		function()
+			ch:IN()
+		end,
+		function()
+			swarm:MAIN()
+		end,
+		function()
+			local ch2 = Channel()
+			log("go{\n")
+			swarm:go(
+				function()
+					log("go1{\n")
+					SLEEP(10)
+					log("go1}\n")
+				end,
+				function()
+					log("go2{\n")
+					SLEEP(0)
+					ch2:IN()
+					log("go2}\n")
+				end
+			)
+			swarm:go(
+				function()
+					log("go3{\n")
+					SLEEP(10)
+					log("go3}\n")
+				end,
+				function()
+					log("go4{\n")
+					ch2:OUT()
+					log("go4}\n")
+				end
+			)
+			log("go}\n")
+			SLEEP(0)
+			SLEEP(0)
+			SLEEP(0)
+			ch:OUT()
+			log("never\n")
+		end
+	)
+	log("testSwarm end\n")
 end
