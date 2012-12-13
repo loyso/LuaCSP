@@ -10,6 +10,7 @@ function main()
 	testAlt2()
 	testAltTime()
 	testTermination()
+	testTermination2()
 	log("main end\n")
 end
 
@@ -260,6 +261,57 @@ function testTermination()
 			log("secondary in progress\n")
 			SLEEP(0)
 			log("secondary p}\n")
+		end,
+		function()
+			log("ter in\n")
+			local ch = Channel()
+			ch:IN()
+		end,
+		function()
+			log("ter out\n")
+			local ch = Channel()
+			ch:OUT()
+		end,
+		function()
+			local ch = Channel()
+			log("ter alt\n")
+			ALT(
+				ch, function()
+				end,
+				time() + 30, function()
+				end
+			)
+		end,
+		function()
+			log("ter par\n")
+			PAR(
+				function()
+					local ch = Channel()
+					ch:IN()
+				end,
+				function()
+					local ch = Channel()
+					ch:OUT()
+				end
+			)
 		end
 	)
+end
+
+function testTermination2()
+	log("testTermination2 begin\n")
+	local ch = Channel()
+	PARWHILE(
+		function()
+			log("p1{\n")
+			ch:IN()
+			log("p1}\n")
+		end,
+		function()
+			log("p2{\n")
+			ch:OUT()
+			log("p2}\n")
+		end
+	)
+	log("testTermination2 end\n")
 end

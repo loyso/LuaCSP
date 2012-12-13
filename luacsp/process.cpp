@@ -130,6 +130,8 @@ void csp::Process::Terminate( Host& host )
 		m_operation->DoTerminate( host );
 		DeleteOperation( host );
 	}
+	
+	host.RemoveProcessFromStack( *this );
 }
 
 void csp::Process::DeleteOperation( Host& host )

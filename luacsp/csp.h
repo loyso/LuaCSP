@@ -58,8 +58,8 @@ namespace csp
 		int (*function)( lua_State* L );
 	};
 
-	void RegisterFunctions( lua::LuaState & state, lua::LuaStackValue & value, const FunctionRegistration registrations[] );
-	void UnregisterFunctions( lua::LuaState & state, lua::LuaStackValue & value, const FunctionRegistration registrations[] );
+	void RegisterFunctions( lua::LuaState& state, lua::LuaStackValue& value, const FunctionRegistration registrations[] );
+	void UnregisterFunctions( lua::LuaState& state, lua::LuaStackValue& value, const FunctionRegistration registrations[] );
 
     Host& Initialize();
     void Shutdown(Host& host);

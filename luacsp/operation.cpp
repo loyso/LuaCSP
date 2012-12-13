@@ -14,7 +14,6 @@ csp::Operation::Operation()
 	: m_pProcess()
 	, m_finished( false )
 {
-
 }
 
 csp::Operation::~Operation()
@@ -23,6 +22,7 @@ csp::Operation::~Operation()
 
 int csp::Operation::PushResults( lua::LuaStack & )
 {
+	// empty by default
 	return 0;
 }
 
@@ -57,6 +57,7 @@ int csp::Operation::DoInit( lua_State* luaState )
 
 bool csp::Operation::Init( lua::LuaStack &, InitError& )
 {
+	// empty by default
 	return true;
 }
 
@@ -72,11 +73,13 @@ void csp::Operation::SetFinished( bool finished )
 
 csp::WorkResult::Enum csp::Operation::Evaluate( Host& )
 {
+	// empty by default
 	return WorkResult::YIELD;
 }
 
 void csp::Operation::DebugCheck( Host& ) const
 {
+	// empty by default
 }
 
 void csp::Operation::DoTerminate( Host& host )
@@ -86,6 +89,7 @@ void csp::Operation::DoTerminate( Host& host )
 
 void csp::Operation::Terminate( Host& )
 {
+	// empty by default
 }
 
 bool csp::Operation::InitError::ArgError( int arg, const char* message )

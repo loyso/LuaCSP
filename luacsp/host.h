@@ -31,8 +31,10 @@ namespace csp
 
 		void PushEvalStep( Process& process );
 		Process& PopEvalStep();
+		
 		Process* GetTopProcess() const;
 		bool IsEvalsStackEmpty() const;
+		void RemoveProcessFromStack( const Process& process );
 
 		void DebugCheckDeletion( const Process& process ) const;
 

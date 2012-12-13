@@ -90,10 +90,10 @@ namespace csp
 		virtual ~OpChannelIn();
 
 	private:
-		virtual bool Init( lua::LuaStack & args, InitError& initError );
+		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual void Terminate( Host& host );
-		virtual int PushResults( lua::LuaStack & luaStack );
+		virtual int PushResults( lua::LuaStack& luaStack );
 		
 		virtual Process& ProcessToEvaluate();
 		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );
@@ -106,7 +106,7 @@ namespace csp
 		virtual ~OpChannelOut();
 
 	private:
-		virtual bool Init( lua::LuaStack & args, InitError& initError );
+		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual void Terminate( Host& host );
 

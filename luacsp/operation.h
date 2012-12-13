@@ -29,7 +29,7 @@ namespace csp
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual WorkResult::Enum Work( Host& host, time_t dt ) = 0;
 		
-		virtual int PushResults( lua::LuaStack & luaStack );
+		virtual int PushResults( lua::LuaStack& luaStack );
 
 		bool IsFinished() const;
 		void SetFinished( bool finished );
@@ -49,7 +49,7 @@ namespace csp
 		};
 
     private:
-		virtual bool Init( lua::LuaStack & args, InitError& initError );
+		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual void Terminate( Host& host );
 
 		Process* m_pProcess;
@@ -62,12 +62,12 @@ namespace csp
 		OpSleep();
 
 	private:
-		virtual bool Init( lua::LuaStack & args, InitError& initError );
+		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Work( Host& host, time_t dt );
 
 		float m_seconds;
 	};
 
-	void RegisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value );
-	void UnregisterStandardOperations( lua::LuaState & state, lua::LuaStackValue & value );
+	void RegisterStandardOperations( lua::LuaState& state, lua::LuaStackValue& value );
+	void UnregisterStandardOperations( lua::LuaState& state, lua::LuaStackValue& value );
 }

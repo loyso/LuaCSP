@@ -130,6 +130,26 @@ csp::Process& csp::Host::PopEvalStep()
 	return *pProcess;
 }
 
+void csp::Host::RemoveProcessFromStack( const Process& process )
+{
+	int writePos = 0;
+	for( int i = 0; i < m_evalStepsStackTop; ++i )
+	{		
+		Process* pProcess = m_evalStepsStack[ i ];
+		if( writePos < i )
+		{
+			m_evalStepsStack[ writePos ] = pProcess;
+			m_evalStepsStack[ i ] = NULL;
+		}
+
+		if( pProcess != &process )
+			++writePos;
+	}
+
+	m_evalStepsStack[ writePos ] = NULL;
+	m_evalStepsStackTop = writePos;
+}
+
 bool csp::Host::IsEvalsStackEmpty() const
 {
 	return m_evalStepsStackTop <= 0;
