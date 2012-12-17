@@ -47,18 +47,24 @@ namespace csp
 		virtual void Terminate( Host& host );
 		
 		void CheckFinished();
-		void UnrefClosures();
 
 		Swarm* m_pSwarm;
 
 		struct SwarmClosure
 		{
+			SwarmClosure* pNext;
 			Process process;
 			lua::LuaRef_t refKey;
 		};
-		SwarmClosure** m_closures;
-		int m_numClosures;
-		int m_closureToRun;
+
+		void UnrefClosures( SwarmClosure* pHead );
+		static void DeleteClosures( SwarmClosure*& pHead, SwarmClosure*& pTail );
+
+		static SwarmClosure* ListPopFromHead( SwarmClosure*& pHead, SwarmClosure*& pTail );
+		static void ListAddToTail( SwarmClosure& node, SwarmClosure*& pHead, SwarmClosure*& pTail );
+
+		SwarmClosure *m_pClosuresHead, *m_pClosuresTail;
+		SwarmClosure* m_pClosuresToRunHead, *m_pClosuresToRunTail;
 	};
 
 	void PushSwarm( lua_State* luaState, Swarm& swarm );

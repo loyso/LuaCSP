@@ -25,8 +25,6 @@ namespace csp
 		, "go", csp::Swarm_go
 		, NULL, NULL
 	};
-
-	const int SWARM_MAX_CLOSURES = 1024;
 }
 
 
@@ -59,9 +57,8 @@ void csp::Swarm::Terminate()
 
 csp::OpSwarmMain::OpSwarmMain()
 	: m_pSwarm()
-	, m_closures()
-	, m_numClosures( 0 )
-	, m_closureToRun( 0 )
+	, m_pClosuresHead(), m_pClosuresTail()
+	, m_pClosuresToRunHead(), m_pClosuresToRunTail()
 {
 }
 
@@ -69,36 +66,41 @@ csp::OpSwarmMain::~OpSwarmMain()
 {
 	CORE_ASSERT( m_pSwarm == NULL );
 
-	delete[] m_closures;
-	m_closures = NULL;
+	DeleteClosures( m_pClosuresHead, m_pClosuresTail );
+	DeleteClosures( m_pClosuresToRunHead, m_pClosuresToRunTail );
 }
 
-void csp::OpSwarmMain::UnrefClosures()
+void csp::OpSwarmMain::DeleteClosures( SwarmClosure*& pHead, SwarmClosure*& pTail )
 {
-	for( int i = 0; i < m_numClosures; ++i )
+	while( pHead )
 	{
-		SwarmClosure* pClosure = m_closures[ i ];
-		CORE_ASSERT( pClosure );
+		SwarmClosure* pNext = pHead->pNext;
+		delete pHead;
+		pHead = pNext;
+	}
+
+	pTail = NULL;
+}
+
+void csp::OpSwarmMain::UnrefClosures( SwarmClosure* pHead )
+{
+	for( SwarmClosure* pClosure = pHead; pClosure; pClosure = pClosure->pNext )
+	{
 		if( pClosure->refKey != lua::LUA_NO_REF )
 		{
 			ThisProcess().LuaThread().GetStack().UnrefInRegistry( pClosure->refKey );
 			pClosure->refKey = lua::LUA_NO_REF;
-
-			delete pClosure;
-			pClosure = NULL;
 		}
 	}
 }
 
 void csp::OpSwarmMain::Terminate( Host& host )
 {
-	for( int i = 0; i < m_closureToRun; ++i )
-	{
-		SwarmClosure* pClosure = m_closures[ i ];
-		CORE_ASSERT( pClosure );
+	for( SwarmClosure* pClosure = m_pClosuresHead; pClosure; pClosure = pClosure->pNext )
 		pClosure->process.Terminate( host );
-	}
-	UnrefClosures();
+
+	UnrefClosures( m_pClosuresHead );
+	UnrefClosures( m_pClosuresToRunHead );
 
 	CORE_ASSERT( m_pSwarm );
 	m_pSwarm->Terminate();
@@ -107,10 +109,8 @@ void csp::OpSwarmMain::Terminate( Host& host )
 
 csp::WorkResult::Enum csp::OpSwarmMain::Work( Host& host, time_t dt )
 {
-	for( int i = 0; i < m_closureToRun; ++i )
+	for( SwarmClosure* pClosure = m_pClosuresHead; pClosure; pClosure = pClosure->pNext )
 	{
-		SwarmClosure* pClosure = m_closures[ i ];
-		CORE_ASSERT( pClosure );
 		if( pClosure->process.IsRunning() )
 			pClosure->process.Work( host, dt );
 	}
@@ -119,46 +119,45 @@ csp::WorkResult::Enum csp::OpSwarmMain::Work( Host& host, time_t dt )
 
 void csp::OpSwarmMain::CheckFinished()
 {
-	CORE_ASSERT( m_closureToRun <= m_numClosures );
-
-	for( int i = 0; i < m_closureToRun; ++i )
+	for( SwarmClosure* pClosure = m_pClosuresHead, *pPrev = NULL; pClosure; )
 	{
-		SwarmClosure* pClosure = m_closures[ i ];
-		CORE_ASSERT( pClosure );
+		SwarmClosure* pNext = pClosure->pNext;
 
 		if( !pClosure->process.IsRunning() && pClosure->refKey != lua::LUA_NO_REF )
 		{
-			// erase element in unordered vector.
-			m_closures[ i ] = m_closures[ m_closureToRun-1 ];
-			m_closures[ m_closureToRun-1 ] = m_closures[ m_numClosures-1 ];
-			m_closures[ m_numClosures-1 ] = NULL;
-
-			--m_closureToRun;
-			--m_numClosures;
-
 			ThisProcess().LuaThread().GetStack().UnrefInRegistry( pClosure->refKey );
 			pClosure->refKey = lua::LUA_NO_REF;
 
+			if( pClosure == m_pClosuresHead )
+			{
+				m_pClosuresHead = pNext;
+			}
+			else
+			{
+				CORE_ASSERT( pPrev );
+				pPrev->pNext = pNext;
+			}
+
+			if( pClosure == m_pClosuresTail )
+				m_pClosuresTail = pPrev;
+
 			delete pClosure;
-			pClosure = NULL;
 		}
+		else
+			pPrev = pClosure;
+
+		pClosure = pNext;
 	}
 }
 
 int csp::OpSwarmMain::Go( lua::LuaStack& args )
 {
-	int numClosures = 0;
 	for( int i = 2; i <= args.NumArgs(); ++i )
 	{
 		lua::LuaStackValue arg = args[i];
-		if ( arg.IsFunction() )
-			++numClosures;
-		else
+		if ( !arg.IsFunction() )
 			return args.ArgError( i, "function closure expected" );
 	}
-
-	if( m_numClosures + numClosures > SWARM_MAX_CLOSURES )
-		return args.Error( "max swarm closure limit achieved." );
 
 	for( int i = 2; i <= args.NumArgs(); ++i )
 	{
@@ -173,7 +172,7 @@ int csp::OpSwarmMain::Go( lua::LuaStack& args )
 		pClosure->process.SetParentProcess( ThisProcess() );
 		pClosure->refKey = args.RefInRegistry();
 
-		m_closures[ m_numClosures++ ] = pClosure;
+		ListAddToTail( *pClosure, m_pClosuresToRunHead, m_pClosuresToRunTail );
 	}
 
 	Host& host = Host::GetHost( args.InternalState() );
@@ -184,12 +183,14 @@ int csp::OpSwarmMain::Go( lua::LuaStack& args )
 
 csp::WorkResult::Enum csp::OpSwarmMain::Evaluate( Host& host )
 {
-	if( m_closureToRun < m_numClosures )
-	{
-		SwarmClosure* pClosure = m_closures[ m_closureToRun++ ];
+	if( m_pClosuresToRunHead )
+	{		
+		SwarmClosure* pClosure = ListPopFromHead( m_pClosuresToRunHead, m_pClosuresToRunTail );
 		CORE_ASSERT( pClosure );
 
-		if( m_closureToRun < m_numClosures )
+		ListAddToTail( *pClosure, m_pClosuresHead, m_pClosuresTail );
+
+		if( m_pClosuresToRunHead )
 			host.PushEvalStep( ThisProcess() );
 
 		pClosure->process.StartEvaluation( host, 0 );
@@ -197,6 +198,31 @@ csp::WorkResult::Enum csp::OpSwarmMain::Evaluate( Host& host )
 
 	CheckFinished();
 	return WorkResult::YIELD;
+}
+
+void csp::OpSwarmMain::ListAddToTail( SwarmClosure& node, SwarmClosure*& pHead, SwarmClosure*& pTail )
+{
+	if( pTail )
+		pTail->pNext = &node;
+	if( pHead == NULL )
+		pHead = &node;
+	
+	pTail = &node;
+	node.pNext = NULL;
+}
+
+csp::OpSwarmMain::SwarmClosure* csp::OpSwarmMain::ListPopFromHead( SwarmClosure*& pHead, SwarmClosure*& pTail )
+{
+	if( pHead == NULL )
+		return NULL;
+
+	SwarmClosure* pNode = pHead;
+	pHead = pHead->pNext;
+	if( pNode == pTail )
+		pTail = NULL;
+
+	pNode->pNext = NULL;
+	return pNode;
 }
 
 bool csp::OpSwarmMain::Init( lua::LuaStack& args, InitError& initError )
@@ -212,13 +238,8 @@ bool csp::OpSwarmMain::Init( lua::LuaStack& args, InitError& initError )
 	m_pSwarm = pSwarm;
 	m_pSwarm->InitMain( *this );
 
-	m_closures = CORE_NEW SwarmClosure*[ SWARM_MAX_CLOSURES ];
-	for( int i = 0; i < SWARM_MAX_CLOSURES; ++i )
-		m_closures[ i ] = NULL;
-
 	return true;
 }
-
 
 void csp::PushSwarm( lua_State* luaState, Swarm& swarm )
 {
