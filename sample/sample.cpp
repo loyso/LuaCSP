@@ -11,6 +11,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include "cppchannel.h"
+
 int main(int argc, const char* argv[])
 {
     if(argc<2)
@@ -21,6 +23,7 @@ int main(int argc, const char* argv[])
 	core::InitializeCore();
 
     csp::Host& host = csp::Initialize();
+	InitializeMyChannels( host.LuaState() );
 
     const char* fileName = argv[1];
 
@@ -57,6 +60,7 @@ int main(int argc, const char* argv[])
         delete[] memblock;
     }
 
+	ShutdownMyChannels( host.LuaState() );
     csp::Shutdown(host);
 	core::ShutdownCore();
 

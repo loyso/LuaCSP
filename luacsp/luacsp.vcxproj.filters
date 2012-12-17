@@ -10,6 +10,7 @@
     <ClCompile Include="op_par.cpp" />
     <ClCompile Include="helpers.cpp" />
     <ClCompile Include="swarm.cpp" />
+    <ClCompile Include="cppchannel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csp.h" />
@@ -21,5 +22,6 @@
     <ClInclude Include="op_par.h" />
     <ClInclude Include="helpers.h" />
     <ClInclude Include="swarm.h" />
+    <ClInclude Include="cppchannel.h" />
   </ItemGroup>
 </Project>

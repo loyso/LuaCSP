@@ -58,7 +58,7 @@ bool csp::OpChannel::InitChannel( lua::LuaStack& args, InitError& initError )
 
 	Channel* pChannel = GetChannelArg( channelArg );
 	if( pChannel == NULL )
-		return initError.ArgError( 1, "channel value expected" );
+		return initError.ArgError( 1, "channel pointer expected" );
 
 	channelArg.PushValue();
 	m_channelRefKey = args.RefInRegistry();
@@ -112,14 +112,19 @@ void csp::OpChannel::UnrefArguments( lua::LuaStack const& stack )
 	}
 }
 
-void csp::OpChannel::MoveChannelArguments( ChannelArgument* arguments, int numArguments )
+
+void csp::OpChannel::SetArguments( ChannelArgument* arguments, int numArguments )
 {
 	CORE_ASSERT( m_arguments == NULL );
 	CORE_ASSERT( m_numArguments == 0 );
 
 	m_arguments = arguments;
 	m_numArguments = numArguments;
+}
 
+void csp::OpChannel::MoveChannelArguments( ChannelArgument* arguments, int numArguments )
+{
+	SetArguments( arguments, numArguments );
 	m_argumentsMoved = true;
 }
 

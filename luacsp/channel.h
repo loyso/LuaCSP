@@ -60,6 +60,7 @@ namespace csp
 		void UnrefChannel( lua::LuaStack const& stack );
 
 		void InitArguments( lua::LuaStack& args, InitError& initError );
+		void SetArguments( ChannelArgument* arguments, int numArguments );
 		void UnrefArguments( lua::LuaStack const& stack );
 
 		bool HasChannel();

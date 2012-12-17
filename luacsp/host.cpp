@@ -5,6 +5,7 @@
 #include "operation.h"
 #include "helpers.h"
 #include "channel.h"
+#include "cppchannel.h"
 #include "swarm.h"
 
 namespace csp
@@ -59,6 +60,7 @@ void csp::Host::Initialize()
 	RegisterStandardHelpers( m_luaState, globals );
 	RegisterStandardOperations( m_luaState, globals );
 	InitializeChannels( m_luaState );
+	InitializeCppChannels( m_luaState );
 	InitializeSwarms( m_luaState );
 	
 	m_luaState.GetStack().Pop(1);
@@ -77,6 +79,7 @@ void csp::Host::Shutdown()
 	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
 
 	ShutdownSwarms( m_luaState );
+	ShutdownCppChannels( m_luaState );
 	ShutdownChannels( m_luaState );
 	UnregisterStandardOperations( m_luaState, globals );	
 	UnregisterStandardHelpers( m_luaState, globals );	
