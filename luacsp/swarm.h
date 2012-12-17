@@ -61,10 +61,10 @@ namespace csp
 		static void DeleteClosures( SwarmClosure*& pHead, SwarmClosure*& pTail );
 
 		static SwarmClosure* ListPopFromHead( SwarmClosure*& pHead, SwarmClosure*& pTail );
-		static void ListAddToTail( SwarmClosure& node, SwarmClosure*& pHead, SwarmClosure*& pTail );
+		static void ListAddToTail( SwarmClosure*& pHead, SwarmClosure*& pTail, SwarmClosure& node );
 
 		SwarmClosure *m_pClosuresHead, *m_pClosuresTail;
-		SwarmClosure* m_pClosuresToRunHead, *m_pClosuresToRunTail;
+		SwarmClosure *m_pClosuresToRunHead, *m_pClosuresToRunTail;
 	};
 
 	void PushSwarm( lua_State* luaState, Swarm& swarm );

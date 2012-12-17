@@ -172,7 +172,7 @@ int csp::OpSwarmMain::Go( lua::LuaStack& args )
 		pClosure->process.SetParentProcess( ThisProcess() );
 		pClosure->refKey = args.RefInRegistry();
 
-		ListAddToTail( *pClosure, m_pClosuresToRunHead, m_pClosuresToRunTail );
+		ListAddToTail( m_pClosuresToRunHead, m_pClosuresToRunTail, *pClosure );
 	}
 
 	Host& host = Host::GetHost( args.InternalState() );
@@ -188,7 +188,7 @@ csp::WorkResult::Enum csp::OpSwarmMain::Evaluate( Host& host )
 		SwarmClosure* pClosure = ListPopFromHead( m_pClosuresToRunHead, m_pClosuresToRunTail );
 		CORE_ASSERT( pClosure );
 
-		ListAddToTail( *pClosure, m_pClosuresHead, m_pClosuresTail );
+		ListAddToTail( m_pClosuresHead, m_pClosuresTail, *pClosure );
 
 		if( m_pClosuresToRunHead )
 			host.PushEvalStep( ThisProcess() );
@@ -200,7 +200,7 @@ csp::WorkResult::Enum csp::OpSwarmMain::Evaluate( Host& host )
 	return WorkResult::YIELD;
 }
 
-void csp::OpSwarmMain::ListAddToTail( SwarmClosure& node, SwarmClosure*& pHead, SwarmClosure*& pTail )
+void csp::OpSwarmMain::ListAddToTail( SwarmClosure*& pHead, SwarmClosure*& pTail, SwarmClosure& node )
 {
 	if( pTail )
 		pTail->pNext = &node;
