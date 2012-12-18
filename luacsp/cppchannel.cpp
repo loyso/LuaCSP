@@ -28,7 +28,7 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Evaluate( Host& host )
 	{
 		if( IsOutputReady() )
 		{
-			int numArguments = 0;
+			int numArguments = CSP_NO_ARGS;
 			ChannelArgument* arguments = CreateArguments( host.LuaState().GetStack(), numArguments );
 			SetArguments( arguments, numArguments );
 			AttachOutput();
@@ -51,7 +51,7 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Evaluate( Host& host )
 	return WorkResult::YIELD;
 }
 
-csp::WorkResult::Enum csp::OpCppChannelOut::Work( Host& host, time_t dt )
+csp::WorkResult::Enum csp::OpCppChannelOut::Work( Host& host, CspTime_t dt )
 {
 	WorkResult::Enum result = Update( dt );
 	if( result == WorkResult::FINISH )

@@ -11,7 +11,7 @@ public:
 private:
 	virtual bool Init( lua::LuaStack& args, InitError& initError );
 
-	virtual csp::WorkResult::Enum Update( csp::time_t dt );
+	virtual csp::WorkResult::Enum Update( csp::CspTime_t dt );
 	virtual bool IsOutputReady() const;
 	virtual csp::ChannelArgument* CreateArguments( lua::LuaStack& stack, int& numArguments );
 

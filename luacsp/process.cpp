@@ -50,7 +50,7 @@ csp::Operation& csp::Process::CurrentOperation()
 	return *m_operation;
 }
 
-void csp::Process::Work( Host& host, time_t dt )
+void csp::Process::Work( Host& host, CspTime_t dt )
 {
 	if( m_operation == NULL )
 		return;

@@ -109,7 +109,7 @@ void csp::Host::Evaluate()
 	}
 }
 
-csp::WorkResult::Enum csp::Host::Work( time_t dt )
+csp::WorkResult::Enum csp::Host::Work( CspTime_t dt )
 {
 	if( !m_mainProcess.IsRunning() )
 		return WorkResult::FINISH;
@@ -183,7 +183,7 @@ void csp::Host::DebugCheckDeletion( const Process& process ) const
 	}
 }
 
-csp::time_t csp::Host::Time() const
+csp::CspTime_t csp::Host::Time() const
 {
 	return m_time;
 }

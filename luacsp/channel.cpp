@@ -32,7 +32,7 @@ csp::OpChannel::OpChannel()
 	: m_pChannel()
 	, m_channelRefKey( lua::LUA_NO_REF )
 	, m_arguments()
-	, m_numArguments( 0 )
+	, m_numArguments( CSP_NO_ARGS )
 	, m_argumentsMoved( false )
 {
 }
@@ -80,7 +80,7 @@ void csp::OpChannel::InitArguments( lua::LuaStack& args, InitError& )
 	}
 }
 
-csp::WorkResult::Enum csp::OpChannel::Work( Host&, time_t )
+csp::WorkResult::Enum csp::OpChannel::Work( Host&, CspTime_t )
 {
 	return WorkResult::YIELD;
 }
@@ -116,7 +116,8 @@ void csp::OpChannel::UnrefArguments( lua::LuaStack const& stack )
 void csp::OpChannel::SetArguments( ChannelArgument* arguments, int numArguments )
 {
 	CORE_ASSERT( m_arguments == NULL );
-	CORE_ASSERT( m_numArguments == 0 );
+	CORE_ASSERT( m_numArguments == CSP_NO_ARGS );
+	CORE_ASSERT( numArguments != CSP_NO_ARGS );
 
 	m_arguments = arguments;
 	m_numArguments = numArguments;
@@ -131,18 +132,20 @@ void csp::OpChannel::MoveChannelArguments( ChannelArgument* arguments, int numAr
 void csp::OpChannel::ArgumentsMoved()
 {
 	m_arguments = NULL;
-	m_numArguments = 0;
+	m_numArguments = CSP_NO_ARGS;
 
 	m_argumentsMoved = true;
 }
 
 csp::ChannelArgument* csp::OpChannel::Arguments() const
 {
+	CORE_ASSERT( m_numArguments != CSP_NO_ARGS );
 	return m_arguments;
 }
 
 int csp::OpChannel::NumArguments() const
 {
+	CORE_ASSERT( m_numArguments != CSP_NO_ARGS );
 	return m_numArguments;
 }
 

@@ -23,7 +23,7 @@ namespace csp
 		static Process* GetProcess( lua_State* luaState );
 		static void SetProcess( lua_State* luaState, Process* process );
 
-		void Work( Host& host, time_t dt );
+		void Work( Host& host, CspTime_t dt );
 
 		WorkResult::Enum StartEvaluation( Host& host, int numArgs );
 		WorkResult::Enum Evaluate( Host& host, int numArgs );

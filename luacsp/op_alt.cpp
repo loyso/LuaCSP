@@ -13,7 +13,7 @@ csp::OpAlt::OpAlt()
 	, m_pCaseTriggered()
 	, m_pNilCase()
 	, m_arguments()
-	, m_numArguments( 0 )
+	, m_numArguments( CSP_NO_ARGS )
 	, m_argumentsMoved( false )
 	, m_processRefKey( lua::LUA_NO_REF )
 {
@@ -29,7 +29,7 @@ csp::OpAlt::~OpAlt()
 
 	delete[] m_arguments;
 	m_arguments = NULL;
-	m_numArguments = 0;
+	m_numArguments = CSP_NO_ARGS;
 }
 
 bool csp::OpAlt::Init( lua::LuaStack& args, InitError& initError )
@@ -194,7 +194,7 @@ void csp::OpAlt::SelectTimeProcessToTrigger( Host& host )
 {
 	CORE_ASSERT( m_pCaseTriggered == NULL );
 
-	time_t time = host.Time();
+	CspTime_t time = host.Time();
 
 	for( int i = 0; i < m_numCases; ++i )
 	{
@@ -242,7 +242,8 @@ csp::WorkResult::Enum csp::OpAlt::StartTriggeredProcess( Host& host )
 	for( int i = 0; i < m_numArguments; ++i )
 		threadStack.PushRegistryReferenced( m_arguments[i].refKey );
 
-	WorkResult::Enum result = m_process.StartEvaluation( host, m_numArguments );
+	int numArguments = m_numArguments == CSP_NO_ARGS ? 0 : m_numArguments;
+	WorkResult::Enum result = m_process.StartEvaluation( host, numArguments );
 	UnrefClosures( stack );
 	return result;
 }
@@ -280,7 +281,7 @@ csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 	return WorkResult::YIELD;
 }
 
-csp::WorkResult::Enum csp::OpAlt::Work( Host& host, time_t dt )
+csp::WorkResult::Enum csp::OpAlt::Work( Host& host, CspTime_t dt )
 {
 	if( m_pCaseTriggered )
 	{
@@ -296,7 +297,8 @@ csp::WorkResult::Enum csp::OpAlt::Work( Host& host, time_t dt )
 void csp::OpAlt::MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments )
 {
 	CORE_ASSERT( m_arguments == NULL );
-	CORE_ASSERT( m_numArguments == 0 );
+	CORE_ASSERT( m_numArguments == CSP_NO_ARGS );
+	CORE_ASSERT( numArguments != CSP_NO_ARGS );
 
 	AltCase* pCaseTriggered = NULL;
 	for( int i = 0; i < m_numCases && pCaseTriggered == NULL; ++i )

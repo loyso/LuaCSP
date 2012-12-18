@@ -43,7 +43,7 @@ namespace csp
 	private:
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
-		virtual WorkResult::Enum Work( Host& host, time_t dt );
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual void Terminate( Host& host );
 		
 		void CheckFinished();

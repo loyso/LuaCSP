@@ -25,14 +25,14 @@ namespace csp
 		bool DetachOutput();
 
 		virtual WorkResult::Enum Evaluate( Host& host );
-		virtual WorkResult::Enum Work( Host& host, time_t dt );
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual int PushResults( lua::LuaStack& luaStack );
 		virtual void Terminate( Host& host );
 
 		virtual Process& ProcessToEvaluate();
 		virtual void MoveChannelArguments();
 
-		virtual WorkResult::Enum Update( time_t dt ) = 0;
+		virtual WorkResult::Enum Update( CspTime_t dt ) = 0;
 		virtual bool IsOutputReady() const = 0;
 		virtual ChannelArgument* CreateArguments( lua::LuaStack& stack, int& numArguments ) = 0;
 	};

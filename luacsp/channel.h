@@ -27,6 +27,8 @@ namespace csp
 		lua::LuaRef_t refKey;
 	};
 
+	const int CSP_NO_ARGS = -1;
+
 	class Channel : public GcObject
 	{
 	public:
@@ -53,7 +55,7 @@ namespace csp
 		OpChannel();
 		virtual ~OpChannel();
 
-		virtual WorkResult::Enum Work( Host& host, time_t dt );
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 
 	protected:
 		bool InitChannel( lua::LuaStack& args, InitError& initError );

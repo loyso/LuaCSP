@@ -78,7 +78,7 @@ csp::WorkResult::Enum csp::OpPar::Evaluate( Host& host )
 	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
 }
 
-csp::WorkResult::Enum csp::OpPar::Work( Host& host, time_t dt )
+csp::WorkResult::Enum csp::OpPar::Work( Host& host, CspTime_t dt )
 {
 	for( int i = 0; i < m_closureToRun; ++i )
 	{

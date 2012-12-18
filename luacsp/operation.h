@@ -27,7 +27,7 @@ namespace csp
 		void DoTerminate( Host& host );
 
 		virtual WorkResult::Enum Evaluate( Host& host );
-		virtual WorkResult::Enum Work( Host& host, time_t dt ) = 0;
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt ) = 0;
 		
 		virtual int PushResults( lua::LuaStack& luaStack );
 
@@ -63,7 +63,7 @@ namespace csp
 
 	private:
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
-		virtual WorkResult::Enum Work( Host& host, time_t dt );
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 
 		float m_seconds;
 	};

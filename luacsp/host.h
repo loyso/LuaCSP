@@ -22,11 +22,11 @@ namespace csp
 
         WorkResult::Enum Main();
 		void TerminateMain();
-		WorkResult::Enum Work( time_t dt );
+		WorkResult::Enum Work( CspTime_t dt );
 
         lua::LuaState& LuaState();
 		
-		time_t Time() const;
+		CspTime_t Time() const;
 		unsigned int Tick() const;
 
 		void PushEvalStep( Process& process );
@@ -48,6 +48,6 @@ namespace csp
 		int m_evalStepsStackTop;
 
 		unsigned int m_tick;
-		time_t m_time;
+		CspTime_t m_time;
     };
 }

@@ -16,7 +16,7 @@ namespace csp
 		void UnrefClosures();
 
 		virtual WorkResult::Enum Evaluate( Host& host );
-		virtual WorkResult::Enum Work( Host& host, time_t dt );
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual void Terminate( Host& host );
 
 		virtual void DebugCheck( Host& host ) const;

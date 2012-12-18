@@ -120,7 +120,7 @@ bool csp::OpSleep::Init( lua::LuaStack & args, InitError& initError )
 	return true;
 }
 
-csp::WorkResult::Enum csp::OpSleep::Work( Host&, time_t dt )
+csp::WorkResult::Enum csp::OpSleep::Work( Host&, CspTime_t dt )
 {
 	m_seconds -= dt;
 	return m_seconds > 0 ? WorkResult::YIELD : WorkResult::FINISH;

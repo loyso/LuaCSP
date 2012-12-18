@@ -12,7 +12,7 @@ namespace csp
 
 	private:
 		virtual WorkResult::Enum Evaluate( Host& host );
-		virtual WorkResult::Enum Work( Host& host, time_t dt );
+		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual void Terminate( Host& host );
 
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
@@ -42,7 +42,7 @@ namespace csp
 
 			Channel* m_pChannel;
 			lua::LuaRef_t m_channelRefKey;
-			time_t m_time;				
+			CspTime_t m_time;				
 		};
 		AltCase* m_cases;
 		int m_numCases;

@@ -29,7 +29,7 @@ bool OpMonitorKeyState::IsOutputReady() const
 	return m_count > 0;
 }
 
-csp::WorkResult::Enum OpMonitorKeyState::Update( csp::time_t )
+csp::WorkResult::Enum OpMonitorKeyState::Update( csp::CspTime_t )
 {
 	int vk = VkKeyScan( m_charToMonitor ) & 0xFF;
 	short state = GetAsyncKeyState( vk );

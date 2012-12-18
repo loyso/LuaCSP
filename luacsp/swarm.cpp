@@ -107,7 +107,7 @@ void csp::OpSwarmMain::Terminate( Host& host )
 	m_pSwarm = NULL;
 }
 
-csp::WorkResult::Enum csp::OpSwarmMain::Work( Host& host, time_t dt )
+csp::WorkResult::Enum csp::OpSwarmMain::Work( Host& host, CspTime_t dt )
 {
 	for( SwarmClosure* pClosure = m_pClosuresHead; pClosure; pClosure = pClosure->pNext )
 	{
