@@ -1,4 +1,4 @@
-#include "cppchannel.h"
+#include "mycppchannel.h"
 
 #include <windows.h>
 

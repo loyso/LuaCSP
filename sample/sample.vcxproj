@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cppchannel.cpp" />
+    <ClCompile Include="mycppchannel.cpp" />
     <ClCompile Include="sample.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -37,7 +37,7 @@
     <None Include="lua\test1.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cppchannel.h" />
+    <ClInclude Include="mycppchannel.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{94F73E47-C1D8-4937-A9B0-8BEDC55A20D3}</ProjectGuid>

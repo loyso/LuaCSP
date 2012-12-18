@@ -11,7 +11,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "cppchannel.h"
+#include "mycppchannel.h"
 
 int main(int argc, const char* argv[])
 {
