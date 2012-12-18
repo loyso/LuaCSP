@@ -28,10 +28,9 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Evaluate( Host& host )
 	{
 		if( IsOutputReady() )
 		{
-			int numArguments = CSP_NO_ARGS;
-			ChannelArgument* arguments = CreateArguments( host.LuaState().GetStack(), numArguments );
-			SetArguments( arguments, numArguments );
-			AttachOutput();
+			lua::LuaStack& stack = host.LuaState().GetStack();
+			MemorizeOutputArguments( stack );
+			ThisChannel().SetAttachmentOut( this );
 		}
 	}
 
@@ -40,11 +39,7 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Evaluate( Host& host )
 		if( channel.InAttached() )
 		{
 			ChannelAttachmentIn_i& in = channel.InAttachment();
-
-			MoveChannelArguments();
-
-			host.PushEvalStep( ThisProcess() );
-			host.PushEvalStep( in.ProcessToEvaluate() );
+			MoveChannelArguments( host, in.ProcessToEvaluate() );
 		}
 	}
 
@@ -57,11 +52,22 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Work( Host& host, CspTime_t dt )
 	if( result == WorkResult::FINISH )
 	{
 		if( IsOutputAttached() )
-			DetachOutput();
+			ThisChannel().SetAttachmentOut( NULL );
 		return result;
 	}
 
 	return Evaluate( host );
+}
+
+void csp::OpCppChannelOut::MemorizeOutputArguments( lua::LuaStack& stack )
+{
+	int numArguments = PushOutputArguments( stack );
+
+	csp::ChannelArgument* arguments = CORE_NEW csp::ChannelArgument[ numArguments ];
+	for( int i = numArguments-1; i >= 0; --i )
+		arguments[ i ].refKey = stack.RefInRegistry();
+
+	SetArguments( arguments, numArguments );
 }
 
 int csp::OpCppChannelOut::PushResults( lua::LuaStack& luaStack )
@@ -81,41 +87,10 @@ csp::Process& csp::OpCppChannelOut::ProcessToEvaluate()
 	return ThisProcess();
 }
 
-void csp::OpCppChannelOut::MoveChannelArguments()
+void csp::OpCppChannelOut::MoveChannelArguments( Host& host, Process& inputProcess )
 {
-	Channel& channel = ThisChannel();
-	ChannelAttachmentIn_i& in = channel.InAttachment();
-
-	in.MoveChannelArguments( channel, Arguments(), NumArguments() );
-	ArgumentsMoved();	
-
 	CORE_ASSERT( IsOutputAttached() );
-	DetachOutput();
-}
-
-bool csp::OpCppChannelOut::AttachOutput()
-{
-	Channel& channel = ThisChannel();
-	
-	if( channel.OutAttached() )
-		return false;
-
-	ThisChannel().SetAttachmentOut( this );
-	return true;
-}
-
-bool csp::OpCppChannelOut::DetachOutput()
-{
-	Channel& channel = ThisChannel();
-	
-	if( !channel.OutAttached() )
-		return false;
-
-	if( !IsOutputAttached() )
-		return false;
-
-	ThisChannel().SetAttachmentOut( NULL );
-	return true;
+	OpChannel::MoveChannelArguments( host, inputProcess );
 }
 
 bool csp::OpCppChannelOut::IsOutputAttached()
@@ -123,7 +98,6 @@ bool csp::OpCppChannelOut::IsOutputAttached()
 	Channel& channel = ThisChannel();
 	return channel.OutAttached() && &channel.OutAttachment() == this;
 }
-
 
 void csp::InitializeCppChannels( lua::LuaState& )
 {

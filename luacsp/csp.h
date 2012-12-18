@@ -49,7 +49,7 @@ namespace csp
 
 	struct ChannelAttachmentOut_i : ChannelAttachment_i
 	{
-		virtual void MoveChannelArguments() = 0;
+		virtual void MoveChannelArguments( Host& host, Process& inputProcess ) = 0;
 	};
 
 	struct FunctionRegistration

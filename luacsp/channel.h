@@ -69,6 +69,7 @@ namespace csp
 		Channel& ThisChannel();
 
 		void MoveChannelArguments( ChannelArgument* arguments, int numArguments );
+		void MoveChannelArguments( Host& host, Process& inputProcess );
 		void ArgumentsMoved();
 		
 		ChannelArgument* Arguments() const;
@@ -114,7 +115,7 @@ namespace csp
 		virtual void Terminate( Host& host );
 
 		virtual Process& ProcessToEvaluate();
-		virtual void MoveChannelArguments();
+		virtual void MoveChannelArguments( Host& host, Process& inputProcess );
 	};
 
 	void PushChannel( lua_State* luaState, Channel& channel );

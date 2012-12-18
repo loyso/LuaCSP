@@ -13,7 +13,7 @@ private:
 
 	virtual csp::WorkResult::Enum Update( csp::CspTime_t dt );
 	virtual bool IsOutputReady() const;
-	virtual csp::ChannelArgument* CreateArguments( lua::LuaStack& stack, int& numArguments );
+	virtual int PushOutputArguments( lua::LuaStack& luaStack );
 
 	char m_charToMonitor;
 	bool m_pressed;

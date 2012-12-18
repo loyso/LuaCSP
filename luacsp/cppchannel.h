@@ -20,21 +20,22 @@ namespace csp
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
 
 	private:
-		bool AttachOutput();
 		bool IsOutputAttached();
-		bool DetachOutput();
 
 		virtual WorkResult::Enum Evaluate( Host& host );
+
+		void MemorizeOutputArguments( lua::LuaStack &stack );
+
 		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual int PushResults( lua::LuaStack& luaStack );
 		virtual void Terminate( Host& host );
 
 		virtual Process& ProcessToEvaluate();
-		virtual void MoveChannelArguments();
+		virtual void MoveChannelArguments( Host& host, Process& inputProcess );
 
 		virtual WorkResult::Enum Update( CspTime_t dt ) = 0;
 		virtual bool IsOutputReady() const = 0;
-		virtual ChannelArgument* CreateArguments( lua::LuaStack& stack, int& numArguments ) = 0;
+		virtual int PushOutputArguments( lua::LuaStack& luaStack ) = 0;
 	};
 
 	void InitializeCppChannels( lua::LuaState& state );

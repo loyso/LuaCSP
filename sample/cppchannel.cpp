@@ -41,22 +41,13 @@ csp::WorkResult::Enum OpMonitorKeyState::Update( csp::CspTime_t )
 	return csp::WorkResult::YIELD;
 }
 
-csp::ChannelArgument* OpMonitorKeyState::CreateArguments( lua::LuaStack& stack, int& numArguments )
+int OpMonitorKeyState::PushOutputArguments( lua::LuaStack& luaStack )
 {
-	numArguments = 1;
-	csp::ChannelArgument* arguments = CORE_NEW csp::ChannelArgument[ numArguments ];
-
-	char str[2] = { m_charToMonitor, 0 };
-
-	for( int i = 0; i < numArguments; ++i )
-	{
-		stack.PushString( str );
-		arguments[ i ].refKey = stack.RefInRegistry();
-	}
-
 	--m_count;
 
-	return arguments;
+	char str[2] = { m_charToMonitor, 0 };
+	luaStack.PushString( str );
+	return 1;
 }
 
 

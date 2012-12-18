@@ -129,6 +129,20 @@ void csp::OpChannel::MoveChannelArguments( ChannelArgument* arguments, int numAr
 	m_argumentsMoved = true;
 }
 
+void csp::OpChannel::MoveChannelArguments( Host& host, Process& inputProcess )
+{
+	Channel& channel = ThisChannel();
+	ChannelAttachmentIn_i& in = channel.InAttachment();
+
+	in.MoveChannelArguments( channel, Arguments(), NumArguments() );
+	ArgumentsMoved();	
+
+	channel.SetAttachmentOut( NULL );
+
+	host.PushEvalStep( ThisProcess() );
+	host.PushEvalStep( inputProcess );
+}
+
 void csp::OpChannel::ArgumentsMoved()
 {
 	m_arguments = NULL;
@@ -197,11 +211,7 @@ csp::WorkResult::Enum csp::OpChannelOut::Evaluate( Host& host )
 	if( channel.InAttached() )
 	{
 		ChannelAttachmentIn_i& in = channel.InAttachment();
-
-		MoveChannelArguments();
-
-		host.PushEvalStep( ThisProcess() );
-		host.PushEvalStep( in.ProcessToEvaluate() );
+		MoveChannelArguments( host, in.ProcessToEvaluate() );
 	}
 
 	return WorkResult::YIELD;
@@ -212,15 +222,9 @@ csp::Process& csp::OpChannelOut::ProcessToEvaluate()
 	return ThisProcess();
 }
 
-void csp::OpChannelOut::MoveChannelArguments()
+void csp::OpChannelOut::MoveChannelArguments( Host& host, Process& inputProcess )
 {
-	Channel& channel = ThisChannel();
-	ChannelAttachmentIn_i& in = channel.InAttachment();
-	
-	in.MoveChannelArguments( channel, Arguments(), NumArguments() );
-	ArgumentsMoved();	
-
-	channel.SetAttachmentOut( NULL );
+	OpChannel::MoveChannelArguments( host, inputProcess );
 }
 
 void csp::OpChannelOut::Terminate( Host& host )
@@ -263,10 +267,7 @@ csp::WorkResult::Enum csp::OpChannelIn::Evaluate( Host& host )
 	if( channel.OutAttached() )
 	{
 		ChannelAttachmentOut_i& out = channel.OutAttachment();
-		out.MoveChannelArguments();
-
-		host.PushEvalStep( out.ProcessToEvaluate() );
-		host.PushEvalStep( ThisProcess() );
+		out.MoveChannelArguments( host, ThisProcess() );
 	}
 
 	return WorkResult::YIELD;
