@@ -7,14 +7,13 @@
 
 namespace csp
 {
-	int swarm( lua_State* luaState );
-
+	int Swarm_new( lua_State* luaState );
 	int Swarm_MAIN( lua_State* luaState );
 	int Swarm_go( lua_State* luaState );
 
 	const csp::FunctionRegistration swarmGlobals[] =
 	{
-		"Swarm", csp::swarm
+		"new", csp::Swarm_new
 		, NULL, NULL
 	};
 
@@ -261,7 +260,7 @@ csp::Swarm* csp::GetSwarmArg( lua::LuaStackValue const& value )
 	return pSwarm;
 }
 
-int csp::swarm( lua_State* luaState )
+int csp::Swarm_new( lua_State* luaState )
 {
 	csp::Swarm* pSwarm = CORE_NEW csp::Swarm();
 	csp::PushSwarm( luaState, *pSwarm );
@@ -290,10 +289,10 @@ int csp::Swarm_go( lua_State* luaState )
 
 void csp::InitializeSwarms( lua::LuaState& state )
 {
-	InitializeCspObject( state, swarmFunctions, swarmGlobals );
+	InitializeCspObject( state, "Swarm", swarmGlobals, swarmFunctions );
 }
 
 void csp::ShutdownSwarms( lua::LuaState& state )
 {
-	ShutdownCspObject( state, swarmFunctions, swarmGlobals );
+	ShutdownCspObject( state, "Swarm", swarmGlobals, swarmFunctions );
 }

@@ -17,7 +17,7 @@ function main()
 end
 
 function testInOut()
-	local ch = Channel()
+	local ch = Channel:new()
 	PAR(
 		function()
 			log("send1{\n")
@@ -107,7 +107,7 @@ end
 
 function testParMix()
 	log("before\n")
-	local ch = Channel()
+	local ch = Channel:new()
 	PAR(
 		function()
 			log("p1{\n")
@@ -147,9 +147,9 @@ end
 
 function testAlt1()
 	log("before\n")
-	local ch1 = Channel()
-	local ch2 = Channel()
-	local ch3 = Channel()
+	local ch1 = Channel:new()
+	local ch2 = Channel:new()
+	local ch3 = Channel:new()
 	PAR(
 		function()
 			log("p1{\n")
@@ -179,8 +179,8 @@ end
 
 function testAlt2()
 	log("before\n")
-	local ch1 = Channel()
-	local ch2 = Channel()
+	local ch1 = Channel:new()
+	local ch2 = Channel:new()
 	PAR(
 		function()
 			log("p1{\n")
@@ -206,7 +206,7 @@ end
 
 function testAltTime()
 	log("testAltTime begin\n")
-	local ch1 = Channel()
+	local ch1 = Channel:new()
 
 	log("alt polling{\n")
 	ALT(
@@ -266,16 +266,16 @@ function testTermination()
 		end,
 		function()
 			log("ter in\n")
-			local ch = Channel()
+			local ch = Channel:new()
 			ch:IN()
 		end,
 		function()
 			log("ter out\n")
-			local ch = Channel()
+			local ch = Channel:new()
 			ch:OUT()
 		end,
 		function()
-			local ch = Channel()
+			local ch = Channel:new()
 			log("ter alt\n")
 			ALT(
 				ch, function()
@@ -288,11 +288,11 @@ function testTermination()
 			log("ter par\n")
 			PAR(
 				function()
-					local ch = Channel()
+					local ch = Channel:new()
 					ch:IN()
 				end,
 				function()
-					local ch = Channel()
+					local ch = Channel:new()
 					ch:OUT()
 				end
 			)
@@ -302,7 +302,7 @@ end
 
 function testTermination2()
 	log("testTermination2 begin\n")
-	local ch = Channel()
+	local ch = Channel:new()
 	PARWHILE(
 		function()
 			log("p1{\n")
@@ -320,8 +320,8 @@ end
 
 function testSwarm()
 	log("testSwarm begin\n")
-	local swarm = Swarm()
-	local ch = Channel()
+	local swarm = Swarm:new()
+	local ch = Channel:new()
 	PARWHILE(
 		function()
 			ch:IN()
@@ -330,7 +330,7 @@ function testSwarm()
 			swarm:MAIN()
 		end,
 		function()
-			local ch2 = Channel()
+			local ch2 = Channel:new()
 			log("go{\n")
 			swarm:go(
 				function()
@@ -370,7 +370,7 @@ end
 
 function testCppChannel()
 	log("testCppChannel start\n")
-	local ch = Channel()
+	local ch = Channel:new()
 	PARWHILE(
 		function()
 			SLEEP(10)

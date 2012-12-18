@@ -7,15 +7,14 @@
 
 namespace csp
 {
-	int channel( lua_State* luaState );
-
+	int Channel_new( lua_State* luaState );
 	int GcObject_Gc( lua_State* luaState );
 	int Channel_IN( lua_State* luaState );
 	int Channel_OUT( lua_State* luaState );
 
 	const csp::FunctionRegistration channelGlobals[] =
 	{
-		"Channel", csp::channel
+		"new", csp::Channel_new
 		, NULL, NULL
 	};
 
@@ -350,6 +349,13 @@ csp::ChannelAttachmentOut_i& csp::Channel::OutAttachment() const
 }
 
 
+int csp::Channel_new( lua_State* luaState )
+{
+	csp::Channel* pChannel = CORE_NEW csp::Channel();
+	csp::PushChannel( luaState, *pChannel );
+	return 1;
+}
+
 int csp::Channel_IN( lua_State* luaState )
 {
 	OpChannelIn* pIn = CORE_NEW OpChannelIn();
@@ -383,19 +389,12 @@ csp::Channel* csp::GetChannelArg( lua::LuaStackValue const& value )
 }
 
 
-int csp::channel( lua_State* luaState )
-{
-	csp::Channel* pChannel = CORE_NEW csp::Channel();
-	csp::PushChannel( luaState, *pChannel );
-	return 1;
-}
-
 void csp::InitializeChannels( lua::LuaState& state )
 {
-	InitializeCspObject( state, channelFunctions, channelGlobals );
+	InitializeCspObject( state, "Channel", channelGlobals, channelFunctions );
 }
 
 void csp::ShutdownChannels( lua::LuaState& state )
 {
-	ShutdownCspObject( state, channelFunctions, channelGlobals );
+	ShutdownCspObject( state, "Channel", channelGlobals, channelFunctions );
 }

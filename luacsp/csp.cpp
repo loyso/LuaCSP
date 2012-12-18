@@ -81,7 +81,8 @@ int csp::GcObject_Gc( lua_State* luaState )
 	return 0;
 }
 
-void csp::InitializeCspObject( lua::LuaState& state, const FunctionRegistration memberFunctions[], const FunctionRegistration globalFunctions[] )
+void csp::InitializeCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
+	, const FunctionRegistration memberFunctions[] )
 {
 	lua::LuaStack stack = state.GetStack();
 
@@ -95,12 +96,15 @@ void csp::InitializeCspObject( lua::LuaState& state, const FunctionRegistration 
 	stack.RegistrySet();
 
 	lua::LuaStackValue globals = stack.PushGlobalTable();
-	RegisterFunctions( state, globals, globalFunctions );
+	lua::LuaStackValue scope = stack.PushTable();
+	RegisterFunctions( state, scope, globalFunctions );
+	stack.SetField( globals, scopeName );
 	stack.Pop(1);
 }
 
 
-void csp::ShutdownCspObject( lua::LuaState& state, const FunctionRegistration memberFunctions[], const FunctionRegistration globalFunctions[] )
+void csp::ShutdownCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration[]
+	, const FunctionRegistration memberFunctions[] )
 {
 	lua::LuaStack stack = state.GetStack();
 
@@ -110,7 +114,8 @@ void csp::ShutdownCspObject( lua::LuaState& state, const FunctionRegistration me
 	stack.RegistrySet();
 
 	lua::LuaStackValue globals = stack.PushGlobalTable();
-	UnregisterFunctions( state, globals, globalFunctions );
+	stack.PushNil();
+	stack.SetField( globals, scopeName );
 	stack.Pop(1);
 }
 

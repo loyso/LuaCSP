@@ -61,8 +61,10 @@ namespace csp
 	void RegisterFunctions( lua::LuaState& state, lua::LuaStackValue& value, const FunctionRegistration registrations[] );
 	void UnregisterFunctions( lua::LuaState& state, lua::LuaStackValue& value, const FunctionRegistration registrations[] );
 
-	void InitializeCspObject( lua::LuaState& state, const FunctionRegistration memberFunctions[], const FunctionRegistration globalFunctions[] );
-	void ShutdownCspObject( lua::LuaState& state, const FunctionRegistration memberFunctions[], const FunctionRegistration globalFunctions[] );
+	void InitializeCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
+		, const FunctionRegistration memberFunctions[] );
+	void ShutdownCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
+		, const FunctionRegistration memberFunctions[] );
 
 	void PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey );
 	void PushGcObject( lua_State* luaState, GcObject& gcObject, const FunctionRegistration memberFunctions[] );
