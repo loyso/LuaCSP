@@ -58,6 +58,8 @@ namespace csp
 		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 
 	protected:
+		void Communicate( Host& host, Process& inputProcess );
+
 		bool InitChannel( lua::LuaStack& args, InitError& initError );
 		void UnrefChannel( lua::LuaStack const& stack );
 
@@ -69,9 +71,7 @@ namespace csp
 		Channel& ThisChannel();
 
 		void MoveChannelArguments( ChannelArgument* arguments, int numArguments );
-		void MoveChannelArguments( Host& host, Process& inputProcess );
-		void ArgumentsMoved();
-		
+		void ArgumentsMoved();		
 		ChannelArgument* Arguments() const;
 		int NumArguments() const;
 		bool HaveArgumentsMoved() const;
@@ -115,7 +115,7 @@ namespace csp
 		virtual void Terminate( Host& host );
 
 		virtual Process& ProcessToEvaluate();
-		virtual void MoveChannelArguments( Host& host, Process& inputProcess );
+		virtual void Communicate( Host& host, Process& inputProcess );
 	};
 
 	void PushChannel( lua_State* luaState, Channel& channel );

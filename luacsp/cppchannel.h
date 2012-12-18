@@ -31,7 +31,7 @@ namespace csp
 		virtual void Terminate( Host& host );
 
 		virtual Process& ProcessToEvaluate();
-		virtual void MoveChannelArguments( Host& host, Process& inputProcess );
+		virtual void Communicate( Host& host, Process& inputProcess );
 
 		virtual WorkResult::Enum Update( CspTime_t dt ) = 0;
 		virtual bool IsOutputReady() const = 0;

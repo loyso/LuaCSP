@@ -39,7 +39,7 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Evaluate( Host& host )
 		if( channel.InAttached() )
 		{
 			ChannelAttachmentIn_i& in = channel.InAttachment();
-			MoveChannelArguments( host, in.ProcessToEvaluate() );
+			Communicate( host, in.ProcessToEvaluate() );
 		}
 	}
 
@@ -87,10 +87,10 @@ csp::Process& csp::OpCppChannelOut::ProcessToEvaluate()
 	return ThisProcess();
 }
 
-void csp::OpCppChannelOut::MoveChannelArguments( Host& host, Process& inputProcess )
+void csp::OpCppChannelOut::Communicate( Host& host, Process& inputProcess )
 {
 	CORE_ASSERT( IsOutputAttached() );
-	OpChannel::MoveChannelArguments( host, inputProcess );
+	OpChannel::Communicate( host, inputProcess );
 }
 
 bool csp::OpCppChannelOut::IsOutputAttached()

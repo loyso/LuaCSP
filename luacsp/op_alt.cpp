@@ -181,7 +181,7 @@ void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 		if( pChannel && pChannel->OutAttached() )
 		{
 			ChannelAttachmentOut_i& out = pChannel->OutAttachment();
-			out.MoveChannelArguments( host, ThisProcess() );
+			out.Communicate( host, ThisProcess() );
 			break;
 		}
 	}
