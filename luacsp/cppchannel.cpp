@@ -93,6 +93,11 @@ void csp::OpCppChannelOut::Communicate( Host& host, Process& inputProcess )
 	OpChannel::Communicate( host, inputProcess );
 }
 
+void csp::OpCppChannelOut::CloseChannel( Host& host, Channel& channel )
+{
+	OpChannel::CloseChannel( host, channel );
+}
+
 bool csp::OpCppChannelOut::IsOutputAttached()
 {
 	Channel& channel = ThisChannel();

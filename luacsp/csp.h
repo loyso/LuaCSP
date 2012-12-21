@@ -40,6 +40,7 @@ namespace csp
 	struct ChannelAttachment_i
 	{
 		virtual Process& ProcessToEvaluate() = 0;
+		virtual void CloseChannel( Host& host, Channel& channel ) = 0;
 	};
 
 	struct ChannelAttachmentIn_i : ChannelAttachment_i

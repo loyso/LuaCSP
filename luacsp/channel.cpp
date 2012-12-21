@@ -12,6 +12,10 @@ namespace csp
 	int Channel_IN( lua_State* luaState );
 	int Channel_OUT( lua_State* luaState );
 
+	int Channel_RANGE( lua_State* luaState );
+	int RANGE_next( lua_State* luaState );
+	int Channel_close( lua_State* luaState );
+	
 	const csp::FunctionRegistration channelGlobals[] =
 	{
 		"new", csp::Channel_new
@@ -23,6 +27,8 @@ namespace csp
 		"__gc", csp::GcObject_Gc
 		, "IN", csp::Channel_IN
 		, "OUT", csp::Channel_OUT
+		, "RANGE", csp::Channel_RANGE
+		, "close", csp::Channel_close
 		, NULL, NULL
 	};
 }
@@ -152,19 +158,24 @@ void csp::OpChannel::ArgumentsMoved()
 
 csp::ChannelArgument* csp::OpChannel::Arguments() const
 {
-	CORE_ASSERT( m_numArguments != CSP_NO_ARGS );
+	CORE_ASSERT( HasArguments() );
 	return m_arguments;
 }
 
 int csp::OpChannel::NumArguments() const
 {
-	CORE_ASSERT( m_numArguments != CSP_NO_ARGS );
+	CORE_ASSERT( HasArguments() );
 	return m_numArguments;
 }
 
-bool csp::OpChannel::HaveArgumentsMoved() const
+bool csp::OpChannel::HasArgumentsMoved() const
 {
 	return m_argumentsMoved;
+}
+
+bool csp::OpChannel::HasArguments() const
+{
+	return m_numArguments != CSP_NO_ARGS;
 }
 
 void csp::OpChannel::Terminate( Host& host )
@@ -172,6 +183,13 @@ void csp::OpChannel::Terminate( Host& host )
 	lua::LuaStack& stack = host.LuaState().GetStack();
 	UnrefChannel( stack );
 	UnrefArguments( stack );
+}
+
+void csp::OpChannel::CloseChannel( Host& host, Channel& )
+{
+	lua::LuaStack& stack = host.LuaState().GetStack();
+	UnrefArguments( stack );
+	ArgumentsMoved();
 }
 
 
@@ -201,7 +219,7 @@ csp::WorkResult::Enum csp::OpChannelOut::Evaluate( Host& host )
 {
 	Channel& channel = ThisChannel();
 
-	if( HaveArgumentsMoved() )
+	if( HasArgumentsMoved() )
 	{
 		UnrefChannel( host.LuaState().GetStack() );
 		return WorkResult::FINISH;
@@ -232,6 +250,11 @@ void csp::OpChannelOut::Terminate( Host& host )
 	OpChannel::Terminate( host );
 }
 
+void csp::OpChannelOut::CloseChannel( Host& host, Channel& channel )
+{
+	OpChannel::CloseChannel( host, channel );
+}
+
 
 csp::OpChannelIn::OpChannelIn()
 {
@@ -257,9 +280,8 @@ csp::WorkResult::Enum csp::OpChannelIn::Evaluate( Host& host )
 {
 	Channel& channel = ThisChannel();
 
-	if( HaveArgumentsMoved() )
+	if( HasArgumentsMoved() )
 	{
-		UnrefChannel( host.LuaState().GetStack() );
 		return WorkResult::FINISH;
 	}
 		
@@ -285,15 +307,18 @@ void csp::OpChannelIn::MoveChannelArguments( Channel&, ChannelArgument* argument
 
 int csp::OpChannelIn::PushResults( lua::LuaStack & luaStack )
 {
-	ChannelArgument* arguments = Arguments();
-	int numArguments = NumArguments();
-
-	for( int i = 0; i < numArguments; ++i )
+	int numArguments = 0;
+	if( HasArguments() )
 	{
-		luaStack.PushRegistryReferenced( arguments[i].refKey );
+		ChannelArgument* arguments = Arguments();
+		numArguments = NumArguments();
+
+		for( int i = 0; i < numArguments; ++i )
+			luaStack.PushRegistryReferenced( arguments[i].refKey );
 	}
 
 	UnrefArguments( luaStack );
+	UnrefChannel( luaStack );
 	return numArguments;
 }
 
@@ -303,10 +328,34 @@ void csp::OpChannelIn::Terminate( Host& host )
 	OpChannel::Terminate( host );
 }
 
+void csp::OpChannelIn::CloseChannel( Host& host, Channel& channel )
+{
+	OpChannel::CloseChannel( host, channel );
+}
+
+
+csp::OpChannelRange::OpChannelRange()
+{
+}
+
+csp::OpChannelRange::~OpChannelRange()
+{
+}
+
+int csp::OpChannelRange::PushResults( lua::LuaStack & luaStack )
+{
+	if( ThisChannel().IsClosed() )
+		luaStack.PushNil();
+	else
+		luaStack.PushBoolean( true );
+	return OpChannelIn::PushResults( luaStack ) + 1;
+}
+
 
 csp::Channel::Channel()
 	: m_pAttachmentIn()
 	, m_pAttachmentOut()
+	, m_isClosed( false )
 {
 }
 
@@ -348,6 +397,29 @@ csp::ChannelAttachmentOut_i& csp::Channel::OutAttachment() const
 	return *m_pAttachmentOut;
 }
 
+bool csp::Channel::IsClosed() const
+{
+	return m_isClosed;
+}
+
+void csp::Channel::Close( Host& host )
+{
+	m_isClosed = true;
+
+	if( InAttached() )
+	{
+		InAttachment().CloseChannel( host, *this );
+		host.PushEvalStep( InAttachment().ProcessToEvaluate() );
+		SetAttachmentIn( NULL );
+	}
+	if( OutAttached() )
+	{
+		OutAttachment().CloseChannel( host, *this );
+		host.PushEvalStep( OutAttachment().ProcessToEvaluate() );
+		SetAttachmentOut( NULL );
+	}
+}
+
 
 int csp::Channel_new( lua_State* luaState )
 {
@@ -366,6 +438,41 @@ int csp::Channel_OUT( lua_State* luaState )
 {
 	OpChannelOut* pOut = CORE_NEW OpChannelOut();
 	return pOut->DoInit( luaState );
+}
+
+int csp::Channel_RANGE( lua_State* luaState )
+{
+	lua::LuaStack stack( luaState );
+	lua::LuaStackValue channel = stack[1];
+	if( !csp::IsChannelArg( channel ) )
+		return channel.ArgError( "Channel expected." );
+
+	stack.PushCFunction( RANGE_next );
+	channel.PushValue();
+	stack.PushBoolean( true );
+	return 3;
+}
+
+int csp::RANGE_next( lua_State* luaState )
+{
+	OpChannelRange* pRange = CORE_NEW OpChannelRange();
+	return pRange->DoInit( luaState );
+}
+
+int csp::Channel_close( lua_State* luaState )
+{
+	lua::LuaStack stack( luaState );
+	lua::LuaStackValue channel = stack[1];
+	if( !csp::IsChannelArg( channel ) )
+		return channel.ArgError( "Channel expected." );
+
+	Channel* pChannel = GetChannelArg( channel );
+	if( pChannel == NULL )
+		return channel.ArgError( "Channel pointer expected." );
+
+	Host& host = Host::GetHost( luaState );
+	pChannel->Close( host );
+	return 0;
 }
 
 void csp::PushChannel( lua_State* luaState, Channel& ch )

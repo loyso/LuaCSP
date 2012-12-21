@@ -159,9 +159,11 @@ void csp::OpAlt::UnrefProcess( lua::LuaStack const& stack )
 	}
 }
 
-void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
+bool csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 {
 	CORE_ASSERT( m_pCaseTriggered == NULL );
+
+	bool allCasesClosed = true;
 
 	for( int i = 0; i < m_numCases; ++i )
 	{
@@ -169,6 +171,7 @@ void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 		if( m_pNilCase == &altCase )
 		{
 			m_pCaseTriggered = m_pNilCase;
+			allCasesClosed = false;
 
 			m_argumentsMoved = true;
 			DetachChannels();
@@ -178,6 +181,9 @@ void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 		}
 
 		Channel* pChannel = altCase.m_pChannel;
+		if( pChannel || altCase.m_time >= 0.0f )
+			allCasesClosed = false;
+
 		if( pChannel && pChannel->OutAttached() )
 		{
 			ChannelAttachmentOut_i& out = pChannel->OutAttachment();
@@ -185,6 +191,8 @@ void csp::OpAlt::SelectChannelProcessToTrigger( Host& host )
 			break;
 		}
 	}
+
+	return allCasesClosed;
 }
 
 void csp::OpAlt::SelectTimeProcessToTrigger( Host& host )
@@ -248,14 +256,16 @@ csp::WorkResult::Enum csp::OpAlt::StartTriggeredProcess( Host& host )
 
 csp::WorkResult::Enum csp::OpAlt::Evaluate( Host& host )
 {
+	lua::LuaStack& stack = host.LuaState().GetStack();
+	
 	if( m_pCaseTriggered == NULL )
 	{
-		SelectChannelProcessToTrigger( host );
+		bool allCasesClosed = SelectChannelProcessToTrigger( host );
+		if( allCasesClosed )
+			return WorkResult::FINISH;
 	}
 	else
 	{
-		lua::LuaStack& stack = host.LuaState().GetStack();
-
 		if( m_argumentsMoved )
 		{
 			m_argumentsMoved = false;
@@ -291,18 +301,26 @@ csp::WorkResult::Enum csp::OpAlt::Work( Host& host, CspTime_t dt )
 	return IsFinished() ? WorkResult::FINISH : WorkResult::YIELD;
 }
 
-void csp::OpAlt::MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments )
-{
-	CORE_ASSERT( m_arguments == NULL );
-	CORE_ASSERT( m_numArguments == CSP_NO_ARGS );
-	CORE_ASSERT( numArguments != CSP_NO_ARGS );
 
+csp::OpAlt::AltCase* csp::OpAlt::FindCaseForChannel( Channel& channel ) const
+{
 	AltCase* pCaseTriggered = NULL;
 	for( int i = 0; i < m_numCases && pCaseTriggered == NULL; ++i )
 	{
 		if( m_cases[ i ].m_pChannel == &channel )
 			pCaseTriggered = m_cases + i;
 	}
+	
+	return pCaseTriggered;
+}
+
+void csp::OpAlt::MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments )
+{
+	CORE_ASSERT( m_arguments == NULL );
+	CORE_ASSERT( m_numArguments == CSP_NO_ARGS );
+	CORE_ASSERT( numArguments != CSP_NO_ARGS );
+
+	AltCase* pCaseTriggered = FindCaseForChannel( channel );
 
 	CORE_ASSERT( pCaseTriggered );
 	CORE_ASSERT( m_pCaseTriggered == NULL );
@@ -345,6 +363,36 @@ void csp::OpAlt::Terminate( Host& host )
 	UnrefArguments( stack );
 	UnrefClosures( stack );
 	UnrefProcess( stack );
+}
+
+void csp::OpAlt::CloseChannel( csp::Host & host, Channel& channel )
+{
+	AltCase* pCaseClosed = FindCaseForChannel( channel );
+	CORE_ASSERT( pCaseClosed );
+	CORE_ASSERT( pCaseClosed->m_pChannel != NULL );
+
+	CloseCase( host.LuaState().GetStack(), *pCaseClosed );
+}
+
+void csp::OpAlt::CloseCase( lua::LuaStack& stack, AltCase& altCase )
+{
+	if( altCase.m_pChannel )
+	{
+		altCase.m_pChannel->SetAttachmentIn( NULL );
+		altCase.m_pChannel = NULL;
+	}
+
+	if( altCase.m_channelRefKey != lua::LUA_NO_REF )
+	{
+		stack.UnrefInRegistry( altCase.m_channelRefKey );
+		altCase.m_channelRefKey = lua::LUA_NO_REF;
+	}
+
+	if( altCase.m_closureRefKey != lua::LUA_NO_REF )
+	{
+		stack.UnrefInRegistry( altCase.m_closureRefKey );
+		altCase.m_closureRefKey = lua::LUA_NO_REF;
+	}
 }
 
 csp::OpAlt::AltCase::AltCase()

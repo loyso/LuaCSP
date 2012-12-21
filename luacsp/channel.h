@@ -44,9 +44,13 @@ namespace csp
 		ChannelAttachmentIn_i& InAttachment() const;
 		ChannelAttachmentOut_i& OutAttachment() const;
 
+		void Close( Host& host );
+		bool IsClosed() const;
+
 	private:
 		ChannelAttachmentIn_i* m_pAttachmentIn;
 		ChannelAttachmentOut_i* m_pAttachmentOut;
+		bool m_isClosed;
 	};
 
 	class OpChannel : public Operation
@@ -74,9 +78,11 @@ namespace csp
 		void ArgumentsMoved();		
 		ChannelArgument* Arguments() const;
 		int NumArguments() const;
-		bool HaveArgumentsMoved() const;
+		bool HasArgumentsMoved() const;
+		bool HasArguments() const;
 
 		virtual void Terminate( Host& host );
+		void CloseChannel( Host& host, Channel& channel );
 
 	private:
 		lua::LuaRef_t m_channelRefKey;
@@ -93,14 +99,17 @@ namespace csp
 		OpChannelIn();
 		virtual ~OpChannelIn();
 
+	protected:
+		virtual int PushResults( lua::LuaStack& luaStack );
+
 	private:
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual void Terminate( Host& host );
-		virtual int PushResults( lua::LuaStack& luaStack );
 		
 		virtual Process& ProcessToEvaluate();
 		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );
+		virtual void CloseChannel( Host& host, Channel& channel );
 	};
 
 	class OpChannelOut : public OpChannel, ChannelAttachmentOut_i
@@ -116,6 +125,17 @@ namespace csp
 
 		virtual Process& ProcessToEvaluate();
 		virtual void Communicate( Host& host, Process& inputProcess );
+		virtual void CloseChannel( Host& host, Channel& channel );
+	};
+
+	class OpChannelRange : public OpChannelIn
+	{
+	public:
+		OpChannelRange();
+		virtual ~OpChannelRange();
+
+	private:
+		virtual int PushResults( lua::LuaStack& luaStack );
 	};
 
 	void PushChannel( lua_State* luaState, Channel& channel );

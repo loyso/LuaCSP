@@ -26,11 +26,12 @@ namespace csp
 		void UnrefProcess( lua::LuaStack const& stack );
 
 		WorkResult::Enum StartTriggeredProcess( Host& host );
-		void SelectChannelProcessToTrigger( Host& host );
+		bool SelectChannelProcessToTrigger( Host& host );
 		void SelectTimeProcessToTrigger( Host& host );
 
 		virtual void MoveChannelArguments( Channel& channel, ChannelArgument* arguments, int numArguments );
 		virtual Process& ProcessToEvaluate();
+		virtual void CloseChannel( csp::Host & host, Channel& channel );
 
 		virtual void DebugCheck( Host& host ) const;
 
@@ -46,6 +47,9 @@ namespace csp
 		};
 		AltCase* m_cases;
 		int m_numCases;
+
+		AltCase* FindCaseForChannel( Channel& channel ) const;
+		void CloseCase( lua::LuaStack& stack, AltCase& altCase );
 
 		AltCase* m_pCaseTriggered;
 		AltCase* m_pNilCase;

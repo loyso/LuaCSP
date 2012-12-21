@@ -4,6 +4,7 @@
 #include <luacpp/luastackvalue.h>
 
 #include "host.h"
+#include "channel.h"
 
 namespace helpers
 {
@@ -52,7 +53,6 @@ int helpers::tick( lua_State* luaState )
 	stack.PushInteger( host.Tick() );
 	return 1;
 }
-
 
 const csp::FunctionRegistration helpersDescriptions[] =
 {

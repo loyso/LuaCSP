@@ -14,6 +14,7 @@ function main()
 	testSwarm()
 	-- testCppChannel()
 	testContract()
+	testRange()
 	log("main end\n")
 end
 
@@ -412,4 +413,23 @@ function testContract()
 		end
 	)
 	log("testContract end", tick(), "\n")
+end
+
+function testRange()
+	log("testRange start\n")
+	local ch = Channel:new()
+	PAR(
+		function()
+			for status, value1, value2 in ch:RANGE() do
+				log("range loop invariant:", status, value1, value2, "\n" )
+			end
+		end,
+		function()
+			ch:OUT( "aaa", "bbb" )
+			ch:OUT( "aaa2", "bbb2" )
+			ch:OUT( "aaa3", "bbb3" )
+			ch:close()
+		end
+	)
+	log("testRange end\n")
 end
