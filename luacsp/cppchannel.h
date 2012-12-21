@@ -7,10 +7,6 @@
 
 namespace csp
 {
-}
-
-namespace csp
-{
 	class OpCppChannelOut : public OpChannel, ChannelAttachmentOut_i
 	{
 	protected:

@@ -112,3 +112,42 @@ void* lua::LuaStackValue::GetLightUserData() const
 {
 	return lua_touserdata( m_state, m_index );
 }
+
+lua_State* lua::LuaStackValue::InternalState() const
+{
+	return m_state;
+}
+
+
+lua::LuaStackTableIterator::LuaStackTableIterator( LuaStackValue const & table )
+	: m_table( table )
+	, m_hasNext( false )
+{
+	lua_pushnil( m_table.InternalState() );
+	m_hasNext = !!lua_next( m_table.InternalState(), m_table.Index() );
+	m_key = lua_gettop( m_table.InternalState() ) - 1;
+}
+
+lua::LuaStackTableIterator::operator bool() const
+{
+	return m_hasNext;
+}
+
+void lua::LuaStackTableIterator::Next()
+{
+	CORE_ASSERT( lua_gettop( m_table.InternalState() ) == m_key+1 );
+	lua_pop( m_table.InternalState(), 1 ); // pop value
+
+	m_hasNext = !!lua_next( m_table.InternalState(), m_table.Index() );
+	m_key = lua_gettop( m_table.InternalState() ) - 1;
+}
+
+lua::LuaStackValue lua::LuaStackTableIterator::Key() const
+{
+	return LuaStackValue( m_table.InternalState(), m_key );
+}
+
+lua::LuaStackValue lua::LuaStackTableIterator::Value() const
+{
+	return LuaStackValue( m_table.InternalState(), m_key+1 );
+}

@@ -201,3 +201,14 @@ int lua::LuaStack::ArgError( int arg, const char* format, ... )
 
 	return luaL_argerror( m_state, arg, buffer );
 }
+
+lua::LuaStackValue lua::LuaStack::RawGet( LuaStackValue & value ) const
+{
+	lua_rawget( m_state, value.Index() );
+	return GetTopValue();
+}
+
+void lua::LuaStack::RawSet( LuaStackValue & value )
+{
+	lua_rawset( m_state, value.Index() );
+}

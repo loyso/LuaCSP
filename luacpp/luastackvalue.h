@@ -35,8 +35,27 @@ namespace lua
 		int Index() const;
 		void PushValue();
 
+		lua_State* InternalState() const;
+
 	private:
 		lua_State* m_state;
 		int m_index;
+	};
+
+	class LuaStackTableIterator
+	{
+	public:
+		LuaStackTableIterator( LuaStackValue const & table );
+
+		operator bool() const;
+		void Next();
+
+		LuaStackValue Key() const;
+		LuaStackValue Value() const;
+
+	private:
+		LuaStackValue m_table;
+		int m_key;
+		bool m_hasNext;
 	};
 }

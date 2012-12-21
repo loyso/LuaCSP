@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="channel.cpp" />
+    <ClCompile Include="contract.cpp" />
     <ClCompile Include="cppchannel.cpp" />
     <ClCompile Include="csp.cpp" />
     <ClCompile Include="helpers.cpp" />
@@ -24,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="channel.h" />
+    <ClInclude Include="contract.h" />
     <ClInclude Include="cppchannel.h" />
     <ClInclude Include="csp.h" />
     <ClInclude Include="helpers.h" />

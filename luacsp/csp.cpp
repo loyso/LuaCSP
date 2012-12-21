@@ -6,6 +6,11 @@
 
 #include "host.h"
 
+namespace csp
+{
+	void PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey );
+}
+
 csp::Host& csp::Initialize()
 {
     lua::LuaState luaState = lua::LuaState::NewState();
@@ -46,7 +51,19 @@ void csp::UnregisterFunctions( lua::LuaState & state, lua::LuaStackValue & value
 	}
 }
 
-void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatableRegistryKey )
+void csp::CspSetMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] )
+{
+	lua::LuaStack stack( luaState );
+
+	stack.PushLightUserData( (void*)memberFunctions );
+	lua::LuaStackValue metatable = stack.RegistryGet();
+	CORE_ASSERT( metatable.IsTable() );
+
+	stack.SetMetaTable( value );
+}
+
+
+void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, const FunctionRegistration memberFunctions[] )
 {
 	lua::LuaStack args( luaState );
 
@@ -54,16 +71,7 @@ void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, void* metatable
 	*ppGcObject = &gcObject;
 	lua::LuaStackValue userData = args.GetTopValue();
 
-	args.PushLightUserData( metatableRegistryKey );
-	lua::LuaStackValue metatable = args.RegistryGet();
-	CORE_ASSERT( metatable.IsTable() );
-
-	args.SetMetaTable( userData );
-}
-
-void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, const FunctionRegistration memberFunctions[] )
-{
-	PushGcObject( luaState, gcObject, (void*)memberFunctions );
+	return CspSetMetatable( luaState, userData, memberFunctions );
 }
 
 int csp::GcObject_Gc( lua_State* luaState )

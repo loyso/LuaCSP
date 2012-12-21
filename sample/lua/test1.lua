@@ -13,6 +13,7 @@ function main()
 	testTermination2()
 	testSwarm()
 	-- testCppChannel()
+	testContract()
 	log("main end\n")
 end
 
@@ -387,4 +388,28 @@ function testCppChannel()
 		end
 	)
 	log("\ntestCppChannel end\n")
+end
+
+
+Stages = Contract:table()
+Stages.stage1 = Channel
+Stages.stage2 = Channel
+Stages.stage3 = Channel
+
+function testContract()
+	log("testContract start", tick(), "\n")
+	local c = Stages:new()
+	PAR(
+		function()
+			c.stage1:OUT()
+			c.stage2:OUT()
+			c.stage3:OUT()
+		end,
+		function()
+			c.stage1:IN()
+			c.stage2:IN()
+			c.stage3:IN()
+		end
+	)
+	log("testContract end", tick(), "\n")
 end

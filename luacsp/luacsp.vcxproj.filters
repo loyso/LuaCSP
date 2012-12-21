@@ -11,6 +11,7 @@
     <ClCompile Include="helpers.cpp" />
     <ClCompile Include="swarm.cpp" />
     <ClCompile Include="cppchannel.cpp" />
+    <ClCompile Include="contract.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csp.h" />
@@ -23,5 +24,6 @@
     <ClInclude Include="helpers.h" />
     <ClInclude Include="swarm.h" />
     <ClInclude Include="cppchannel.h" />
+    <ClInclude Include="contract.h" />
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 #include "channel.h"
 #include "cppchannel.h"
 #include "swarm.h"
+#include "contract.h"
 
 namespace csp
 {
@@ -62,6 +63,7 @@ void csp::Host::Initialize()
 	InitializeChannels( m_luaState );
 	InitializeCppChannels( m_luaState );
 	InitializeSwarms( m_luaState );
+	InitializeContracts( m_luaState );
 	
 	m_luaState.GetStack().Pop(1);
 
@@ -78,6 +80,7 @@ void csp::Host::Shutdown()
 
 	lua::LuaStackValue globals = m_luaState.GetStack().PushGlobalTable();
 
+	ShutdownContracts( m_luaState );
 	ShutdownSwarms( m_luaState );
 	ShutdownCppChannels( m_luaState );
 	ShutdownChannels( m_luaState );

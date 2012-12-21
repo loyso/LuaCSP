@@ -45,6 +45,9 @@ namespace lua
 		LuaStackValue GetField(LuaStackValue & value, const char * key) const;
 		void SetField(LuaStackValue & value, const char * key);
 
+		LuaStackValue RawGet(LuaStackValue & value) const;
+		void RawSet(LuaStackValue & value);
+
 		LuaState NewThread();
 
 		void XMove( const LuaStack& toStack, int numValues );
