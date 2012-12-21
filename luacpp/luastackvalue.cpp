@@ -124,8 +124,7 @@ lua::LuaStackTableIterator::LuaStackTableIterator( LuaStackValue const & table )
 	, m_hasNext( false )
 {
 	lua_pushnil( m_table.InternalState() );
-	m_hasNext = !!lua_next( m_table.InternalState(), m_table.Index() );
-	m_key = lua_gettop( m_table.InternalState() ) - 1;
+	DoNext();
 }
 
 lua::LuaStackTableIterator::operator bool() const
@@ -137,7 +136,11 @@ void lua::LuaStackTableIterator::Next()
 {
 	CORE_ASSERT( lua_gettop( m_table.InternalState() ) == m_key+1 );
 	lua_pop( m_table.InternalState(), 1 ); // pop value
+	DoNext();
+}
 
+void lua::LuaStackTableIterator::DoNext()
+{
 	m_hasNext = !!lua_next( m_table.InternalState(), m_table.Index() );
 	m_key = lua_gettop( m_table.InternalState() ) - 1;
 }
@@ -151,3 +154,4 @@ lua::LuaStackValue lua::LuaStackTableIterator::Value() const
 {
 	return LuaStackValue( m_table.InternalState(), m_key+1 );
 }
+

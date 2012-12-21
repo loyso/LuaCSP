@@ -38,7 +38,7 @@ int csp::Contract_new( lua_State* luaState )
 	if( !table.IsTable() )
 		return table.ArgError( "contract table expected." );
 
-	lua::LuaStackValue instance = stack.PushTable();
+	lua::LuaStackValue contractInstance = stack.PushTable();
 
 	for ( lua::LuaStackTableIterator it( table ); it; it.Next() )
 	{
@@ -55,7 +55,7 @@ int csp::Contract_new( lua_State* luaState )
 		Channel* pChannel = CORE_NEW Channel();
 		PushChannel( luaState, *pChannel );
 
-		stack.RawSet( instance );
+		stack.RawSet( contractInstance );
 	}
 
 	return 1;

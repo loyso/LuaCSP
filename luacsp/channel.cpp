@@ -98,8 +98,6 @@ void csp::OpChannel::Communicate( Host& host, Process& inputProcess )
 	in.MoveChannelArguments( channel, Arguments(), NumArguments() );
 	ArgumentsMoved();	
 
-	channel.SetAttachmentOut( NULL );
-
 	host.PushEvalStep( ThisProcess() );
 	host.PushEvalStep( inputProcess );
 }
@@ -211,7 +209,7 @@ bool csp::OpChannelOut::Init( lua::LuaStack & args, InitError& initError )
 	if( ThisChannel().OutAttached() )
 		return initError.ArgError( 1, "channel is in output operation already" );
 
-	ThisChannel().SetAttachmentOut( this );
+	ThisChannel().SetAttachmentOut( *this );
 	return true;
 }
 
@@ -242,17 +240,19 @@ csp::Process& csp::OpChannelOut::ProcessToEvaluate()
 void csp::OpChannelOut::Communicate( Host& host, Process& inputProcess )
 {
 	OpChannel::Communicate( host, inputProcess );
+	ThisChannel().ResetAttachmentOut( *this );
 }
 
 void csp::OpChannelOut::Terminate( Host& host )
 {
-	ThisChannel().SetAttachmentOut( NULL );
+	ThisChannel().ResetAttachmentOut( *this );
 	OpChannel::Terminate( host );
 }
 
 void csp::OpChannelOut::CloseChannel( Host& host, Channel& channel )
 {
 	OpChannel::CloseChannel( host, channel );
+	channel.ResetAttachmentOut( *this );
 }
 
 
@@ -272,7 +272,7 @@ bool csp::OpChannelIn::Init( lua::LuaStack & args, InitError& initError )
 	if( ThisChannel().InAttached() )
 		return initError.ArgError( 1, "channel is in input operation already" );
 
-	ThisChannel().SetAttachmentIn( this );
+	ThisChannel().SetAttachmentIn( *this );
 	return true;
 }
 
@@ -302,7 +302,7 @@ csp::Process& csp::OpChannelIn::ProcessToEvaluate()
 void csp::OpChannelIn::MoveChannelArguments( Channel&, ChannelArgument* arguments, int numArguments )
 {
 	OpChannel::MoveChannelArguments( arguments, numArguments );
-	ThisChannel().SetAttachmentIn( NULL );
+	ThisChannel().ResetAttachmentIn( *this );
 }
 
 int csp::OpChannelIn::PushResults( lua::LuaStack & luaStack )
@@ -324,13 +324,14 @@ int csp::OpChannelIn::PushResults( lua::LuaStack & luaStack )
 
 void csp::OpChannelIn::Terminate( Host& host )
 {
-	ThisChannel().SetAttachmentIn( NULL );
+	ThisChannel().ResetAttachmentIn( *this );
 	OpChannel::Terminate( host );
 }
 
 void csp::OpChannelIn::CloseChannel( Host& host, Channel& channel )
 {
 	OpChannel::CloseChannel( host, channel );
+	channel.ResetAttachmentIn( *this );
 }
 
 
@@ -365,14 +366,26 @@ csp::Channel::~Channel()
 	CORE_ASSERT( m_pAttachmentOut == NULL );
 }
 
-void csp::Channel::SetAttachmentIn( ChannelAttachmentIn_i* pAttachment )
+void csp::Channel::SetAttachmentIn( ChannelAttachmentIn_i& attachment )
 {
-	m_pAttachmentIn = pAttachment;
+	m_pAttachmentIn = &attachment;
 }
 
-void csp::Channel::SetAttachmentOut( ChannelAttachmentOut_i* pAttachment )
+void csp::Channel::SetAttachmentOut( ChannelAttachmentOut_i& attachment )
 {
-	m_pAttachmentOut = pAttachment;
+	m_pAttachmentOut = &attachment;
+}
+
+void csp::Channel::ResetAttachmentIn( const ChannelAttachmentIn_i& attachment )
+{
+	if( m_pAttachmentIn == &attachment )
+		m_pAttachmentIn = NULL;
+}
+
+void csp::Channel::ResetAttachmentOut( const ChannelAttachmentOut_i& attachment )
+{
+	if( m_pAttachmentOut == &attachment )
+		m_pAttachmentOut = NULL;
 }
 
 bool csp::Channel::InAttached() const
@@ -408,15 +421,13 @@ void csp::Channel::Close( Host& host )
 
 	if( InAttached() )
 	{
-		InAttachment().CloseChannel( host, *this );
 		host.PushEvalStep( InAttachment().ProcessToEvaluate() );
-		SetAttachmentIn( NULL );
+		InAttachment().CloseChannel( host, *this );
 	}
 	if( OutAttached() )
 	{
-		OutAttachment().CloseChannel( host, *this );
 		host.PushEvalStep( OutAttachment().ProcessToEvaluate() );
-		SetAttachmentOut( NULL );
+		OutAttachment().CloseChannel( host, *this );
 	}
 }
 

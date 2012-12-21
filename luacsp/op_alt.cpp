@@ -95,7 +95,7 @@ void csp::OpAlt::InitCases( lua::LuaStack& args )
 		{
 			Channel* pChannel = GetChannelArg( guard );
 			CORE_ASSERT( pChannel != NULL );
-			pChannel->SetAttachmentIn( this );
+			pChannel->SetAttachmentIn( *this );
 
 			guard.PushValue();
 			m_cases[ initCase ].m_channelRefKey = args.RefInRegistry();
@@ -343,7 +343,7 @@ void csp::OpAlt::DetachChannels() const
 	for( int i = 0; i < m_numCases; ++i )
 	{
 		if( m_cases[i].m_pChannel )
-			m_cases[i].m_pChannel->SetAttachmentIn( NULL );
+			m_cases[i].m_pChannel->ResetAttachmentIn( *this );
 	}
 }
 
@@ -372,13 +372,14 @@ void csp::OpAlt::CloseChannel( csp::Host & host, Channel& channel )
 	CORE_ASSERT( pCaseClosed->m_pChannel != NULL );
 
 	CloseCase( host.LuaState().GetStack(), *pCaseClosed );
+	channel.ResetAttachmentIn( *this );
 }
 
 void csp::OpAlt::CloseCase( lua::LuaStack& stack, AltCase& altCase )
 {
 	if( altCase.m_pChannel )
 	{
-		altCase.m_pChannel->SetAttachmentIn( NULL );
+		altCase.m_pChannel->ResetAttachmentIn( *this );
 		altCase.m_pChannel = NULL;
 	}
 

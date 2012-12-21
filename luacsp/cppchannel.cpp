@@ -30,7 +30,7 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Evaluate( Host& host )
 		{
 			lua::LuaStack& stack = host.LuaState().GetStack();
 			MemorizeOutputArguments( stack );
-			ThisChannel().SetAttachmentOut( this );
+			ThisChannel().SetAttachmentOut( *this );
 		}
 	}
 
@@ -52,7 +52,7 @@ csp::WorkResult::Enum csp::OpCppChannelOut::Work( Host& host, CspTime_t dt )
 	if( result == WorkResult::FINISH )
 	{
 		if( IsOutputAttached() )
-			ThisChannel().SetAttachmentOut( NULL );
+			ThisChannel().ResetAttachmentOut( *this );
 		return result;
 	}
 
@@ -91,11 +91,13 @@ void csp::OpCppChannelOut::Communicate( Host& host, Process& inputProcess )
 {
 	CORE_ASSERT( IsOutputAttached() );
 	OpChannel::Communicate( host, inputProcess );
+	ThisChannel().ResetAttachmentOut( *this );
 }
 
 void csp::OpCppChannelOut::CloseChannel( Host& host, Channel& channel )
 {
 	OpChannel::CloseChannel( host, channel );
+	channel.ResetAttachmentOut( *this );
 }
 
 bool csp::OpCppChannelOut::IsOutputAttached()

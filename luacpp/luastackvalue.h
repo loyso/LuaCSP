@@ -54,6 +54,8 @@ namespace lua
 		LuaStackValue Value() const;
 
 	private:
+		void DoNext();
+
 		LuaStackValue m_table;
 		int m_key;
 		bool m_hasNext;

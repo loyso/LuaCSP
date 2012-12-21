@@ -35,9 +35,12 @@ namespace csp
 		Channel();
 		virtual ~Channel();
 
-		void SetAttachmentIn( ChannelAttachmentIn_i* pAttachment );
-		void SetAttachmentOut( ChannelAttachmentOut_i* pAttachment );
+		void SetAttachmentIn( ChannelAttachmentIn_i& attachment );
+		void SetAttachmentOut( ChannelAttachmentOut_i& attachment );
 	
+		void ResetAttachmentIn( const ChannelAttachmentIn_i& attachment );
+		void ResetAttachmentOut( const ChannelAttachmentOut_i& attachment );
+
 		bool InAttached() const;
 		bool OutAttached() const;
 
