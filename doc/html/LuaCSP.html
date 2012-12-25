@@ -1,0 +1,61 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>LuaCSP Reference Manual 0.1</title><link rel="stylesheet" href="LuaCSP.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="LuaCSP Reference Manual 0.1"><div class="titlepage"><div><div><h2 class="title"><a name="luacsp_reference_manual"></a>LuaCSP Reference Manual 0.1</h2></div><div><p class="copyright">Copyright © 2012, 2013 Alexey Baskakov</p></div><div><div class="legalnotice" title="Legal Notice"><a name="luacsp_reference_manual.legal"></a><p>
+        Distributed under GNU General Public License (GPL), Version 2.0.
+      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#luacsp_reference_manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts">2. Basic Concepts</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.embedding">4. Embedding and Extending
+    The Language</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.advanced.implementation_disclaimer">Implementation
+      disclaimer</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.introduction"></a><a class="link" href="#luacsp_reference_manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
+      The idea to express commands or simulation events as a sequence of operations
+      is very natural for programmers. However, general procedural programming languages
+      tend to execute the instructions in "as fast as possible" fashion.
+      When the time comes for time-spreaded real world simulations or interaction
+      with the environment in robotics, such concepts as finite state machines or
+      event-driven programming are applicable. Those concepts can be implemented
+      very efficiently but the resulting model logic is quite fragmented, as the
+      scheduling and the evaluation of conditions are scattered throughout the event
+      routines.
+    </p><p>
+      The LuaCSP framework designed to support natural control flow via parallel
+      composition of domain-specific time-spreaded operations. It's up to extender
+      to implement such operations and to define logical time frame semantics in
+      each of them.
+    </p></div><div class="section" title="2. Basic Concepts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.basicConcepts"></a><a class="link" href="#luacsp_reference_manual.basicConcepts" title="2. Basic Concepts">2. Basic Concepts</a></h2></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.theLanguage"></a><a class="link" href="#luacsp_reference_manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.embedding"></a><a class="link" href="#luacsp_reference_manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending
+    The Language</a></h2></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.advanced"></a><a class="link" href="#luacsp_reference_manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.advanced.implementation_disclaimer"></a><a class="link" href="#luacsp_reference_manual.advanced.implementation_disclaimer" title="Implementation disclaimer">Implementation
+      disclaimer</a></h3></div></div></div><p>
+        The following priorities were taken (in declining order):
+      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+            Extend standard Lua distribution in non-intrusive way (just using allowed
+            #defines and API)
+          </li><li class="listitem">
+            Make LuaCSP to run on every architecture where Lua runs. Minimize the
+            usage of advanced C++ (exceptions, RTTI, templates, STL)
+          </li><li class="listitem">
+            Keep LuaCSP fast and minimalistic.
+          </li></ol></div><p>
+        Current distribution is based on Lua 5.2. However, it can be easily back-ported
+        to Lua 5.1 since LuaCSP doesn't use any specifics.
+      </p><p>
+        It also should work perfectly with commercial Lua implementations including
+        debuggers such as <a class="ulink" href="http://www.havok.com/products/script" target="_top">Havok
+        script</a> (former KoreVM).
+      </p><p>
+        A <a class="ulink" href="http://luaplus.org/" target="_top">LuaPlus</a> port would give some speed-up.
+        Implementing it isn't a problem as well.
+      </p></div></div><div class="section" title="6. Frequently Asked Questions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.faq"></a><a class="link" href="#luacsp_reference_manual.faq" title="6. Frequently Asked Questions">6. Frequently Asked Questions</a></h2></div></div></div></div><div class="section" title="7. Development Roadmap"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.roadmap"></a><a class="link" href="#luacsp_reference_manual.roadmap" title="7. Development Roadmap">7. Development Roadmap</a></h2></div></div></div><p>
+      The implementation of user requests is priority number one. Next:
+    </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+          Write very first working vertical slice (almost done).
+        </li><li class="listitem">
+          Write the comprehensive manual (in progress).
+        </li><li class="listitem">
+          Implement basic, low-level samples.
+        </li><li class="listitem">
+          Make it fully test-driven.
+        </li><li class="listitem">
+          Implemt extra language features.
+        </li><li class="listitem">
+          Perform obvious optimizations (no heap allocs, memory pools, variants everywhere
+          etc)
+        </li><li class="listitem">
+          Implement comprehensive, high-level sample.
+        </li><li class="listitem">
+          Cross-platform support (x64, cmake)
+        </li></ol></div></div></div></body></html>
