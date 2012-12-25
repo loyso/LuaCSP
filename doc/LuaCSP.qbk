@@ -14,19 +14,25 @@ Those concepts can be implemented very efficiently but the resulting model logic
 
 The LuaCSP framework designed to support natural control flow via parallel composition of domain-specific time-spreaded operations. It's up to extender to implement such operations and to define
 logical time frame semantics in each of them.
-[endsect]
+[endsect] [/introduction]
 
 [section:basicConcepts 2. Basic Concepts]
-[endsect]
+Unlike Lua, LuaCSP has a notion of a "main" program.
+[endsect] [/basicConcepts]
 
 [section:theLanguage 3. The Language]
-[endsect]
+[endsect] [/theLanguage]
 
 [section:embedding 4. Embedding and Extending The Language]
-[endsect]
+
+[section:api The Application Program Interface]
+[endsect] [/api]
+
+[endsect] [/embedding]
 
 [section:advanced 5. Advanced Topics]
-[section Implementation disclaimer]
+
+[section:disclaimer Implementation disclaimer]
 The following priorities were taken (in declining order):
 
 # Extend standard Lua distribution in non-intrusive way (just using allowed #defines and API)
@@ -35,27 +41,62 @@ The following priorities were taken (in declining order):
 
 Current distribution is based on Lua 5.2. However, it can be easily back-ported to Lua 5.1 since LuaCSP doesn't use any specifics.
 
-It also should work perfectly with commercial Lua implementations including debuggers such as [@http://www.havok.com/products/script Havok script] (former KoreVM).
+It also should work perfectly with commercial Lua implementations (including debugger support) such as [@http://www.havok.com/products/script Havok script] (former KoreVM).
 
 A [@http://luaplus.org/ LuaPlus] port would give some speed-up. Implementing it isn't a problem as well.
+[endsect] [/disclaimer]
 
-[endsect]
+[section:areas Application areas]
 
-[endsect]
+The LuaCSP framework supposed to be used in:
+
+* Video Games Development
+	* High-level game flow: to orchestrate asyncronous loading of packages/assets in pseudo-syncronous way.
+	* Gameplay-coupled interactive cut scenes with heavy logic flow.
+	* Scripted artificial intelligence (at tactic level: units, at strategic level: groups of units)
+	* As a general alternative to finite state machines.
+* Distributed Systems
+	* High-level coordination of network-distributed services and entities.
+	* Implementation of a communications protocol for services (requests/responses, handshakes)
+	* Deployment scenarios.
+* Quality Assuarance and Test Automation
+	* Automated user input testing (mimicking human user activities according to use case scenarios)
+	* Load testing for High load systems (thousands of client/front-end scripted bots, mimicking users of the service)
+* Robotics
+	* Concurrent high-level commands to hardware, concurrent sensors monitoring, decisions coordination.
+	* Behavior for groups of robots, in-group coordination.
+* Graphical User Interfaces/Experience
+	* Animation for GUI elements and frames (color, screen movement, fade in/out).
+	* Generic dispatch of user input.
+	* Input gestures recognition, high-level tracking of real world objects in time (Video cameras, Microsoft's Kinect).
+	* Interactive multimedia installations.
+
+[endsect] [/areas]
+
+[endsect] [/advanced]
 
 [section:faq 6. Frequently Asked Questions]
-[endsect]
+
+* [*Q]: Why Lua?
+	* [*A]: Lua is embeddable, high-performance, minimalistic but highly extensible language. [@http://lambda-the-ultimate.org/node/3894 Small is Beautiful: the design of Lua].
+	See some admirations for game development here: [@http://gdcvault.com/play/1014795/Havok-Script-Efficient-Lua-Scripting Havok Script: Efficient Lua Scripting].
+
+* [*Q]: How fast is it?
+	* [*A]: LuaCSP is intended to be used in real time systems. Most of the time, all the LuaCSP coroutines will be blocked
+	waiting for fundamental operations to complete. So it's a matter of balance - you can always move computationally heavy code to C++.
+
+[endsect] [/faq]
 
 [section:roadmap 7. Development Roadmap]
-The implementation of user requests is priority number one. Next:
+Reacting to user requests is priority number one. Next:
 
 # Write very first working vertical slice (almost done).
 # Write the comprehensive manual (in progress).
 # Implement basic, low-level samples.
 # Make it fully test-driven.
-# Implemt extra language features.
+# Implement extra language features.
 # Perform obvious optimizations (no heap allocs, memory pools, variants everywhere etc) 
 # Implement comprehensive, high-level sample.
-# Cross-platform support (x64, cmake)
+# Portability, cross-platform support (x64, cmake)
 
-[endsect]
+[endsect] [/roadmap]
