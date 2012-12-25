@@ -20,7 +20,7 @@ scattered throughout the event routines.
 - Callbacks and FSMs are way too low-level. FSMs are non-composable.
 
 - Asyncronous "push" multi-threaded systems are hard to program and understand.
-Whould be nice to orchestrate them at higher level in syncronous way: back to
+Whould be nice to orchestrate them at a higher level in syncronous way: back to
 natural control flow - stack and sequence are very powerful abstractions.
 
 We should resolve these complexity and maintainability issues.

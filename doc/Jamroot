@@ -1,0 +1,26 @@
+
+import quickbook ;
+
+path-constant images_location : images ;
+
+xml LuaCSP_xml : LuaCSP.qbk ;
+
+boostbook doc : LuaCSP.qbk
+    :
+	    <implicit-dependency>LuaCSP_xml
+     	<dependency>LuaCSP_xml
+		<xsl:param>generate.section.toc.level=0
+		<xsl:param>toc.section.depth=3
+        <xsl:param>doc.standalone=true 
+	    <xsl:param>nav.layout=none
+		<xsl:param>generate.manifest=0
+		<xsl:param>html.stylesheet="LuaCSP.css"
+		<xsl:param>root.filename="LuaCSP"
+		<xsl:param>admon.graphics.path="images/"
+		<xsl:param>navig.graphics.path="images/"
+		<xsl:param>img.src.path=$(images_location)/
+		<format>onehtml
+    ;
+
+install distHtml : doc : <location>html ;
+
