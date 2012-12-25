@@ -39,7 +39,7 @@ So, LuaCSP:
 
 
 !!! DOCUMENTATION IS UNDER CONSTRUCTION AT THE MOMENT.
-[See it here](https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
+[See it here]( http://htmlpreview.github.com/?https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
 
 
 LuaCSP can be used under GNU General Public License (GPL), version 2.
