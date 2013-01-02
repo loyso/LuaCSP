@@ -1,12 +1,12 @@
 
 import quickbook ;
 
-xml LuaCSP_xml : LuaCSP.qbk ;
+xml LuaCSP_boostbook : LuaCSP.qbk ;
 
 boostbook doc : LuaCSP.qbk
     :
-	    <implicit-dependency>LuaCSP_xml
-     	<dependency>LuaCSP_xml
+	    <implicit-dependency>LuaCSP_boostbook
+     	<dependency>LuaCSP_boostbook
 		<xsl:param>generate.section.toc.level=0
 		<xsl:param>toc.section.depth=3
         <xsl:param>doc.standalone=true 

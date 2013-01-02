@@ -97,7 +97,7 @@ All the other sub-processes can be spawned from main or it's sub-procedures.
 In order to construct a channel you should call:
 [example1_construct_channel]
 Channel is a garbage-collectable object so there is no need to destroy it
-explicitly. As mentioned above, a channel introduces two member functions: IN
+explicitly. As mentioned above, channel introduces two member functions: IN
 and OUT. These two functions are fundamental operations and fall under the
 umbrella of communication. Channels are uni-directional, unbuffered and
 synchronised "wires". When one process communicates on a channel, it will block
@@ -125,9 +125,116 @@ As a result, LuaCSP framework defines three conceptual levels, as shown in the p
 
 [endsect] [/fundamentalOperations]
 
+[section:composition Composition of Processes]
+The IN and OUT processes aren't much use on their own, so several ways of
+putting processes together are provided.
 
-[section:composition Composition of processes]
+[section:seq Sequential Composition]
+Sequential composition of proccesses is the basic one. LuaCSP leverages Lua's default
+semantics to run expressions for that, so all your processes will be
+executed from top to bottom as in standard Lua:
+[import samples/seq.lua]
+[seq_foo]
+
+In the example below, the function will run for 10+20+10*1=40 seconds in total.
+[seq_sleeps]
+
+[endsect] [/seq]
+
+[section:par Parallel Composition]
+Being a parallel language, LuaCSP has the PAR process constructor. This arranges for the processes inside it to be executed in parallel, for example:
+[import samples/par.lua]
+[par_foo]
+In fact, PAR is a function which consumes any number of closures (function instances). We can't change Lua syntax, so we use anonymous closures
+to mark separate blocks of code to compose.
+
+PAR waits for all sub-processes to complete:
+[par_bar]
+In the example above, the function will run for 3+max(1,2,3)+4=10 seconds in total.
+
+In other words, there is a barrier synchronisation at the end of a PAR, on which all the
+sub-processes synchronise. As well as synchronising at the end of a PAR block,
+processes may also wish to synchronise with other processes at various points
+during their lifetime. This is normally achieved by using channels, which allows
+two processes to synchronise and communicate some data between them. In many
+programs, the data communicated is not used, instead the channel is used purely
+for synchronisation.
+
+Because of the Lua lexical scoping rules, local variables can be freely accessed
+by functions defined inside their scope. A local variable used by an inner
+function is called an upvalue, or external local variable, inside the inner
+function. The Lua implementation (in particular, the garbage collector) makes
+sure the variables referred to by the closure survive as long as they are
+active. 
+
+Concurrent programming in many environments is made difficult by the subtleties
+required to implement correct access to shared objects. LuaCSP encourages a
+different approach in which shared values are passed around on channels and
+never actively shared by separate Lua threads. If two or more processes have no
+access to the object, data inconsistencies cannot occur, by design. To encourage this way of thinking, remember Rob Pyke's slogan:
+
+['Do not communicate by sharing memory; instead, share memory by communicating.]
+
+Although LuaCSP doesn't deny shared variables, a high-level approach, using channels to control access makes it easier to write clear, correct programs.
+
+So, for PAR statements it's recommended to share
+channels as the only upvalues and hide all the other objects in a process local
+scope:
+[par_sharedchannel]
+[endsect] [/par]
+
+[section:alt Alt Composition]
+There is also an ALTernative (external/internal choice) for constructing
+processes. Alting is perhaps one of the most useful features of the LuaCSP
+language (and CSP in general). It allows a process to wait for multiple events,
+but only engage in one of them. In fact, LuaCSP's ALT represents Occam's PRI
+ALT (prioritized ALT), which waits for multiple events then selects the first
+available, giving highest priority to the one at the top of the list. The
+generic syntax for an ALT is trivial:
+[import samples/alt.lua]
+[alt_syntax]
+In other words, ALT function consumes any number of pairs (guard, function closure).
+The types of guard (event selector) supported are: 
+
+* Channel inputs. 
+* Timeout guards. These simply wait for an absolute time to expire then become ready.
+* nil (do-nothing) guard.
+
+Here are some examples:
+[alt_channel_guards]
+In case of channel input guard, the provided corresponding closure receives all the input channel data as arguments.
+
+[*time] is a LuaCSP system function which returns ['absolute] time in seconds (Lua number):
+[alt_time]
+Working with absolute time instead of relative time intervals is more suitable for simulation languages.
+Typically, a mark on timeline is calculated as a result of some predictions. It's more common to give a name
+to some 'notch' in time rather then to an interval.
+
+The last example here is that of 'polling':
+[alt_nil]
+This code will either find the 'ch1' channel ready, than perform the output on
+'ch2', or, it will find the 'ch1' channel not ready and output zero on the 'ch2'
+channel. In general, polling is a bad thing. This is because most of the time
+it's not required, the desired result is usually achievable through the use of
+parallelism (PAR), plus some suitable ALT. Sometimes however it is desirable,
+for instance on a loop body whose termination is signalled on an incoming
+channel.
+[endsect] [/alt]
+
+Of course, any process constructors can be nested, i.e. PAR or ALT can contain
+any number of other PARs and ALTs as sub processes (directly or indirectly via
+functions).
+
+[section:api_examples API examples]
+[endsect] [/api_examples]
+
 [endsect] [/composition]
+
+[section:contracts Contracts]
+[endsect] [/contracts]
+
+[section:termination Termination]
+[endsect] [/termination]
 
 [endsect] [/basicConcepts]
 
@@ -136,7 +243,7 @@ As a result, LuaCSP framework defines three conceptual levels, as shown in the p
 
 [section:embedding 4. Embedding and Extending The Language]
 
-[section:writing_fundamental_operations Writing your own fundamental operations]
+[section:writing_fundamental_operations Writing Your Own Fundamental Operations]
 [endsect] [/writing_fundamental_operations]
 
 [section:api The Application Program Interface]

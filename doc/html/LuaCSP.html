@@ -2,8 +2,9 @@
         Distributed under GNU General Public License (GPL), Version 2.0.
       </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts">2. Basic Concepts</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.origins">Origins. Communicating
       Sequential Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.fundamentalOperations">Fundamental
-      Operations</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition">Composition of processes</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
-      your own fundamental operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
+      Operations</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.alt">Alt Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.api_examples">API
+        examples</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.basicConcepts.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.termination">Termination</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
+      Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
       The world is parallel. If we want to write programs that behave as other objects
       behave in the real world, then these programs will have a concurrent structure.
       Moreover, the structure must be executable and debuggable. A LuaCSP program
@@ -104,7 +105,7 @@
 </pre><p>
       </p><p>
         Channel is a garbage-collectable object so there is no need to destroy it
-        explicitly. As mentioned above, a channel introduces two member functions:
+        explicitly. As mentioned above, channel introduces two member functions:
         IN and OUT. These two functions are fundamental operations and fall under
         the umbrella of communication. Channels are uni-directional, unbuffered and
         synchronised "wires". When one process communicates on a channel,
@@ -133,14 +134,240 @@
       </p><p>
         It's the main task for extender of LuaCSP: to create domain-specific language
         via wrapping her base C/C++ code in a composable set of LuaCSP's fundamental
-        operations (see <a class="xref" href="#manual.embedding.writing_fundamental_operations" title="Writing your own fundamental operations">Writing
-      your own fundamental operations</a>). As a result,
+        operations (see <a class="xref" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
+      Your Own Fundamental Operations</a>). As a result,
         LuaCSP framework defines three conceptual levels, as shown in the picture
         below:
       </p><p>
         <a class="ulink" href="images/csp_framework_layers.png" target="_top"><span class="inlinemediaobject"><img src="images/csp_framework_layers_small.png" alt="csp_framework_layers_small"></span></a>
-      </p></div><div class="section" title="Composition of processes"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.composition"></a><a class="link" href="#manual.basicConcepts.composition" title="Composition of processes">Composition of processes</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.theLanguage"></a><a class="link" href="#manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing your own fundamental operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing your own fundamental operations">Writing
-      your own fundamental operations</a></h3></div></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.disclaimer"></a><a class="link" href="#manual.advanced.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Composition of Processes"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.composition"></a><a class="link" href="#manual.basicConcepts.composition" title="Composition of Processes">Composition of Processes</a></h3></div></div></div><p>
+        The IN and OUT processes aren't much use on their own, so several ways of
+        putting processes together are provided.
+      </p><div class="section" title="Sequential Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.seq"></a><a class="link" href="#manual.basicConcepts.composition.seq" title="Sequential Composition">Sequential Composition</a></h4></div></div></div><p>
+          Sequential composition of proccesses is the basic one. LuaCSP leverages
+          Lua's default semantics to run expressions for that, so all your processes
+          will be executed from top to bottom as in standard Lua:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">ch2</span> <span class="special">)</span>
+	<span class="identifier">local</span> <span class="identifier">d</span> <span class="special">=</span> <span class="number">10</span>
+	<span class="identifier">ch1</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">d</span><span class="special">,</span> <span class="string">"hello"</span> <span class="special">)</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">10</span><span class="special">)</span>
+	<span class="identifier">local</span> <span class="identifier">v1</span><span class="special">,</span> <span class="identifier">v2</span> <span class="special">=</span> <span class="identifier">ch2</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          In the example below, the function will run for 10+20+10*1=40 seconds in
+          total.
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">bar</span><span class="special">()</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">10</span><span class="special">)</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">20</span><span class="special">)</span>
+	<span class="keyword">for</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">1</span><span class="special">,</span><span class="number">10</span> <span class="keyword">do</span>
+		<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">1</span><span class="special">)</span>
+	<span class="identifier">end</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p></div><div class="section" title="Parallel Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.par"></a><a class="link" href="#manual.basicConcepts.composition.par" title="Parallel Composition">Parallel Composition</a></h4></div></div></div><p>
+          Being a parallel language, LuaCSP has the PAR process constructor. This
+          arranges for the processes inside it to be executed in parallel, for example:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">ch2</span> <span class="special">)</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">x</span> <span class="special">=</span> <span class="number">3</span>
+			<span class="identifier">ch1</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">x</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">y</span> <span class="special">=</span> <span class="identifier">ch2</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">20</span><span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          In fact, PAR is a function which consumes any number of closures (function
+          instances). We can't change Lua syntax, so we use anonymous closures to
+          mark separate blocks of code to compose.
+        </p><p>
+          PAR waits for all sub-processes to complete:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">bar</span><span class="special">()</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">3</span><span class="special">)</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">1</span><span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">2</span><span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">3</span><span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">4</span><span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          In the example above, the function will run for 3+max(1,2,3)+4=10 seconds
+          in total.
+        </p><p>
+          In other words, there is a barrier synchronisation at the end of a PAR,
+          on which all the sub-processes synchronise. As well as synchronising at
+          the end of a PAR block, processes may also wish to synchronise with other
+          processes at various points during their lifetime. This is normally achieved
+          by using channels, which allows two processes to synchronise and communicate
+          some data between them. In many programs, the data communicated is not
+          used, instead the channel is used purely for synchronisation.
+        </p><p>
+          Because of the Lua lexical scoping rules, local variables can be freely
+          accessed by functions defined inside their scope. A local variable used
+          by an inner function is called an upvalue, or external local variable,
+          inside the inner function. The Lua implementation (in particular, the garbage
+          collector) makes sure the variables referred to by the closure survive
+          as long as they are active.
+        </p><p>
+          Concurrent programming in many environments is made difficult by the subtleties
+          required to implement correct access to shared objects. LuaCSP encourages
+          a different approach in which shared values are passed around on channels
+          and never actively shared by separate Lua threads. If two or more processes
+          have no access to the object, data inconsistencies cannot occur, by design.
+          To encourage this way of thinking, remember Rob Pyke's slogan:
+        </p><p>
+          <span class="emphasis"><em>Do not communicate by sharing memory; instead, share memory by
+          communicating.</em></span>
+        </p><p>
+          Although LuaCSP doesn't deny shared variables, a high-level approach, using
+          channels to control access makes it easier to write clear, correct programs.
+        </p><p>
+          So, for PAR statements it's recommended to share channels as the only upvalues
+          and hide all the other objects in a process local scope:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">main</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">ch</span> <span class="special">=</span> <span class="identifier">Channel</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span> <span class="special">---</span> <span class="identifier">shared</span><span class="special">!</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">a</span> <span class="special">=</span> <span class="number">1</span> <span class="special">---</span> <span class="identifier">isolated</span><span class="special">,</span> <span class="identifier">hidden</span>
+			<span class="identifier">ch</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">a</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">b</span> <span class="special">=</span> <span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p></div><div class="section" title="Alt Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.alt"></a><a class="link" href="#manual.basicConcepts.composition.alt" title="Alt Composition">Alt Composition</a></h4></div></div></div><p>
+          There is also an ALTernative (external/internal choice) for constructing
+          processes. Alting is perhaps one of the most useful features of the LuaCSP
+          language (and CSP in general). It allows a process to wait for multiple
+          events, but only engage in one of them. In fact, LuaCSP's ALT represents
+          Occam's PRI ALT (prioritized ALT), which waits for multiple events then
+          selects the first available, giving highest priority to the one at the
+          top of the list. The generic syntax for an ALT is trivial:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">ALT</span><span class="special">(</span>
+	<span class="identifier">guard1</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+		<span class="special">---</span> <span class="identifier">process</span> <span class="number">1</span>
+	<span class="identifier">end</span>
+	<span class="special">,</span>
+	<span class="identifier">guard2</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+		<span class="special">---</span> <span class="identifier">process</span> <span class="number">2</span>
+	<span class="identifier">end</span>
+	<span class="special">,</span>
+<span class="special">...</span>
+	<span class="special">,</span>
+	<span class="identifier">guardN</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+		<span class="special">---</span> <span class="identifier">process</span> <span class="identifier">N</span>
+	<span class="identifier">end</span>
+<span class="special">)</span>
+</pre><p>
+        </p><p>
+          In other words, ALT function consumes any number of pairs (guard, function
+          closure). The types of guard (event selector) supported are:
+        </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+              Channel inputs.
+            </li><li class="listitem">
+              Timeout guards. These simply wait for an absolute time to expire then
+              become ready.
+            </li><li class="listitem">
+              nil (do-nothing) guard.
+            </li></ul></div><p>
+          Here are some examples:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">ch2</span><span class="special">,</span> <span class="identifier">ch3</span><span class="special">,</span> <span class="identifier">ch4</span> <span class="special">)</span>
+	<span class="identifier">ALT</span><span class="special">(</span>
+		<span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">function</span><span class="special">(</span> <span class="identifier">arg1</span><span class="special">,</span> <span class="identifier">arg2</span> <span class="special">)</span>
+			<span class="identifier">ch3</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">arg1</span><span class="special">,</span> <span class="identifier">arg2</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">ch2</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ch4</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">()</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          In case of channel input guard, the provided corresponding closure receives
+          all the input channel data as arguments.
+        </p><p>
+          <span class="bold"><strong>time</strong></span> is a LuaCSP system function which
+          returns <span class="emphasis"><em>absolute</em></span> time in seconds (Lua number):
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch</span> <span class="special">)</span>
+	<span class="identifier">ALT</span><span class="special">(</span>
+		<span class="identifier">time</span><span class="special">()</span> <span class="special">+</span> <span class="number">100</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+			<span class="special">---</span> <span class="identifier">timeout</span> <span class="identifier">of</span> <span class="number">100</span> <span class="identifier">seconds</span> <span class="identifier">expired</span><span class="special">!</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">ch</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">v</span> <span class="special">=</span> <span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          Working with absolute time instead of relative time intervals is more suitable
+          for simulation languages. Typically, a mark on timeline is calculated as
+          a result of some predictions. It's more common to give a name to some 'notch'
+          in time rather then to an interval.
+        </p><p>
+          The last example here is that of 'polling':
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">ch2</span> <span class="special">)</span>
+	<span class="identifier">ALT</span><span class="special">(</span>
+		<span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">v</span> <span class="special">=</span> <span class="identifier">ch1</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+			<span class="identifier">ch2</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">v</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">nil</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">zero</span> <span class="special">=</span> <span class="number">0</span>
+			<span class="identifier">ch2</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">zero</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          This code will either find the 'ch1' channel ready, than perform the output
+          on 'ch2', or, it will find the 'ch1' channel not ready and output zero
+          on the 'ch2' channel. In general, polling is a bad thing. This is because
+          most of the time it's not required, the desired result is usually achievable
+          through the use of parallelism (PAR), plus some suitable ALT. Sometimes
+          however it is desirable, for instance on a loop body whose termination
+          is signalled on an incoming channel.
+        </p></div><p>
+        Of course, any process constructors can be nested, i.e. PAR or ALT can contain
+        any number of other PARs and ALTs as sub processes (directly or indirectly
+        via functions).
+      </p><div class="section" title="API examples"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.api_examples"></a><a class="link" href="#manual.basicConcepts.composition.api_examples" title="API examples">API
+        examples</a></h4></div></div></div></div></div><div class="section" title="Contracts"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.contracts"></a><a class="link" href="#manual.basicConcepts.contracts" title="Contracts">Contracts</a></h3></div></div></div></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.termination"></a><a class="link" href="#manual.basicConcepts.termination" title="Termination">Termination</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.theLanguage"></a><a class="link" href="#manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing Your Own Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
+      Your Own Fundamental Operations</a></h3></div></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.disclaimer"></a><a class="link" href="#manual.advanced.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
         The following priorities were taken (in declining order):
       </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
             Extend standard Lua distribution in non-intrusive way (just using allowed
