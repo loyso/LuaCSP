@@ -1,10 +1,13 @@
 [article LuaCSP Reference Manual
     [quickbook 1.5]
     [version 0.1]
+	[id manual]
     [copyright 2012 2013 Alexey Baskakov]
     [license Distributed under GNU General Public License (GPL), Version 2.0. ]
 	[source-mode teletype]
 ]
+
+[template sref[name]'''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
 
 [section:introduction 1. Introduction]
 The world is parallel. If we want to write programs that behave as other objects
@@ -103,7 +106,28 @@ transferred and both processes continue.
 [endsect] [/channels]
 
 [section:fundamentalOperations Fundamental Operations]
+LuaCSP includes Lua as a subset. It means that statements and expressions work the same way.
+In addition, LuaCSP uses a notion of 'fundamental operations' - functions with implicit 'yield' inside. 
+Fundamental operation is a function that lasts
+for a specific amount of time defined directly or indirectly in a function call arguments.
+Fundamental operations are atoms (smallest building blocks) for composition in LuaCSP.
+
+The most simple example is SLEEP, a system function which just sleeps for specified amount of seconds:
+[example1_sleep]
+This manual uses a coding convension with all the fundamental operations named in capital letters.
+As you can see now, IN and OUT functions for channels are fundamental operations as well.
+
+It's the main task for extender of LuaCSP: to create domain-specific language via wrapping her
+base C/C++ code in a composable set of LuaCSP's fundamental operations (see [sref manual.embedding.writing_fundamental_operations]).
+As a result, LuaCSP framework defines three conceptual levels, as shown in the picture below:
+
+[@images/csp_framework_layers.png [$images/csp_framework_layers_small.png]]
+
 [endsect] [/fundamentalOperations]
+
+
+[section:composition Composition of processes]
+[endsect] [/composition]
 
 [endsect] [/basicConcepts]
 
@@ -111,6 +135,9 @@ transferred and both processes continue.
 [endsect] [/theLanguage]
 
 [section:embedding 4. Embedding and Extending The Language]
+
+[section:writing_fundamental_operations Writing your own fundamental operations]
+[endsect] [/writing_fundamental_operations]
 
 [section:api The Application Program Interface]
 [endsect] [/api]

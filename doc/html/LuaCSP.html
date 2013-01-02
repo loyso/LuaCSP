@@ -1,11 +1,9 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>LuaCSP Reference Manual 0.1</title><link rel="stylesheet" href="LuaCSP.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="LuaCSP Reference Manual 0.1"><div class="titlepage"><div><div><h2 class="title"><a name="luacsp_reference_manual"></a>LuaCSP Reference Manual 0.1</h2></div><div><p class="copyright">Copyright © 2012, 2013 Alexey Baskakov</p></div><div><div class="legalnotice" title="Legal Notice"><a name="luacsp_reference_manual.legal"></a><p>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>LuaCSP Reference Manual 0.1</title><link rel="stylesheet" href="LuaCSP.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="LuaCSP Reference Manual 0.1"><div class="titlepage"><div><div><h2 class="title"><a name="manual"></a>LuaCSP Reference Manual 0.1</h2></div><div><p class="copyright">Copyright © 2012, 2013 Alexey Baskakov</p></div><div><div class="legalnotice" title="Legal Notice"><a name="manual.legal"></a><p>
         Distributed under GNU General Public License (GPL), Version 2.0.
-      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#luacsp_reference_manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts">2. Basic Concepts</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts.origins">Origins.
-      Communicating Sequential Processes (CSP)</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts.channels">Channels</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts.fundamentalOperations">Fundamental
-      Operations</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.embedding">4. Embedding and Extending
-    The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.embedding.api">The Application
-      Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.advanced.disclaimer">Implementation
-      disclaimer</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.introduction"></a><a class="link" href="#luacsp_reference_manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
+      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts">2. Basic Concepts</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.origins">Origins. Communicating
+      Sequential Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.fundamentalOperations">Fundamental
+      Operations</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition">Composition of processes</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
+      your own fundamental operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
       The world is parallel. If we want to write programs that behave as other objects
       behave in the real world, then these programs will have a concurrent structure.
       Moreover, the structure must be executable and debuggable. A LuaCSP program
@@ -39,8 +37,8 @@
       and so on, so that programs you write will be easy to understand for other
       LuaCSP programmers. This document gives tips for writing clear, idiomatic LuaCSP
       code.
-    </p></div><div class="section" title="2. Basic Concepts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.basicConcepts"></a><a class="link" href="#luacsp_reference_manual.basicConcepts" title="2. Basic Concepts">2. Basic Concepts</a></h2></div></div></div><div class="section" title="Origins. Communicating Sequential Processes (CSP)"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.basicConcepts.origins"></a><a class="link" href="#luacsp_reference_manual.basicConcepts.origins" title="Origins. Communicating Sequential Processes (CSP)">Origins.
-      Communicating Sequential Processes (CSP)</a></h3></div></div></div><p>
+    </p></div><div class="section" title="2. Basic Concepts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.basicConcepts"></a><a class="link" href="#manual.basicConcepts" title="2. Basic Concepts">2. Basic Concepts</a></h2></div></div></div><div class="section" title="Origins. Communicating Sequential Processes (CSP)"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.origins"></a><a class="link" href="#manual.basicConcepts.origins" title="Origins. Communicating Sequential Processes (CSP)">Origins. Communicating
+      Sequential Processes (CSP)</a></h3></div></div></div><p>
         Concurrency and multi-threaded programming have a reputation for difficulty.
         The problem is due partly to complex designs such as proto threads and partly
         to overemphasis on low-level details such as mutexes, condition variables,
@@ -59,7 +57,7 @@
         primitives. Now run another such instance. It needs no synchronization as
         well. Now let those two communicate via channel. If the communication is
         the synchronizer, there's still no need for other synchronization.
-      </p></div><div class="section" title="Channels"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.basicConcepts.channels"></a><a class="link" href="#luacsp_reference_manual.basicConcepts.channels" title="Channels">Channels</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Channels"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.channels"></a><a class="link" href="#manual.basicConcepts.channels" title="Channels">Channels</a></h3></div></div></div><p>
         In LuaCSP, a program is a network of processes, which are connected using
         channels.
       </p><p>
@@ -112,11 +110,37 @@
         synchronised "wires". When one process communicates on a channel,
         it will block until the other party engages in the communication. At that
         moment, the data is transferred and both processes continue.
-      </p></div><div class="section" title="Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.basicConcepts.fundamentalOperations"></a><a class="link" href="#luacsp_reference_manual.basicConcepts.fundamentalOperations" title="Fundamental Operations">Fundamental
-      Operations</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.theLanguage"></a><a class="link" href="#luacsp_reference_manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.embedding"></a><a class="link" href="#luacsp_reference_manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending
-    The Language</a></h2></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.embedding.api"></a><a class="link" href="#luacsp_reference_manual.embedding.api" title="The Application Program Interface">The Application
-      Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.advanced"></a><a class="link" href="#luacsp_reference_manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.advanced.disclaimer"></a><a class="link" href="#luacsp_reference_manual.advanced.disclaimer" title="Implementation disclaimer">Implementation
-      disclaimer</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.fundamentalOperations"></a><a class="link" href="#manual.basicConcepts.fundamentalOperations" title="Fundamental Operations">Fundamental
+      Operations</a></h3></div></div></div><p>
+        LuaCSP includes Lua as a subset. It means that statements and expressions
+        work the same way. In addition, LuaCSP uses a notion of 'fundamental operations'
+        - functions with implicit 'yield' inside. Fundamental operation is a function
+        that lasts for a specific amount of time defined directly or indirectly in
+        a function call arguments. Fundamental operations are atoms (smallest building
+        blocks) for composition in LuaCSP.
+      </p><p>
+        The most simple example is SLEEP, a system function which just sleeps for
+        specified amount of seconds:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">main</span><span class="special">()</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">10</span><span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        This manual uses a coding convension with all the fundamental operations
+        named in capital letters. As you can see now, IN and OUT functions for channels
+        are fundamental operations as well.
+      </p><p>
+        It's the main task for extender of LuaCSP: to create domain-specific language
+        via wrapping her base C/C++ code in a composable set of LuaCSP's fundamental
+        operations (see <a class="xref" href="#manual.embedding.writing_fundamental_operations" title="Writing your own fundamental operations">Writing
+      your own fundamental operations</a>). As a result,
+        LuaCSP framework defines three conceptual levels, as shown in the picture
+        below:
+      </p><p>
+        <a class="ulink" href="images/csp_framework_layers.png" target="_top"><span class="inlinemediaobject"><img src="images/csp_framework_layers_small.png" alt="csp_framework_layers_small"></span></a>
+      </p></div><div class="section" title="Composition of processes"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.composition"></a><a class="link" href="#manual.basicConcepts.composition" title="Composition of processes">Composition of processes</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.theLanguage"></a><a class="link" href="#manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing your own fundamental operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing your own fundamental operations">Writing
+      your own fundamental operations</a></h3></div></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.disclaimer"></a><a class="link" href="#manual.advanced.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
         The following priorities were taken (in declining order):
       </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
             Extend standard Lua distribution in non-intrusive way (just using allowed
@@ -136,7 +160,7 @@
       </p><p>
         A <a class="ulink" href="http://luaplus.org/" target="_top">LuaPlus</a> port would give some speed-up.
         Implementing it isn't a problem as well.
-      </p></div><div class="section" title="Application areas"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.advanced.areas"></a><a class="link" href="#luacsp_reference_manual.advanced.areas" title="Application areas">Application areas</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Application areas"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.areas"></a><a class="link" href="#manual.advanced.areas" title="Application areas">Application areas</a></h3></div></div></div><p>
         The LuaCSP framework supposed to be used in:
       </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Video Games Development
@@ -191,7 +215,7 @@
                 </li><li class="listitem">
                   Interactive multimedia installations.
                 </li></ul></div>
-          </li></ul></div></div></div><div class="section" title="6. Frequently Asked Questions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.faq"></a><a class="link" href="#luacsp_reference_manual.faq" title="6. Frequently Asked Questions">6. Frequently Asked Questions</a></h2></div></div></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+          </li></ul></div></div></div><div class="section" title="6. Frequently Asked Questions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.faq"></a><a class="link" href="#manual.faq" title="6. Frequently Asked Questions">6. Frequently Asked Questions</a></h2></div></div></div><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
           <span class="bold"><strong>Q</strong></span>: Why Lua?
           <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
                 <span class="bold"><strong>A</strong></span>: Lua is embeddable, high-performance,
@@ -209,7 +233,7 @@
                 it's a matter of balance - you can always move computationally heavy
                 code to C++.
               </li></ul></div>
-        </li></ul></div></div><div class="section" title="7. Development Roadmap"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.roadmap"></a><a class="link" href="#luacsp_reference_manual.roadmap" title="7. Development Roadmap">7. Development Roadmap</a></h2></div></div></div><p>
+        </li></ul></div></div><div class="section" title="7. Development Roadmap"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.roadmap"></a><a class="link" href="#manual.roadmap" title="7. Development Roadmap">7. Development Roadmap</a></h2></div></div></div><p>
       Reacting to user requests is priority number one. Next:
     </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
           Write very first working vertical slice (almost done).

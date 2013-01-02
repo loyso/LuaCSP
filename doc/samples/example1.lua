@@ -19,4 +19,9 @@ function main()
 end
 //]
 
+//[ example1_sleep
+function main()
+	SLEEP(10)
+end
+//]
 
