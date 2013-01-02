@@ -19,8 +19,7 @@ boostbook doc : LuaCSP.qbk
 		<xsl:param>admon.graphics.path="images/"
 		<xsl:param>navig.graphics.path="images/"
 		<xsl:param>img.src.path=$(images_location)/
-		<format>onehtml
     ;
 
-install distHtml : doc : <location>html ;
-
+install distHtml : doc : <location>html <format>onehtml ;
+# install distPdf : doc : <location>pdf <format>pdf ;

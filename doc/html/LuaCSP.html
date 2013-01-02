@@ -1,9 +1,16 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>LuaCSP Reference Manual 0.1</title><link rel="stylesheet" href="LuaCSP.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="LuaCSP Reference Manual 0.1"><div class="titlepage"><div><div><h2 class="title"><a name="luacsp_reference_manual"></a>LuaCSP Reference Manual 0.1</h2></div><div><p class="copyright">Copyright © 2012, 2013 Alexey Baskakov</p></div><div><div class="legalnotice" title="Legal Notice"><a name="luacsp_reference_manual.legal"></a><p>
         Distributed under GNU General Public License (GPL), Version 2.0.
-      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#luacsp_reference_manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts">2. Basic Concepts</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.embedding">4. Embedding and Extending
+      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#luacsp_reference_manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts">2. Basic Concepts</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts.origins">Origins.
+      Communicating Sequential Processes (CSP)</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts.channels">Channels</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.basicConcepts.fundamentalOperations">Fundamental
+      Operations</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.embedding">4. Embedding and Extending
     The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.embedding.api">The Application
       Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#luacsp_reference_manual.advanced.disclaimer">Implementation
       disclaimer</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#luacsp_reference_manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#luacsp_reference_manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.introduction"></a><a class="link" href="#luacsp_reference_manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
+      The world is parallel. If we want to write programs that behave as other objects
+      behave in the real world, then these programs will have a concurrent structure.
+      Moreover, the structure must be executable and debuggable. A LuaCSP program
+      models how we think and interact.
+    </p><p>
       The idea to express commands or simulation events as a sequence of operations
       is very natural for programmers. However, general procedural programming languages
       tend to execute the instructions in "as fast as possible" fashion.
@@ -18,9 +25,95 @@
       composition of domain-specific time-spreaded operations. It's up to extender
       to implement such operations and to define logical time frame semantics in
       each of them.
-    </p></div><div class="section" title="2. Basic Concepts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.basicConcepts"></a><a class="link" href="#luacsp_reference_manual.basicConcepts" title="2. Basic Concepts">2. Basic Concepts</a></h2></div></div></div><p>
-      Unlike Lua, LuaCSP has a notion of a "main" program.
-    </p></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.theLanguage"></a><a class="link" href="#luacsp_reference_manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.embedding"></a><a class="link" href="#luacsp_reference_manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending
+    </p><p>
+      LuaCSP is a different language. Although it contains Lua as a subset, it has
+      unusual properties that make effective LuaCSP programs different in character
+      from programs written in its relatives. A straightforward translation of a
+      C++ or Lua program into LuaCSP is unlikely to produce a satisfactory result
+      - Lua programs are written in Lua (or even more, in the subset of Lua heavily
+      influenced by C/C++ minded style), not LuaCSP. Moreover, thinking about the
+      problem from a LuaCSP perspective can produce a successful and very different
+      program. In other words, to write LuaCSP code well, it's important to understand
+      its properties and idioms. It's also important to know the established conventions
+      for programming in LuaCSP, such as naming, formatting, program construction,
+      and so on, so that programs you write will be easy to understand for other
+      LuaCSP programmers. This document gives tips for writing clear, idiomatic LuaCSP
+      code.
+    </p></div><div class="section" title="2. Basic Concepts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.basicConcepts"></a><a class="link" href="#luacsp_reference_manual.basicConcepts" title="2. Basic Concepts">2. Basic Concepts</a></h2></div></div></div><div class="section" title="Origins. Communicating Sequential Processes (CSP)"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.basicConcepts.origins"></a><a class="link" href="#luacsp_reference_manual.basicConcepts.origins" title="Origins. Communicating Sequential Processes (CSP)">Origins.
+      Communicating Sequential Processes (CSP)</a></h3></div></div></div><p>
+        Concurrency and multi-threaded programming have a reputation for difficulty.
+        The problem is due partly to complex designs such as proto threads and partly
+        to overemphasis on low-level details such as mutexes, condition variables,
+        and even memory barriers.
+      </p><p>
+        One of the most successful models for providing high-level linguistic support
+        for concurrency comes from Tony Hoare's Communicating Sequential Processes
+        (CSP). CSP is a process algebra which is used to describe parallel programs.
+        Erlang, Stackless Python, Newsqueak and Google Go are well known languages
+        that stem from CSP. LuaCSP's concurrency primitives derive from orginal Hoare's
+        Occam Programming Language, whose main contribution is the powerful notion
+        of channels as first class objects.
+      </p><p>
+        One way to think about CSP model is to consider a typical single-threaded
+        program running on a single CPU core. It has no need for synchronization
+        primitives. Now run another such instance. It needs no synchronization as
+        well. Now let those two communicate via channel. If the communication is
+        the synchronizer, there's still no need for other synchronization.
+      </p></div><div class="section" title="Channels"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.basicConcepts.channels"></a><a class="link" href="#luacsp_reference_manual.basicConcepts.channels" title="Channels">Channels</a></h3></div></div></div><p>
+        In LuaCSP, a program is a network of processes, which are connected using
+        channels.
+      </p><p>
+        A channel is a point-to-point, uni-directional, synchronous unbuffered communications
+        link. Processes only need to be aware of the channels connecting them to
+        other processes, and how to communicate on those channels (generally using
+        the same protocol as the process on the other end).
+      </p><p>
+        The nature of channels means that the communication is (considered) instantaneous,
+        and takes place when both the inputting and outputting processes have reached
+        the communication statement. The first process to arrive at a channel will
+        wait for the second one. When the second process arrives, it wakes the other
+        one up, the data is copied and both processes carry on as before.
+      </p><p>
+        A process in LuaCSP has a simple model: it is a function executing in parallel
+        with other processes in the same address space. In fact, it is a lightweight
+        Lua coroutine, costing little more than the allocation of stack space.
+      </p><p>
+        Consider the example for two processes, 'foo' and 'bar', connected by a channel
+        'ch' where 'foo' outputs something down the channel, and where 'bar' reads
+        something from the channel:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch</span> <span class="special">)</span>
+	<span class="identifier">ch</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="number">42</span> <span class="special">)</span>
+<span class="identifier">end</span>
+
+<span class="identifier">function</span> <span class="identifier">bar</span><span class="special">(</span> <span class="identifier">ch</span> <span class="special">)</span>
+	<span class="identifier">local</span> <span class="identifier">v</span> <span class="special">=</span> <span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        Unlike Lua, LuaCSP has a notion of a 'main' program, which is a root process.
+        All the other sub-processes can be spawned from main or it's sub-procedures.
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">main</span><span class="special">()</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        In order to construct a channel you should call:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">main</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">ch</span> <span class="special">=</span> <span class="identifier">Channel</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        Channel is a garbage-collectable object so there is no need to destroy it
+        explicitly. As mentioned above, a channel introduces two member functions:
+        IN and OUT. These two functions are fundamental operations and fall under
+        the umbrella of communication. Channels are uni-directional, unbuffered and
+        synchronised "wires". When one process communicates on a channel,
+        it will block until the other party engages in the communication. At that
+        moment, the data is transferred and both processes continue.
+      </p></div><div class="section" title="Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.basicConcepts.fundamentalOperations"></a><a class="link" href="#luacsp_reference_manual.basicConcepts.fundamentalOperations" title="Fundamental Operations">Fundamental
+      Operations</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.theLanguage"></a><a class="link" href="#luacsp_reference_manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.embedding"></a><a class="link" href="#luacsp_reference_manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending
     The Language</a></h2></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.embedding.api"></a><a class="link" href="#luacsp_reference_manual.embedding.api" title="The Application Program Interface">The Application
       Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="luacsp_reference_manual.advanced"></a><a class="link" href="#luacsp_reference_manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="luacsp_reference_manual.advanced.disclaimer"></a><a class="link" href="#luacsp_reference_manual.advanced.disclaimer" title="Implementation disclaimer">Implementation
       disclaimer</a></h3></div></div></div><p>

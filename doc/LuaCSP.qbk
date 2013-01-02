@@ -7,17 +7,104 @@
 ]
 
 [section:introduction 1. Introduction]
-The idea to express commands or simulation events as a sequence of operations is very natural for programmers.
-However, general procedural programming languages tend to execute the instructions in "as fast as possible" fashion.
-When the time comes for time-spreaded real world simulations or interaction with the environment in robotics, such concepts as finite state machines or event-driven programming are applicable.
-Those concepts can be implemented very efficiently but the resulting model logic is quite fragmented, as the scheduling and the evaluation of conditions are scattered throughout the event routines. 
+The world is parallel. If we want to write programs that behave as other objects
+behave in the real world, then these programs will have a concurrent structure.
+Moreover, the structure must be executable and debuggable. A LuaCSP program
+models how we think and interact.
 
-The LuaCSP framework designed to support natural control flow via parallel composition of domain-specific time-spreaded operations. It's up to extender to implement such operations and to define
-logical time frame semantics in each of them.
+The idea to express commands or simulation events as a sequence of operations is
+very natural for programmers. However, general procedural programming languages
+tend to execute the instructions in "as fast as possible" fashion. When the time
+comes for time-spreaded real world simulations or interaction with the
+environment in robotics, such concepts as finite state machines or event-driven
+programming are applicable. Those concepts can be implemented very efficiently
+but the resulting model logic is quite fragmented, as the scheduling and the
+evaluation of conditions are scattered throughout the event routines.
+
+The LuaCSP framework designed to support natural control flow via parallel
+composition of domain-specific time-spreaded operations. It's up to extender to
+implement such operations and to define logical time frame semantics in each of
+them.
+
+LuaCSP is a different language. Although it contains Lua as a subset, it has
+unusual properties that make effective LuaCSP programs different in character
+from programs written in its relatives. A straightforward translation of a C++
+or Lua program into LuaCSP is unlikely to produce a satisfactory result - Lua
+programs are written in Lua (or even more, in the subset of Lua heavily
+influenced by C/C++ minded style), not LuaCSP. Moreover, thinking
+about the problem from a LuaCSP perspective can produce a successful and
+very different program. In other words, to write LuaCSP code well, it's
+important to understand its properties and idioms. It's also important to know
+the established conventions for programming in LuaCSP, such as naming,
+formatting, program construction, and so on, so that programs you write will be
+easy to understand for other LuaCSP programmers. This document gives tips for
+writing clear, idiomatic LuaCSP code.
 [endsect] [/introduction]
 
 [section:basicConcepts 2. Basic Concepts]
-Unlike Lua, LuaCSP has a notion of a "main" program.
+
+[section:origins Origins. Communicating Sequential Processes (CSP)]
+Concurrency and multi-threaded programming have a reputation for difficulty. The
+problem is due partly to complex designs such as proto threads and partly to
+overemphasis on low-level details such as mutexes, condition variables, and even
+memory barriers. 
+
+One of the most successful models for providing high-level linguistic support
+for concurrency comes from Tony Hoare's Communicating Sequential Processes (CSP).
+CSP is a process algebra which is used to describe parallel programs.
+Erlang, Stackless Python, Newsqueak and Google Go are well known languages that stem from CSP.
+LuaCSP's concurrency primitives derive from orginal Hoare's Occam Programming Language,
+whose main contribution is the powerful notion of channels as first class
+objects. 
+
+One way to think about CSP model is to consider a typical single-threaded
+program running on a single CPU core. It has no need for synchronization primitives. Now
+run another such instance. It needs no synchronization as well. Now let those two
+communicate via channel. If the communication is the synchronizer, there's still no need for
+other synchronization. 
+[endsect] [/origins]
+
+[section:channels Channels]
+In LuaCSP, a program is a network of processes, which are connected using channels.
+
+A channel is a point-to-point, uni-directional, synchronous unbuffered
+communications link. Processes only need to be aware of the channels connecting
+them to other processes, and how to communicate on those channels (generally
+using the same protocol as the process on the other end). 
+
+The nature of channels means that the communication is (considered)
+instantaneous, and takes place when both the inputting and outputting processes
+have reached the communication statement. The first process to arrive at a
+channel will wait for the second one. When the second process arrives, it wakes
+the other one up, the data is copied and both processes carry on as before.
+
+A process in LuaCSP has a simple model: it is a function executing in parallel
+with other processes in the same address space. In fact, it is a lightweight Lua
+coroutine, costing little more than the allocation of stack space.
+
+Consider the example for two processes, 'foo' and 'bar', connected by a channel
+'ch' where 'foo' outputs something down the channel, and where 'bar' reads
+something from the channel:
+[import samples/example1.lua]
+[example1_foobar]
+
+Unlike Lua, LuaCSP has a notion of a 'main' program, which is a root process.
+All the other sub-processes can be spawned from main or it's sub-procedures.
+[example1_main]
+In order to construct a channel you should call:
+[example1_construct_channel]
+Channel is a garbage-collectable object so there is no need to destroy it
+explicitly. As mentioned above, a channel introduces two member functions: IN
+and OUT. These two functions are fundamental operations and fall under the
+umbrella of communication. Channels are uni-directional, unbuffered and
+synchronised "wires". When one process communicates on a channel, it will block
+until the other party engages in the communication. At that moment, the data is
+transferred and both processes continue.
+[endsect] [/channels]
+
+[section:fundamentalOperations Fundamental Operations]
+[endsect] [/fundamentalOperations]
+
 [endsect] [/basicConcepts]
 
 [section:theLanguage 3. The Language]
