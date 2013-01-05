@@ -221,9 +221,24 @@ for instance on a loop body whose termination is signalled on an incoming
 channel.
 [endsect] [/alt]
 
+[section:flow Computational Flow]
 Of course, any process constructors can be nested, i.e. PAR or ALT can contain
 any number of other PARs and ALTs as sub processes (directly or indirectly via
 functions).
+
+The LuaCSP evaluator tries to push the computational flow for current simulation tick
+as further as possible. So, it resolves all the communications via channels as
+separate extra steps during current tick (so called 'greedy' concept). The evaluation of tick
+only stops if there is no more communication and Lua coroutines resumes possible without updating
+working fundamental operations with delta time.
+
+Note that most of the time, all LuaCSP processes will be blocked
+waiting for something. The power of the model is that we can
+decompose the complex state of the system into independently
+executing, simple sequences of operations. External events
+will naturally lead to sequencing of the processes through their
+actions by scheduling the associated communications.
+[endsect] [/flow]
 
 [endsect] [/composition]
 
@@ -394,6 +409,21 @@ Consider the following declaration for your custom SLEEP:
 [operation_cpp_sleep_impl]
 The Work function is called once a simulation tick and it must return one of the following WorkResult::Enum values:
 [operation_h_workresult]
+Terminate function is called on your operation termination.
+Override it, if your operation needs to close or stop any resources.
+This is a place to stop a sound in your PLAY_SOUND operation, for instance.
+
+In Init function, your operation must decide, whether it wants to
+be yielded or wants to return to Lua immediately. Consider the following example: there are
+two possible semantics for SLEEP(0) statement. First option: sleep until next simulation tick. Second option: do not
+sleep at all, return immediately. So if you want to return from operation on it's start,
+you should call SetFinished(true) in Init function:
+[operation_coo_sleep_set_finished]
+You have to pay attention to this detail because sometimes it's very important
+to avoid 1-tick stalls in your simulation flow. The problem also exists in inaccurate FSM implementations: state switches can be
+delayed until next update if implemented incorrectly. Also, remember that
+Work will be called only on the next tick after operation creation (Init).
+
 The final stage. Expose your operation to Lua:
 [operation_cpp_sleep_reg]
 
@@ -401,8 +431,15 @@ If you want to return values from your operation, just override PushResults meth
 and push arguments onto provided Lua stack. Overrided PushResults method should return the number of passed arguments.
 Consider dummy example:
 [operation_cpp_push_results]
+It allows one to receive some results in the following way:
+[operation_cpp_results_example]
+... where 'str' will contain "hello!" string and 'status' will contain 'true'.
 
 [endsect] [/writing_fundamental_operations]
+
+[section:writing_fundamental_operations_lua Writing Fundamental Operations in Plane Lua]
+TBD
+[endsect] [/writing_fundamental_operations_lua]
 
 [section:api The Application Program Interface]
 TBD
@@ -468,6 +505,12 @@ The LuaCSP framework supposed to be used in:
 * [*Q]: Did you ever hear of Cont Monad?
 	* [*A]: Sure. I heard of delimited continuations and CPS as well. 
 	LuaCSP designed to be a pragmatic tool. It should be easy to use and understand for as many programmers as possible.
+
+* [*Q]: Why not pure coroutines?
+	* [*A]: Firstly, Lua coroutines represent only sequential execution for processes (the letters S and P in CSP).
+    So, they lack the communication aspect (the letter C in CSP). 
+	Secondly, Lua coroutine only suspends/resumes it's execution by explicitly calling yield/resume functions. 
+	In LuaCSP all the coroutine yields are hidden inside the C++ system functions. The domain-specific language user sees none of this, which is the point. 
 
 [endsect] [/faq]
 

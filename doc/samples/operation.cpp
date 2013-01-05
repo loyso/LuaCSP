@@ -20,6 +20,21 @@ WorkResult::Enum OpSleep::Work( Host&, CspTime_t dt )
 }
 //]
 
+//[ operation_coo_sleep_set_finished
+bool OpSleep::Init( lua::LuaStack& args, InitError& initError )
+{
+	if ( !args[1].IsNumber() )
+		return initError.ArgError( 1, "seconds expected" );
+
+	m_seconds = args[1].GetNumber();
+
+	if( m_seconds <= 0 )
+		SetFinsihed( true );
+
+	return true;
+}
+//]
+
 
 //[ operation_cpp_sleep_reg
 int SLEEP( lua_State* luaState )
@@ -52,4 +67,11 @@ int OpMyDummyOp::PushResults( lua::LuaStack& luaStack )
 	luaStack.PushBoolean( true );
 	return 2;
 }
+//]
+
+//[ operation_cpp_results_example
+function bar()
+	local str, status = MY_DUMMY_OP()
+	log( str, status )
+end
 //]

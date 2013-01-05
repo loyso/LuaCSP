@@ -2,10 +2,12 @@
         Distributed under GNU General Public License (GPL), Version 2.0.
       </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.the_language">2. The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.origins">Origins. Communicating Sequential
       Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.the_language.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.the_language.fundamentalOperations">Fundamental
-      Operations</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.alt">Alt Composition</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.the_language.api_examples">Domain-Specific API
+      Operations</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.alt">Alt Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.flow">Computational
+        Flow</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.the_language.api_examples">Domain-Specific API
       Examples</a></span></dt><dt><span class="section"><a href="#manual.the_language.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.the_language.termination">Termination</a></span></dt><dt><span class="section"><a href="#manual.the_language.swarm">Swarms and Go</a></span></dt><dt><span class="section"><a href="#manual.the_language.misc">Miscellaneous Functions</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">3. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.evaluation">Evaluation Precedence</a></span></dt><dt><span class="section"><a href="#manual.advanced.patterns">Best Programming Practices,
       Patterns and Idioms</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
-      Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.additional_notes">5. Additional notes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.additional_notes.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.additional_notes.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
+      Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations_lua">Writing
+      Fundamental Operations in Plane Lua</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.additional_notes">5. Additional notes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.additional_notes.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.additional_notes.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
       The world is parallel. If we want to write programs that behave as other objects
       behave in the real world, then these programs will have a concurrent structure.
       Moreover, the structure must be executable and debuggable. A LuaCSP program
@@ -361,11 +363,25 @@
           through the use of parallelism (PAR), plus some suitable ALT. Sometimes
           however it is desirable, for instance on a loop body whose termination
           is signalled on an incoming channel.
-        </p></div><p>
-        Of course, any process constructors can be nested, i.e. PAR or ALT can contain
-        any number of other PARs and ALTs as sub processes (directly or indirectly
-        via functions).
-      </p></div><div class="section" title="Domain-Specific API Examples"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.api_examples"></a><a class="link" href="#manual.the_language.api_examples" title="Domain-Specific API Examples">Domain-Specific API
+        </p></div><div class="section" title="Computational Flow"><div class="titlepage"><div><div><h4 class="title"><a name="manual.the_language.composition.flow"></a><a class="link" href="#manual.the_language.composition.flow" title="Computational Flow">Computational
+        Flow</a></h4></div></div></div><p>
+          Of course, any process constructors can be nested, i.e. PAR or ALT can
+          contain any number of other PARs and ALTs as sub processes (directly or
+          indirectly via functions).
+        </p><p>
+          The LuaCSP evaluator tries to push the computational flow for current simulation
+          tick as further as possible. So, it resolves all the communications via
+          channels as separate extra steps during current tick (so called 'greedy'
+          concept). The evaluation of tick only stops if there is no more communication
+          and Lua coroutines resumes possible without updating working fundamental
+          operations with delta time.
+        </p><p>
+          Note that most of the time, all LuaCSP processes will be blocked waiting
+          for something. The power of the model is that we can decompose the complex
+          state of the system into independently executing, simple sequences of operations.
+          External events will naturally lead to sequencing of the processes through
+          their actions by scheduling the associated communications.
+        </p></div></div><div class="section" title="Domain-Specific API Examples"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.api_examples"></a><a class="link" href="#manual.the_language.api_examples" title="Domain-Specific API Examples">Domain-Specific API
       Examples</a></h3></div></div></div><p>
         The most simple demonstration for LuaCSP domain specific API is sound playback.
         In the following example, the PLAY function lasts as long, as sound lasts.
@@ -872,6 +888,37 @@
 <span class="special">}</span>
 </pre><p>
       </p><p>
+        Terminate function is called on your operation termination. Override it,
+        if your operation needs to close or stop any resources. This is a place to
+        stop a sound in your PLAY_SOUND operation, for instance.
+      </p><p>
+        In Init function, your operation must decide, whether it wants to be yielded
+        or wants to return to Lua immediately. Consider the following example: there
+        are two possible semantics for SLEEP(0) statement. First option: sleep until
+        next simulation tick. Second option: do not sleep at all, return immediately.
+        So if you want to return from operation on it's start, you should call SetFinished(true)
+        in Init function:
+      </p><p>
+</p><pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">OpSleep</span><span class="special">::</span><span class="identifier">Init</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">args</span><span class="special">,</span> <span class="identifier">InitError</span><span class="special">&amp;</span> <span class="identifier">initError</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="keyword">if</span> <span class="special">(</span> <span class="special">!</span><span class="identifier">args</span><span class="special">[</span><span class="number">1</span><span class="special">].</span><span class="identifier">IsNumber</span><span class="special">()</span> <span class="special">)</span>
+		<span class="keyword">return</span> <span class="identifier">initError</span><span class="special">.</span><span class="identifier">ArgError</span><span class="special">(</span> <span class="number">1</span><span class="special">,</span> <span class="string">"seconds expected"</span> <span class="special">);</span>
+
+	<span class="identifier">m_seconds</span> <span class="special">=</span> <span class="identifier">args</span><span class="special">[</span><span class="number">1</span><span class="special">].</span><span class="identifier">GetNumber</span><span class="special">();</span>
+
+	<span class="keyword">if</span><span class="special">(</span> <span class="identifier">m_seconds</span> <span class="special">&lt;=</span> <span class="number">0</span> <span class="special">)</span>
+		<span class="identifier">SetFinsihed</span><span class="special">(</span> <span class="keyword">true</span> <span class="special">);</span>
+
+	<span class="keyword">return</span> <span class="keyword">true</span><span class="special">;</span>
+<span class="special">}</span>
+</pre><p>
+      </p><p>
+        You have to pay attention to this detail because sometimes it's very important
+        to avoid 1-tick stalls in your simulation flow. The problem also exists in
+        inaccurate FSM implementations: state switches can be delayed until next
+        update if implemented incorrectly. Also, remember that Work will be called
+        only on the next tick after operation creation (Init).
+      </p><p>
         The final stage. Expose your operation to Lua:
       </p><p>
 </p><pre class="programlisting"><span class="keyword">int</span> <span class="identifier">SLEEP</span><span class="special">(</span> <span class="identifier">lua_State</span><span class="special">*</span> <span class="identifier">luaState</span> <span class="special">)</span>
@@ -908,6 +955,20 @@
 	<span class="keyword">return</span> <span class="number">2</span><span class="special">;</span>
 <span class="special">}</span>
 </pre><p>
+      </p><p>
+        It allows one to receive some results in the following way:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">bar</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">str</span><span class="special">,</span> <span class="identifier">status</span> <span class="special">=</span> <span class="identifier">MY_DUMMY_OP</span><span class="special">()</span>
+	<span class="identifier">log</span><span class="special">(</span> <span class="identifier">str</span><span class="special">,</span> <span class="identifier">status</span> <span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        ... where 'str' will contain "hello!" string and 'status' will
+        contain 'true'.
+      </p></div><div class="section" title="Writing Fundamental Operations in Plane Lua"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations_lua"></a><a class="link" href="#manual.embedding.writing_fundamental_operations_lua" title="Writing Fundamental Operations in Plane Lua">Writing
+      Fundamental Operations in Plane Lua</a></h3></div></div></div><p>
+        TBD
       </p></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div><p>
         TBD
       </p></div></div><div class="section" title="5. Additional notes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.additional_notes"></a><a class="link" href="#manual.additional_notes" title="5. Additional notes">5. Additional notes</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.additional_notes.disclaimer"></a><a class="link" href="#manual.additional_notes.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
@@ -1009,6 +1070,17 @@
                 <span class="bold"><strong>A</strong></span>: Sure. I heard of delimited continuations
                 and CPS as well. LuaCSP designed to be a pragmatic tool. It should
                 be easy to use and understand for as many programmers as possible.
+              </li></ul></div>
+        </li><li class="listitem">
+          <span class="bold"><strong>Q</strong></span>: Why not pure coroutines?
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+                <span class="bold"><strong>A</strong></span>: Firstly, Lua coroutines represent
+                only sequential execution for processes (the letters S and P in CSP).
+                So, they lack the communication aspect (the letter C in CSP). Secondly,
+                Lua coroutine only suspends/resumes it's execution by explicitly
+                calling yield/resume functions. In LuaCSP all the coroutine yields
+                are hidden inside the C++ system functions. The domain-specific language
+                user sees none of this, which is the point.
               </li></ul></div>
         </li></ul></div></div><div class="section" title="7. Development Roadmap"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.roadmap"></a><a class="link" href="#manual.roadmap" title="7. Development Roadmap">7. Development Roadmap</a></h2></div></div></div><p>
       Reacting to user requests is priority number one. Next:
