@@ -263,7 +263,7 @@ animations on some 3D mesh:
 The more advanced technique is to use composition of objects and composition of time-spreaded operations on those objects
 as two orthogonal concepts helping each other. In cinematics API for your virtual world you can create a hierarchy
 of camera controllers and blenders. Then, you can operate controller's parameters in time (mixing, blending, fade in, fade out).
-Camera track is external animation for all the camera parameters, created by non-programmer:
+In the code below, camera track is external 'animatable' data for all the camera parameters, created by non-programmer:
 [import samples/camera.lua]
 [camera_main]
 Blender is a controller itself. So you can stick blenders and controllers into each other, creating a hierarchy.
@@ -447,7 +447,7 @@ TBD
 
 [endsect] [/embedding]
 
-[section:additional_notes 5. Additional notes]
+[section:additional_notes 5. Additional Notes]
 
 [section:disclaimer Implementation Disclaimer]
 The following priorities were taken (in declining order):
