@@ -229,8 +229,8 @@ functions).
 The LuaCSP evaluator tries to push the computational flow for current simulation tick
 as further as possible. So, it resolves all the communications via channels as
 separate extra steps during current tick (so called 'greedy' concept). The evaluation of tick
-only stops if there is no more communication and Lua coroutines resumes possible without updating
-working fundamental operations with delta time.
+only stops if there is no more communication possible without updating
+leaf operations with delta time.
 
 Note that most of the time, all LuaCSP processes will be blocked
 waiting for something. The power of the model is that we can
@@ -261,7 +261,7 @@ animations on some 3D mesh:
 [animation_heartbeat]
 
 The more advanced technique is to use composition of objects and composition of time-spreaded operations on those objects
-as two orthogonal concepts helping each other. In cinematic cameras API for your virtual world you can create a hierarchy
+as two orthogonal concepts helping each other. In cinematics API for your virtual world you can create a hierarchy
 of camera controllers and blenders. Then, you can operate controller's parameters in time (mixing, blending, fade in, fade out).
 Camera track is external animation for all the camera parameters, created by non-programmer:
 [import samples/camera.lua]
@@ -274,7 +274,7 @@ In the example above, camera_play_track and camera_play_track_lookat could be im
 The idea is that you can play multiple tracks on controller but apply or mix only certain parameters from those tracks
 (position, rotation, depth of field - DOF, field of view - FOV, etc)
 Each controller has an array of 3d matrices inside to support a hierarchy of relative geometric transformations.
-Coordinates-related operations (TRANSLATION, ROTATION) consume one extra parameter - a number, the index in that array. 
+Coordinate-related operations (TRANSLATION, ROTATION) consume one extra parameter - a number, the index in that array. 
 So you can organize your modifiers to work in world space, actor space, actor's bone space and so on.
 
 [camera_play_track_lookat]
@@ -449,7 +449,7 @@ TBD
 
 [section:additional_notes 5. Additional notes]
 
-[section:disclaimer Implementation disclaimer]
+[section:disclaimer Implementation Disclaimer]
 The following priorities were taken (in declining order):
 
 # Extend standard Lua distribution in non-intrusive way (just using allowed #defines and API)
@@ -463,7 +463,7 @@ It also should work perfectly with commercial Lua implementations (including deb
 A [@http://luaplus.org/ LuaPlus] port would give some speed-up. Implementing it isn't a problem as well.
 [endsect] [/disclaimer]
 
-[section:areas Application areas]
+[section:areas Application Areas]
 
 The LuaCSP framework supposed to be used in:
 
