@@ -275,7 +275,7 @@ It's often useful to define a set of named channels and then pass it around as a
 So, the contract is just a structure definition for a table of channels:
 [import samples/contract.lua]
 [contract_stages]
-Contracts improve code re-use (you can produce as many instances of your interface as
+Contracts improve code re-use (you can produce as many instances of your contract as
 you need) and allow you to increase extensibility (you don't need to
 modify all the function definitions in order to add one more argument).
 Typical example for contracts is user input:
@@ -284,7 +284,88 @@ Typical example for contracts is user input:
 [endsect] [/contracts]
 
 [section:termination Termination]
+Correct termination of parallel systems is sometimes thought to be a difficult problem:
+given a sub-network of processes with arbitrary topology, message
+protocol and synchronisation regime, arrange for it to terminate. The initiative
+to kill the system may come from one or more of the processes themselves and/or
+from one or more points outside (if the network is not a closed system). This
+problem has multiple proposed solutions, but even the poison/resetting approach and
+ultra-short processes don't work well.
+
+[*How not to do it]: Pass a special termination channel everywhere. The problem
+is that every single long lasting operation requires to wait a termination
+signal in parallel to itself (via PAR or ALT). This is unacceptable. As we can see
+from here, termination is non-local effect.
+
+[*How not to do it]: You might try setting a global flag that each process and
+each fundamental operation polls to see if it's time to close down. Main issue
+stays the same as in previous approach. Moreover, an extra problem appears:
+the order of shut-down of the components is very difficult to control.
+
+[*How to do it]: Let's give any process the ability to 'terminate' any child
+processes. Notice, that we should keep processes anonymous (not a first-class
+values) since it was a key language design decision.
+
+Yes, this is not a fully secure feature: this wants child processes
+to be at the mercy of parent (perhaps quite unconnected) process. External
+termination of a sub-network results in deadlock if done wrongly. The pit-fall we
+have to avoid is committing a process to communicate with a terminated
+neighbour. If this were to happen, that communication would never terminate and,
+therefore, the network would never terminate. 
+
+The decision: trade some security for convenience of declaring most common case.
+LuaCSP introduces the notion of termination scope via PARWHILE construct.
+
+PARWHILE syntax is the same as for PAR but semantics is different:
+[import samples/parwhile.lua]
+[parwhile_syntax]
+PAR operation lasts until any of it's child processes lasts, which is very consistent.
+PARWHILE operation lasts as long as [*the process specified first] (main child process) lasts.
+[parwhile_bar]
+In the example above, the function runs for 3+1+5=9 seconds in total. All the
+secondary proccesses start to operate, but are terminated within 1 second. In
+terms of Lua implementation:  if first PARWHILE coroutine successfully exits, all
+the rest PARWHILE coroutines will never be resumed and later will be collected by
+the garbage-collector as any other Lua object.
+
+This enables you to use functions
+with no return (lasting forever, at first glance):
+[parwhile_noreturn]
+The semantics of SLEEP(0) is "sleep until next update (simulation tick)".
+The above proposed approach allows a programmer to 'fill' an unknown amount of
+time with some useful activities while waiting for some special event, which is
+quite natural. 
+
+If a process needs to be closed down, it must be given the
+opportunity to perform whatever termination activities are essential to maintain
+a clean system environment. In most simple case you can put clean-up code right
+before the end of your main child process, i.e.:
+[parwhile_simple_cleanup]
+
+In high-level LuaCSP you don't need to
+worry about clean-up, which is really a low-level task. In LuaCSP you have to
+operate in terms of fundamental operations written either in C++ or
+standard 'immediate' Lua. As a consequence, your fundamental operations are
+responsible for resources clean-up, which is a topic highlighted in this section: 
+[sref manual.embedding.writing_fundamental_operations].
+
 [endsect] [/termination]
+
+[section:swarm Swarms and Go]
+Sometimes it's useful to start a new process in fire-and-forget style (like 'go' command in the Google's Go language).
+However, the termination aspect is still applicable for such processes. LuaCSP introduces the notion of swarm.
+Swarm is a garbage-collectable object, which represents a group of asyncronously started coroutines:
+[import samples/swarm.lua]
+[swarm_example]
+This example spawns four 'go' processes without any waitings. 
+Notice that swarm:MAIN() function call will never return, because it's only purpose is to be terminated with outer PARWHILE construct.
+If that happens, all the swarm coroutines started with swarm:go command are terminated. And of course, swarm processes can
+communicate with outer process network via channels using standard LuaCSP rules.
+[endsect] [/swarm]
+
+[section:misc Miscellaneous Functions]
+TBD
+[endsect] [/misc]
 
 [endsect] [/the_language]
 
@@ -294,12 +375,33 @@ Typical example for contracts is user input:
 TBD
 [endsect] [/evaluation]
 
+[section:patterns Best Programming Practices, Patterns and Idioms]
+TBD
+[endsect] [/patterns]
+
 [endsect] [/advanced]
 
 [section:embedding 4. Embedding and Extending The Language]
 
 [section:writing_fundamental_operations Writing Your Own Fundamental Operations]
-TBD
+LuaCSP provides a C++ abstract class for all fundamental operations called Operation:
+[import samples/operation.h]
+[operation_h_decl]
+Consider the following declaration for your custom SLEEP:
+[operation_h_sleep_decl]
+... and the implementation (don't forget about un-typed to typed code conversions, error handling and reporting):
+[import samples/operation.cpp]
+[operation_cpp_sleep_impl]
+The Work function is called once a simulation tick and it must return one of the following WorkResult::Enum values:
+[operation_h_workresult]
+The final stage. Expose your operation to Lua:
+[operation_cpp_sleep_reg]
+
+If you want to return values from your operation, just override PushResults method
+and push arguments onto provided Lua stack. Overrided PushResults method should return the number of passed arguments.
+Consider dummy example:
+[operation_cpp_push_results]
+
 [endsect] [/writing_fundamental_operations]
 
 [section:api The Application Program Interface]
@@ -314,7 +416,7 @@ TBD
 The following priorities were taken (in declining order):
 
 # Extend standard Lua distribution in non-intrusive way (just using allowed #defines and API)
-# Make LuaCSP to run on every architecture where Lua runs. Minimize the usage of advanced C++ (exceptions, RTTI, templates, STL)
+# Make LuaCSP to run on every architecture where Lua runs. Minimize the usage of complicated C/C++ (exceptions, RTTI, templates, STL, macroses)
 # Keep LuaCSP fast and minimalistic.
 
 Current distribution is based on Lua 5.2. However, it can be easily back-ported to Lua 5.1 since LuaCSP doesn't use any specifics.
@@ -362,6 +464,10 @@ The LuaCSP framework supposed to be used in:
 * [*Q]: How fast is it?
 	* [*A]: LuaCSP is intended to be used in real time systems. Most of the time, all the LuaCSP coroutines will be blocked
 	waiting for fundamental operations to complete. So it's a matter of balance - you can always move computationally heavy code to C++.
+
+* [*Q]: Did you ever hear of Cont Monad?
+	* [*A]: Sure. I heard of delimited continuations and CPS as well. 
+	LuaCSP designed to be a pragmatic tool. It should be easy to use and understand for as many programmers as possible.
 
 [endsect] [/faq]
 

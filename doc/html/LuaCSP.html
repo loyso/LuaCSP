@@ -3,7 +3,8 @@
       </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.the_language">2. The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.origins">Origins. Communicating Sequential
       Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.the_language.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.the_language.fundamentalOperations">Fundamental
       Operations</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.alt">Alt Composition</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.the_language.api_examples">Domain-Specific API
-      Examples</a></span></dt><dt><span class="section"><a href="#manual.the_language.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.the_language.termination">Termination</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">3. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.evaluation">Evaluation Precedence</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
+      Examples</a></span></dt><dt><span class="section"><a href="#manual.the_language.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.the_language.termination">Termination</a></span></dt><dt><span class="section"><a href="#manual.the_language.swarm">Swarms and Go</a></span></dt><dt><span class="section"><a href="#manual.the_language.misc">Miscellaneous Functions</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">3. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.evaluation">Evaluation Precedence</a></span></dt><dt><span class="section"><a href="#manual.advanced.patterns">Best Programming Practices,
+      Patterns and Idioms</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
       Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.additional_notes">5. Additional notes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.additional_notes.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.additional_notes.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
       The world is parallel. If we want to write programs that behave as other objects
       behave in the real world, then these programs will have a concurrent structure.
@@ -581,7 +582,7 @@
 </pre><p>
       </p><p>
         Contracts improve code re-use (you can produce as many instances of your
-        interface as you need) and allow you to increase extensibility (you don't
+        contract as you need) and allow you to increase extensibility (you don't
         need to modify all the function definitions in order to add one more argument).
         Typical example for contracts is user input:
       </p><p>
@@ -610,11 +611,303 @@
 	<span class="identifier">end</span>
 <span class="identifier">end</span>
 </pre><p>
-      </p></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.termination"></a><a class="link" href="#manual.the_language.termination" title="Termination">Termination</a></h3></div></div></div></div></div><div class="section" title="3. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="3. Advanced Topics">3. Advanced Topics</a></h2></div></div></div><div class="section" title="Evaluation Precedence"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.evaluation"></a><a class="link" href="#manual.advanced.evaluation" title="Evaluation Precedence">Evaluation Precedence</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.termination"></a><a class="link" href="#manual.the_language.termination" title="Termination">Termination</a></h3></div></div></div><p>
+        Correct termination of parallel systems is sometimes thought to be a difficult
+        problem: given a sub-network of processes with arbitrary topology, message
+        protocol and synchronisation regime, arrange for it to terminate. The initiative
+        to kill the system may come from one or more of the processes themselves
+        and/or from one or more points outside (if the network is not a closed system).
+        This problem has multiple proposed solutions, but even the poison/resetting
+        approach and ultra-short processes don't work well.
+      </p><p>
+        <span class="bold"><strong>How not to do it</strong></span>: Pass a special termination
+        channel everywhere. The problem is that every single long lasting operation
+        requires to wait a termination signal in parallel to itself (via PAR or ALT).
+        This is unacceptable. As we can see from here, termination is non-local effect.
+      </p><p>
+        <span class="bold"><strong>How not to do it</strong></span>: You might try setting
+        a global flag that each process and each fundamental operation polls to see
+        if it's time to close down. Main issue stays the same as in previous approach.
+        Moreover, an extra problem appears: the order of shut-down of the components
+        is very difficult to control.
+      </p><p>
+        <span class="bold"><strong>How to do it</strong></span>: Let's give any process the
+        ability to 'terminate' any child processes. Notice, that we should keep processes
+        anonymous (not a first-class values) since it was a key language design decision.
+      </p><p>
+        Yes, this is not a fully secure feature: this wants child processes to be
+        at the mercy of parent (perhaps quite unconnected) process. External termination
+        of a sub-network results in deadlock if done wrongly. The pit-fall we have
+        to avoid is committing a process to communicate with a terminated neighbour.
+        If this were to happen, that communication would never terminate and, therefore,
+        the network would never terminate.
+      </p><p>
+        The decision: trade some security for convenience of declaring most common
+        case. LuaCSP introduces the notion of termination scope via PARWHILE construct.
+      </p><p>
+        PARWHILE syntax is the same as for PAR but semantics is different:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">PARWHILE</span><span class="special">(</span>
+	<span class="identifier">function</span><span class="special">()</span>
+		<span class="special">---</span> <span class="identifier">main</span> <span class="identifier">child</span> <span class="identifier">process</span>
+	<span class="identifier">end</span>
+	<span class="special">,</span>
+	<span class="identifier">function</span><span class="special">()</span>
+		<span class="special">---</span> <span class="identifier">child</span> <span class="identifier">process1</span> <span class="special">(</span><span class="identifier">potential</span> <span class="identifier">termination</span> <span class="identifier">victim</span><span class="special">)</span>
+	<span class="identifier">end</span>
+	<span class="special">,</span>
+<span class="special">...</span>
+	<span class="special">,</span>
+	<span class="identifier">function</span><span class="special">()</span>
+		<span class="special">---</span> <span class="identifier">child</span> <span class="identifier">processN</span> <span class="special">(</span><span class="identifier">potential</span> <span class="identifier">termination</span> <span class="identifier">victim</span><span class="special">)</span>
+	<span class="identifier">end</span>
+<span class="special">)</span>
+</pre><p>
+      </p><p>
+        PAR operation lasts until any of it's child processes lasts, which is very
+        consistent. PARWHILE operation lasts as long as <span class="bold"><strong>the
+        process specified first</strong></span> (main child process) lasts.
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">bar</span><span class="special">()</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">3</span><span class="special">)</span>
+	<span class="identifier">PARWHILE</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">1</span><span class="special">)</span> <span class="special">---</span> <span class="identifier">main</span> <span class="identifier">process</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">3</span><span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">4</span><span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+	<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">5</span><span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        In the example above, the function runs for 3+1+5=9 seconds in total. All
+        the secondary proccesses start to operate, but are terminated within 1 second.
+        In terms of Lua implementation: if first PARWHILE coroutine successfully
+        exits, all the rest PARWHILE coroutines will never be resumed and later will
+        be collected by the garbage-collector as any other Lua object.
+      </p><p>
+        This enables you to use functions with no return (lasting forever, at first
+        glance):
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch</span> <span class="special">)</span>
+	<span class="identifier">PARWHILE</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+				<span class="special">...</span>
+				<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">0</span><span class="special">)</span>
+			<span class="identifier">end</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        The semantics of SLEEP(0) is "sleep until next update (simulation tick)".
+        The above proposed approach allows a programmer to 'fill' an unknown amount
+        of time with some useful activities while waiting for some special event,
+        which is quite natural.
+      </p><p>
+        If a process needs to be closed down, it must be given the opportunity to
+        perform whatever termination activities are essential to maintain a clean
+        system environment. In most simple case you can put clean-up code right before
+        the end of your main child process, i.e.:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch</span> <span class="special">)</span>
+	<span class="identifier">PARWHILE</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+			<span class="special">---</span> <span class="identifier">put</span> <span class="identifier">clean</span> <span class="identifier">up</span> <span class="identifier">code</span> <span class="identifier">here</span><span class="special">!!!</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+				<span class="special">...</span>
+				<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">0</span><span class="special">)</span>
+			<span class="identifier">end</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        In high-level LuaCSP you don't need to worry about clean-up, which is really
+        a low-level task. In LuaCSP you have to operate in terms of fundamental operations
+        written either in C++ or standard 'immediate' Lua. As a consequence, your
+        fundamental operations are responsible for resources clean-up, which is a
+        topic highlighted in this section: <a class="xref" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
+      Your Own Fundamental Operations</a>.
+      </p></div><div class="section" title="Swarms and Go"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.swarm"></a><a class="link" href="#manual.the_language.swarm" title="Swarms and Go">Swarms and Go</a></h3></div></div></div><p>
+        Sometimes it's useful to start a new process in fire-and-forget style (like
+        'go' command in the Google's Go language). However, the termination aspect
+        is still applicable for such processes. LuaCSP introduces the notion of swarm.
+        Swarm is a garbage-collectable object, which represents a group of asyncronously
+        started coroutines:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch</span> <span class="special">)</span>
+	<span class="identifier">local</span> <span class="identifier">swarm</span> <span class="special">=</span> <span class="identifier">Swarm</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+
+	<span class="identifier">PARWHILE</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">swarm</span><span class="special">:</span><span class="identifier">MAIN</span><span class="special">()</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">ch2</span> <span class="special">=</span> <span class="identifier">Channel</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+			<span class="identifier">swarm</span><span class="special">:</span><span class="identifier">go</span><span class="special">(</span>
+				<span class="identifier">function</span><span class="special">()</span>
+					<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">10</span><span class="special">)</span>
+				<span class="identifier">end</span><span class="special">,</span>
+				<span class="identifier">function</span><span class="special">()</span>
+					<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">20</span><span class="special">)</span>
+					<span class="identifier">ch2</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+				<span class="identifier">end</span>
+			<span class="special">)</span>
+			<span class="identifier">swarm</span><span class="special">:</span><span class="identifier">go</span><span class="special">(</span>
+				<span class="identifier">function</span><span class="special">()</span>
+					<span class="identifier">SLEEP</span><span class="special">(</span><span class="number">10</span><span class="special">)</span>
+				<span class="identifier">end</span><span class="special">,</span>
+				<span class="identifier">function</span><span class="special">()</span>
+					<span class="identifier">ch2</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">()</span>
+				<span class="identifier">end</span>
+			<span class="special">)</span>
+			<span class="identifier">log</span><span class="special">(</span><span class="string">"finished!\n"</span><span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        This example spawns four 'go' processes without any waitings. Notice that
+        swarm:MAIN() function call will never return, because it's only purpose is
+        to be terminated with outer PARWHILE construct. If that happens, all the
+        swarm coroutines started with swarm:go command are terminated. And of course,
+        swarm processes can communicate with outer process network via channels using
+        standard LuaCSP rules.
+      </p></div><div class="section" title="Miscellaneous Functions"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.misc"></a><a class="link" href="#manual.the_language.misc" title="Miscellaneous Functions">Miscellaneous Functions</a></h3></div></div></div><p>
+        TBD
+      </p></div></div><div class="section" title="3. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="3. Advanced Topics">3. Advanced Topics</a></h2></div></div></div><div class="section" title="Evaluation Precedence"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.evaluation"></a><a class="link" href="#manual.advanced.evaluation" title="Evaluation Precedence">Evaluation Precedence</a></h3></div></div></div><p>
+        TBD
+      </p></div><div class="section" title="Best Programming Practices, Patterns and Idioms"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.patterns"></a><a class="link" href="#manual.advanced.patterns" title="Best Programming Practices, Patterns and Idioms">Best Programming Practices,
+      Patterns and Idioms</a></h3></div></div></div><p>
         TBD
       </p></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing Your Own Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
       Your Own Fundamental Operations</a></h3></div></div></div><p>
-        TBD
+        LuaCSP provides a C++ abstract class for all fundamental operations called
+        Operation:
+      </p><p>
+</p><pre class="programlisting"><span class="keyword">class</span> <span class="identifier">Operation</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+	<span class="keyword">virtual</span> <span class="identifier">WorkResult</span><span class="special">::</span><span class="identifier">Enum</span> <span class="identifier">Work</span><span class="special">(</span> <span class="identifier">Host</span><span class="special">&amp;</span> <span class="identifier">host</span><span class="special">,</span> <span class="identifier">CspTime_t</span> <span class="identifier">dt</span> <span class="special">)</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span>	
+	<span class="keyword">virtual</span> <span class="keyword">int</span> <span class="identifier">PushResults</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">luaStack</span> <span class="special">);</span>
+	<span class="keyword">void</span> <span class="identifier">SetFinished</span><span class="special">(</span> <span class="keyword">bool</span> <span class="identifier">finished</span> <span class="special">);</span>
+<span class="special">...</span>
+
+<span class="keyword">private</span><span class="special">:</span>
+	<span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="identifier">Init</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">args</span><span class="special">,</span> <span class="identifier">InitError</span><span class="special">&amp;</span> <span class="identifier">initError</span> <span class="special">);</span>
+	<span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">Terminate</span><span class="special">(</span> <span class="identifier">Host</span><span class="special">&amp;</span> <span class="identifier">host</span> <span class="special">);</span>
+<span class="special">...</span>
+<span class="special">};</span>
+</pre><p>
+      </p><p>
+        Consider the following declaration for your custom SLEEP:
+      </p><p>
+</p><pre class="programlisting"><span class="keyword">class</span> <span class="identifier">OpSleep</span> <span class="special">:</span> <span class="keyword">public</span> <span class="identifier">Operation</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+	<span class="identifier">OpSleep</span><span class="special">();</span>
+
+<span class="keyword">private</span><span class="special">:</span>
+	<span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="identifier">Init</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">args</span><span class="special">,</span> <span class="identifier">InitError</span><span class="special">&amp;</span> <span class="identifier">initError</span> <span class="special">);</span>
+	<span class="keyword">virtual</span> <span class="identifier">WorkResult</span><span class="special">::</span><span class="identifier">Enum</span> <span class="identifier">Work</span><span class="special">(</span> <span class="identifier">Host</span><span class="special">&amp;</span> <span class="identifier">host</span><span class="special">,</span> <span class="identifier">CspTime_t</span> <span class="identifier">dt</span> <span class="special">);</span>
+
+	<span class="keyword">float</span> <span class="identifier">m_seconds</span><span class="special">;</span>
+<span class="special">};</span>
+</pre><p>
+      </p><p>
+        ... and the implementation (don't forget about un-typed to typed code conversions,
+        error handling and reporting):
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">OpSleep</span><span class="special">::</span><span class="identifier">OpSleep</span><span class="special">()</span>
+	<span class="special">:</span> <span class="identifier">m_seconds</span><span class="special">()</span>
+<span class="special">{</span>
+<span class="special">}</span>
+
+<span class="keyword">bool</span> <span class="identifier">OpSleep</span><span class="special">::</span><span class="identifier">Init</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">args</span><span class="special">,</span> <span class="identifier">InitError</span><span class="special">&amp;</span> <span class="identifier">initError</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="keyword">if</span> <span class="special">(</span> <span class="special">!</span><span class="identifier">args</span><span class="special">[</span><span class="number">1</span><span class="special">].</span><span class="identifier">IsNumber</span><span class="special">()</span> <span class="special">)</span>
+		<span class="keyword">return</span> <span class="identifier">initError</span><span class="special">.</span><span class="identifier">ArgError</span><span class="special">(</span> <span class="number">1</span><span class="special">,</span> <span class="string">"seconds expected"</span> <span class="special">);</span>
+
+	<span class="identifier">m_seconds</span> <span class="special">=</span> <span class="identifier">args</span><span class="special">[</span><span class="number">1</span><span class="special">].</span><span class="identifier">GetNumber</span><span class="special">();</span>
+	<span class="keyword">return</span> <span class="keyword">true</span><span class="special">;</span>
+<span class="special">}</span>
+
+<span class="identifier">WorkResult</span><span class="special">::</span><span class="identifier">Enum</span> <span class="identifier">OpSleep</span><span class="special">::</span><span class="identifier">Work</span><span class="special">(</span> <span class="identifier">Host</span><span class="special">&amp;,</span> <span class="identifier">CspTime_t</span> <span class="identifier">dt</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="identifier">m_seconds</span> <span class="special">-=</span> <span class="identifier">dt</span><span class="special">;</span>
+	<span class="keyword">return</span> <span class="identifier">m_seconds</span> <span class="special">&gt;</span> <span class="number">0</span> <span class="special">?</span> <span class="identifier">WorkResult</span><span class="special">::</span><span class="identifier">YIELD</span> <span class="special">:</span> <span class="identifier">WorkResult</span><span class="special">::</span><span class="identifier">FINISH</span><span class="special">;</span>
+<span class="special">}</span>
+</pre><p>
+      </p><p>
+        The Work function is called once a simulation tick and it must return one
+        of the following WorkResult::Enum values:
+      </p><p>
+</p><pre class="programlisting"><span class="keyword">namespace</span> <span class="identifier">WorkResult</span>
+<span class="special">{</span>
+	<span class="keyword">enum</span> <span class="identifier">Enum</span>
+	<span class="special">{</span>
+		  <span class="identifier">FINISH</span> <span class="special">=</span> <span class="number">0</span> <span class="comment">// return from operation, resume coroutine</span>
+		<span class="special">,</span> <span class="identifier">YIELD</span>	<span class="comment">// do not return for now, continue to work</span>
+	<span class="special">};</span>
+<span class="special">}</span>
+</pre><p>
+      </p><p>
+        The final stage. Expose your operation to Lua:
+      </p><p>
+</p><pre class="programlisting"><span class="keyword">int</span> <span class="identifier">SLEEP</span><span class="special">(</span> <span class="identifier">lua_State</span><span class="special">*</span> <span class="identifier">luaState</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="identifier">OpSleep</span><span class="special">*</span> <span class="identifier">pSleep</span> <span class="special">=</span> <span class="keyword">new</span> <span class="identifier">OpSleep</span><span class="special">();</span>
+	<span class="keyword">return</span> <span class="identifier">pSleep</span><span class="special">-&gt;</span><span class="identifier">DoInit</span><span class="special">(</span> <span class="identifier">luaState</span> <span class="special">);</span>
+<span class="special">}</span>
+
+<span class="keyword">const</span> <span class="identifier">FunctionRegistration</span> <span class="identifier">operationDescriptions</span><span class="special">[]</span> <span class="special">=</span>
+<span class="special">{</span>
+	  <span class="string">"SLEEP"</span><span class="special">,</span> <span class="identifier">SLEEP</span>
+	<span class="special">,</span> <span class="identifier">NULL</span><span class="special">,</span> <span class="identifier">NULL</span>
+<span class="special">};</span>
+
+<span class="keyword">void</span> <span class="identifier">RegisterMyOperations</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaState</span><span class="special">&amp;</span> <span class="identifier">state</span><span class="special">,</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStackValue</span><span class="special">&amp;</span> <span class="identifier">value</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="identifier">RegisterFunctions</span><span class="special">(</span> <span class="identifier">state</span><span class="special">,</span> <span class="identifier">value</span><span class="special">,</span> <span class="identifier">operationDescriptions</span> <span class="special">);</span>
+<span class="special">}</span>
+
+<span class="keyword">void</span> <span class="identifier">UnregisterMyOperations</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaState</span><span class="special">&amp;</span> <span class="identifier">state</span><span class="special">,</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStackValue</span><span class="special">&amp;</span> <span class="identifier">value</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="identifier">UnregisterFunctions</span><span class="special">(</span> <span class="identifier">state</span><span class="special">,</span> <span class="identifier">value</span><span class="special">,</span> <span class="identifier">operationDescriptions</span> <span class="special">);</span>
+<span class="special">}</span>
+</pre><p>
+      </p><p>
+        If you want to return values from your operation, just override PushResults
+        method and push arguments onto provided Lua stack. Overrided PushResults
+        method should return the number of passed arguments. Consider dummy example:
+      </p><p>
+</p><pre class="programlisting"><span class="keyword">int</span> <span class="identifier">OpMyDummyOp</span><span class="special">::</span><span class="identifier">PushResults</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">luaStack</span> <span class="special">)</span>
+<span class="special">{</span>
+	<span class="identifier">luaStack</span><span class="special">.</span><span class="identifier">PushString</span><span class="special">(</span> <span class="string">"hello!"</span> <span class="special">);</span>
+	<span class="identifier">luaStack</span><span class="special">.</span><span class="identifier">PushBoolean</span><span class="special">(</span> <span class="keyword">true</span> <span class="special">);</span>
+	<span class="keyword">return</span> <span class="number">2</span><span class="special">;</span>
+<span class="special">}</span>
+</pre><p>
       </p></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div><p>
         TBD
       </p></div></div><div class="section" title="5. Additional notes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.additional_notes"></a><a class="link" href="#manual.additional_notes" title="5. Additional notes">5. Additional notes</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.additional_notes.disclaimer"></a><a class="link" href="#manual.additional_notes.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
@@ -624,7 +917,7 @@
             #defines and API)
           </li><li class="listitem">
             Make LuaCSP to run on every architecture where Lua runs. Minimize the
-            usage of advanced C++ (exceptions, RTTI, templates, STL)
+            usage of complicated C/C++ (exceptions, RTTI, templates, STL, macroses)
           </li><li class="listitem">
             Keep LuaCSP fast and minimalistic.
           </li></ol></div><p>
@@ -709,6 +1002,13 @@
                 will be blocked waiting for fundamental operations to complete. So
                 it's a matter of balance - you can always move computationally heavy
                 code to C++.
+              </li></ul></div>
+        </li><li class="listitem">
+          <span class="bold"><strong>Q</strong></span>: Did you ever hear of Cont Monad?
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+                <span class="bold"><strong>A</strong></span>: Sure. I heard of delimited continuations
+                and CPS as well. LuaCSP designed to be a pragmatic tool. It should
+                be easy to use and understand for as many programmers as possible.
               </li></ul></div>
         </li></ul></div></div><div class="section" title="7. Development Roadmap"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.roadmap"></a><a class="link" href="#manual.roadmap" title="7. Development Roadmap">7. Development Roadmap</a></h2></div></div></div><p>
       Reacting to user requests is priority number one. Next:
