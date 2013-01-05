@@ -1,6 +1,6 @@
 //[ camera_main
 function camera_main( actor, actor_bone, tollerance_settings, relative_dof_settings )
-	local viewport = Viewport:new( posX, posY, sizeX, sizeY )	
+	local viewport = Viewport:new( 0, 0, 1, 1 )	
 
 	local camera = Camera:new()	
 	viewport.set_camera( camera )
@@ -11,7 +11,7 @@ function camera_main( actor, actor_bone, tollerance_settings, relative_dof_setti
 
 	camera:set_controller( blender )
 
-	blender:set_blend( 0 ) -- 0 means ctrl1 at full strength, 1 - ctrl 2 at full strength.
+	blender:set_blend( 0 ) -- 0 means ctrl1 at full strength, 1 - ctrl2 at full strength.
 	
 	PAR(						
 		function()
@@ -25,8 +25,8 @@ function camera_main( actor, actor_bone, tollerance_settings, relative_dof_setti
 		function()
 			local transition_seconds1 = 5
 			local transition_seconds2 = 3
-			blender:LINEAR_FADE_TO( 1.0, transition_seconds1 ) -- fade to 1 in 5 seconds
-			blender:EXPONENTIAL_FADE_TO( 0.0, transition_seconds2 ) -- fade back to 0 in 3 seconds 
+			blender:LINEAR_FADE_TO( 1.0, transition_seconds1 ) -- fade to 1.0 in 5 seconds
+			blender:EXPONENTIAL_FADE_TO( 0.0, transition_seconds2 ) -- fade back to 0.0 in 3 seconds 
 		end		
 	)
 end

@@ -1,10 +1,10 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>LuaCSP Reference Manual 0.1</title><link rel="stylesheet" href="LuaCSP.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="LuaCSP Reference Manual 0.1"><div class="titlepage"><div><div><h2 class="title"><a name="manual"></a>LuaCSP Reference Manual 0.1</h2></div><div><p class="copyright">Copyright © 2012, 2013 Alexey Baskakov</p></div><div><div class="legalnotice" title="Legal Notice"><a name="manual.legal"></a><p>
         Distributed under GNU General Public License (GPL), Version 2.0.
-      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts">2. Basic Concepts</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.origins">Origins. Communicating
-      Sequential Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.fundamentalOperations">Fundamental
-      Operations</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.alt">Alt Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.api_examples">Domain-specific
-        API Examples</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.basicConcepts.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.termination">Termination</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
-      Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
+      </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.the_language">2. The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.origins">Origins. Communicating Sequential
+      Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.the_language.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.the_language.fundamentalOperations">Fundamental
+      Operations</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.the_language.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.the_language.composition.alt">Alt Composition</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.the_language.api_examples">Domain-Specific API
+      Examples</a></span></dt><dt><span class="section"><a href="#manual.the_language.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.the_language.termination">Termination</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">3. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.evaluation">Evaluation Precedence</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
+      Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.additional_notes">5. Additional notes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.additional_notes.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.additional_notes.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
       The world is parallel. If we want to write programs that behave as other objects
       behave in the real world, then these programs will have a concurrent structure.
       Moreover, the structure must be executable and debuggable. A LuaCSP program
@@ -38,8 +38,8 @@
       and so on, so that programs you write will be easy to understand for other
       LuaCSP programmers. This document gives tips for writing clear, idiomatic LuaCSP
       code.
-    </p></div><div class="section" title="2. Basic Concepts"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.basicConcepts"></a><a class="link" href="#manual.basicConcepts" title="2. Basic Concepts">2. Basic Concepts</a></h2></div></div></div><div class="section" title="Origins. Communicating Sequential Processes (CSP)"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.origins"></a><a class="link" href="#manual.basicConcepts.origins" title="Origins. Communicating Sequential Processes (CSP)">Origins. Communicating
-      Sequential Processes (CSP)</a></h3></div></div></div><p>
+    </p></div><div class="section" title="2. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.the_language"></a><a class="link" href="#manual.the_language" title="2. The Language">2. The Language</a></h2></div></div></div><div class="section" title="Origins. Communicating Sequential Processes (CSP)"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.origins"></a><a class="link" href="#manual.the_language.origins" title="Origins. Communicating Sequential Processes (CSP)">Origins. Communicating Sequential
+      Processes (CSP)</a></h3></div></div></div><p>
         Concurrency and multi-threaded programming have a reputation for difficulty.
         The problem is due partly to complex designs such as proto threads and partly
         to overemphasis on low-level details such as mutexes, condition variables,
@@ -58,7 +58,7 @@
         primitives. Now run another such instance. It needs no synchronization as
         well. Now let those two communicate via channel. If the communication is
         the synchronizer, there's still no need for other synchronization.
-      </p></div><div class="section" title="Channels"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.channels"></a><a class="link" href="#manual.basicConcepts.channels" title="Channels">Channels</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Channels"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.channels"></a><a class="link" href="#manual.the_language.channels" title="Channels">Channels</a></h3></div></div></div><p>
         In LuaCSP, a program is a network of processes, which are connected using
         channels.
       </p><p>
@@ -111,7 +111,7 @@
         synchronised "wires". When one process communicates on a channel,
         it will block until the other party engages in the communication. At that
         moment, the data is transferred and both processes continue.
-      </p></div><div class="section" title="Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.fundamentalOperations"></a><a class="link" href="#manual.basicConcepts.fundamentalOperations" title="Fundamental Operations">Fundamental
+      </p></div><div class="section" title="Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.fundamentalOperations"></a><a class="link" href="#manual.the_language.fundamentalOperations" title="Fundamental Operations">Fundamental
       Operations</a></h3></div></div></div><p>
         LuaCSP includes Lua as a subset. It means that statements and expressions
         work the same way. In addition, LuaCSP uses a notion of 'fundamental operations'
@@ -140,10 +140,10 @@
         below:
       </p><p>
         <a class="ulink" href="images/csp_framework_layers.png" target="_top"><span class="inlinemediaobject"><img src="images/csp_framework_layers_small.png" alt="csp_framework_layers_small"></span></a>
-      </p></div><div class="section" title="Composition of Processes"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.composition"></a><a class="link" href="#manual.basicConcepts.composition" title="Composition of Processes">Composition of Processes</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Composition of Processes"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.composition"></a><a class="link" href="#manual.the_language.composition" title="Composition of Processes">Composition of Processes</a></h3></div></div></div><p>
         The IN and OUT processes aren't much use on their own, so several ways of
         putting processes together are provided.
-      </p><div class="section" title="Sequential Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.seq"></a><a class="link" href="#manual.basicConcepts.composition.seq" title="Sequential Composition">Sequential Composition</a></h4></div></div></div><p>
+      </p><div class="section" title="Sequential Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.the_language.composition.seq"></a><a class="link" href="#manual.the_language.composition.seq" title="Sequential Composition">Sequential Composition</a></h4></div></div></div><p>
           Sequential composition of proccesses is the basic one. LuaCSP leverages
           Lua's default semantics to run expressions for that, so all your processes
           will be executed from top to bottom as in standard Lua:
@@ -167,7 +167,7 @@
 	<span class="identifier">end</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p></div><div class="section" title="Parallel Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.par"></a><a class="link" href="#manual.basicConcepts.composition.par" title="Parallel Composition">Parallel Composition</a></h4></div></div></div><p>
+        </p></div><div class="section" title="Parallel Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.the_language.composition.par"></a><a class="link" href="#manual.the_language.composition.par" title="Parallel Composition">Parallel Composition</a></h4></div></div></div><p>
           Being a parallel language, LuaCSP has the PAR process constructor. This
           arranges for the processes inside it to be executed in parallel, for example:
         </p><p>
@@ -262,7 +262,7 @@
 	<span class="special">)</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p></div><div class="section" title="Alt Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.alt"></a><a class="link" href="#manual.basicConcepts.composition.alt" title="Alt Composition">Alt Composition</a></h4></div></div></div><p>
+        </p></div><div class="section" title="Alt Composition"><div class="titlepage"><div><div><h4 class="title"><a name="manual.the_language.composition.alt"></a><a class="link" href="#manual.the_language.composition.alt" title="Alt Composition">Alt Composition</a></h4></div></div></div><p>
           There is also an ALTernative (external/internal choice) for constructing
           processes. Alting is perhaps one of the most useful features of the LuaCSP
           language (and CSP in general). It allows a process to wait for multiple
@@ -364,14 +364,14 @@
         Of course, any process constructors can be nested, i.e. PAR or ALT can contain
         any number of other PARs and ALTs as sub processes (directly or indirectly
         via functions).
-      </p><div class="section" title="Domain-specific API Examples"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.api_examples"></a><a class="link" href="#manual.basicConcepts.composition.api_examples" title="Domain-specific API Examples">Domain-specific
-        API Examples</a></h4></div></div></div><p>
-          The most simple demonstration for LuaCSP domain specific API is sound playback.
-          In the following example, the PLAY function lasts as long, as sound lasts.
-          This decouples a composition structure from actual duration of participating
-          sound files and allows those files to be edited by non-programmers (sound
-          engineers) without corrupting the logic for the dialog:
-        </p><p>
+      </p></div><div class="section" title="Domain-Specific API Examples"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.api_examples"></a><a class="link" href="#manual.the_language.api_examples" title="Domain-Specific API Examples">Domain-Specific API
+      Examples</a></h3></div></div></div><p>
+        The most simple demonstration for LuaCSP domain specific API is sound playback.
+        In the following example, the PLAY function lasts as long, as sound lasts.
+        This decouples a composition structure from actual duration of participating
+        sound files and allows those files to be edited by non-programmers (sound
+        engineers) without corrupting the logic for the dialog:
+      </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">dialog</span><span class="special">(</span> <span class="identifier">sound_bank</span><span class="special">,</span> <span class="identifier">variant</span> <span class="special">)</span>
 	<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">speech1</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
 	<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">speech2</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
@@ -384,9 +384,9 @@
 	<span class="identifier">end</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p><p>
-          Another simple example is mixing audio tracks for your multimedia introduction:
-        </p><p>
+      </p><p>
+        Another simple example is mixing audio tracks for your multimedia introduction:
+      </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">intro_sound</span><span class="special">(</span> <span class="identifier">sound_bank</span> <span class="special">)</span>
 	<span class="identifier">PAR</span><span class="special">(</span>
 		<span class="identifier">function</span><span class="special">()</span>
@@ -405,10 +405,14 @@
 	<span class="special">)</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p><p>
-          Your domain-specific API can include specific channels on object to listen
-          the events:
-        </p><p>
+      </p><p>
+        LuaCSP language can be used not only at high level, but at the level just
+        above your FSMs. The following animation examples demonstrate that.
+      </p><p>
+        Your domain-specific API can include specific channels on object to listen
+        the events. Assume that actor is an FSM which manages animations on some
+        3D mesh:
+      </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">game</span><span class="special">(</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">sound_bank</span> <span class="special">)</span>
 	<span class="identifier">PAR</span><span class="special">(</span>
 		<span class="identifier">function</span><span class="special">()</span>
@@ -433,17 +437,16 @@
 	<span class="special">)</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p><p>
-          The more advanced technique is to use composition of objects and composition
-          of time-spreaded operations on those objects as two orthogonal concepts
-          helping each other. In cinematic cameras API for your virtual world you
-          can create a hierarchy of camera controllers and blenders. Then, you can
-          operate controller's parameters in time (mixing, blending, fade in, fade
-          out). Camera track is external animation for all the camera parameters,
-          created by non-programmer:
-        </p><p>
+      </p><p>
+        The more advanced technique is to use composition of objects and composition
+        of time-spreaded operations on those objects as two orthogonal concepts helping
+        each other. In cinematic cameras API for your virtual world you can create
+        a hierarchy of camera controllers and blenders. Then, you can operate controller's
+        parameters in time (mixing, blending, fade in, fade out). Camera track is
+        external animation for all the camera parameters, created by non-programmer:
+      </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">camera_main</span><span class="special">(</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span><span class="special">,</span> <span class="identifier">relative_dof_settings</span> <span class="special">)</span>
-	<span class="identifier">local</span> <span class="identifier">viewport</span> <span class="special">=</span> <span class="identifier">Viewport</span><span class="special">:</span><span class="keyword">new</span><span class="special">(</span> <span class="identifier">posX</span><span class="special">,</span> <span class="identifier">posY</span><span class="special">,</span> <span class="identifier">sizeX</span><span class="special">,</span> <span class="identifier">sizeY</span> <span class="special">)</span>	
+	<span class="identifier">local</span> <span class="identifier">viewport</span> <span class="special">=</span> <span class="identifier">Viewport</span><span class="special">:</span><span class="keyword">new</span><span class="special">(</span> <span class="number">0</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">,</span> <span class="number">1</span> <span class="special">)</span>	
 
 	<span class="identifier">local</span> <span class="identifier">camera</span> <span class="special">=</span> <span class="identifier">Camera</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>	
 	<span class="identifier">viewport</span><span class="special">.</span><span class="identifier">set_camera</span><span class="special">(</span> <span class="identifier">camera</span> <span class="special">)</span>
@@ -454,7 +457,7 @@
 
 	<span class="identifier">camera</span><span class="special">:</span><span class="identifier">set_controller</span><span class="special">(</span> <span class="identifier">blender</span> <span class="special">)</span>
 
-	<span class="identifier">blender</span><span class="special">:</span><span class="identifier">set_blend</span><span class="special">(</span> <span class="number">0</span> <span class="special">)</span> <span class="special">--</span> <span class="number">0</span> <span class="identifier">means</span> <span class="identifier">ctrl1</span> <span class="identifier">at</span> <span class="identifier">full</span> <span class="identifier">strength</span><span class="special">,</span> <span class="number">1</span> <span class="special">-</span> <span class="identifier">ctrl</span> <span class="number">2</span> <span class="identifier">at</span> <span class="identifier">full</span> <span class="identifier">strength</span><span class="special">.</span>
+	<span class="identifier">blender</span><span class="special">:</span><span class="identifier">set_blend</span><span class="special">(</span> <span class="number">0</span> <span class="special">)</span> <span class="special">--</span> <span class="number">0</span> <span class="identifier">means</span> <span class="identifier">ctrl1</span> <span class="identifier">at</span> <span class="identifier">full</span> <span class="identifier">strength</span><span class="special">,</span> <span class="number">1</span> <span class="special">-</span> <span class="identifier">ctrl2</span> <span class="identifier">at</span> <span class="identifier">full</span> <span class="identifier">strength</span><span class="special">.</span>
 	
 	<span class="identifier">PAR</span><span class="special">(</span>						
 		<span class="identifier">function</span><span class="special">()</span>
@@ -468,20 +471,20 @@
 		<span class="identifier">function</span><span class="special">()</span>
 			<span class="identifier">local</span> <span class="identifier">transition_seconds1</span> <span class="special">=</span> <span class="number">5</span>
 			<span class="identifier">local</span> <span class="identifier">transition_seconds2</span> <span class="special">=</span> <span class="number">3</span>
-			<span class="identifier">blender</span><span class="special">:</span><span class="identifier">LINEAR_FADE_TO</span><span class="special">(</span> <span class="number">1.0</span><span class="special">,</span> <span class="identifier">transition_seconds1</span> <span class="special">)</span> <span class="special">--</span> <span class="identifier">fade</span> <span class="identifier">to</span> <span class="number">1</span> <span class="identifier">in</span> <span class="number">5</span> <span class="identifier">seconds</span>
-			<span class="identifier">blender</span><span class="special">:</span><span class="identifier">EXPONENTIAL_FADE_TO</span><span class="special">(</span> <span class="number">0.0</span><span class="special">,</span> <span class="identifier">transition_seconds2</span> <span class="special">)</span> <span class="special">--</span> <span class="identifier">fade</span> <span class="identifier">back</span> <span class="identifier">to</span> <span class="number">0</span> <span class="identifier">in</span> <span class="number">3</span> <span class="identifier">seconds</span>
+			<span class="identifier">blender</span><span class="special">:</span><span class="identifier">LINEAR_FADE_TO</span><span class="special">(</span> <span class="number">1.0</span><span class="special">,</span> <span class="identifier">transition_seconds1</span> <span class="special">)</span> <span class="special">--</span> <span class="identifier">fade</span> <span class="identifier">to</span> <span class="number">1.0</span> <span class="identifier">in</span> <span class="number">5</span> <span class="identifier">seconds</span>
+			<span class="identifier">blender</span><span class="special">:</span><span class="identifier">EXPONENTIAL_FADE_TO</span><span class="special">(</span> <span class="number">0.0</span><span class="special">,</span> <span class="identifier">transition_seconds2</span> <span class="special">)</span> <span class="special">--</span> <span class="identifier">fade</span> <span class="identifier">back</span> <span class="identifier">to</span> <span class="number">0.0</span> <span class="identifier">in</span> <span class="number">3</span> <span class="identifier">seconds</span>
 		<span class="identifier">end</span>		
 	<span class="special">)</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p><p>
-          Blender is a controller itself. So you can stick blenders and controllers
-          into each other, creating a hierarchy. CameraHermiteBlend, CameraBaryCentricBlend,
-          CameraCatmullRomBlend are possible options.
-        </p><p>
-          In the example above, camera_play_track and camera_play_track_lookat could
-          be implemented as follows:
-        </p><p>
+      </p><p>
+        Blender is a controller itself. So you can stick blenders and controllers
+        into each other, creating a hierarchy. CameraHermiteBlend, CameraBaryCentricBlend,
+        CameraCatmullRomBlend are possible options.
+      </p><p>
+        In the example above, camera_play_track and camera_play_track_lookat could
+        be implemented as follows:
+      </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">camera_play_track</span><span class="special">(</span> <span class="identifier">ctrl</span><span class="special">,</span> <span class="identifier">track</span> <span class="special">)</span>
 	<span class="identifier">PAR</span><span class="special">(</span>
 		<span class="identifier">function</span><span class="special">()</span>
@@ -502,11 +505,15 @@
 	<span class="special">)</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p><p>
-          The idea is that you can play multiple tracks on controller but apply or
-          mix only certain parameters from those tracks (position, rotation, depth
-          of field (DOF), field of view (FOV) etc)
-        </p><p>
+      </p><p>
+        The idea is that you can play multiple tracks on controller but apply or
+        mix only certain parameters from those tracks (position, rotation, depth
+        of field - DOF, field of view - FOV, etc) Each controller has an array of
+        3d matrices inside to support a hierarchy of relative geometric transformations.
+        Coordinates-related operations (TRANSLATION, ROTATION) consume one extra
+        parameter - a number, the index in that array. So you can organize your modifiers
+        to work in world space, actor space, actor's bone space and so on.
+      </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">camera_play_track_lookat</span><span class="special">(</span> <span class="identifier">ctrl</span><span class="special">,</span> <span class="identifier">track</span><span class="special">,</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span><span class="special">,</span> <span class="identifier">relative_dof_settings</span> <span class="special">)</span>
 	<span class="identifier">PAR</span><span class="special">(</span>						
 		<span class="identifier">function</span><span class="special">()</span>
@@ -527,8 +534,90 @@
 	<span class="special">)</span>
 <span class="identifier">end</span>
 </pre><p>
-        </p></div></div><div class="section" title="Contracts"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.contracts"></a><a class="link" href="#manual.basicConcepts.contracts" title="Contracts">Contracts</a></h3></div></div></div></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.termination"></a><a class="link" href="#manual.basicConcepts.termination" title="Termination">Termination</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.theLanguage"></a><a class="link" href="#manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing Your Own Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
-      Your Own Fundamental Operations</a></h3></div></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.disclaimer"></a><a class="link" href="#manual.advanced.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
+      </p><p>
+        Here, in addition to camera position taken from track, ROTATION_TO_ACTOR
+        and DOF_TO_ACTOR operations make camera controller oriented at specified
+        actor. Orientation and DOF from track are ignored. Controller's DOF is set
+        to focus at specified actor's bone.
+      </p></div><div class="section" title="Contracts"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.contracts"></a><a class="link" href="#manual.the_language.contracts" title="Contracts">Contracts</a></h3></div></div></div><p>
+        Channels provide a mechanism for implementing the contract between two different
+        pieces of code and also a way to synchronize them. You can think about contract
+        as a communication interface. It's often useful to define a set of named
+        channels and then pass it around as a single argument. So, the contract is
+        just a structure definition for a table of channels:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">Stages</span> <span class="special">=</span> <span class="identifier">Contract</span><span class="special">:</span><span class="identifier">table</span><span class="special">()</span>
+<span class="identifier">Stages</span><span class="special">.</span><span class="identifier">stage1</span> <span class="special">=</span> <span class="identifier">Channel</span>
+<span class="identifier">Stages</span><span class="special">.</span><span class="identifier">stage2</span> <span class="special">=</span> <span class="identifier">Channel</span>
+<span class="identifier">Stages</span><span class="special">.</span><span class="identifier">stage3</span> <span class="special">=</span> <span class="identifier">Channel</span> <span class="special">--</span> <span class="number">3</span> <span class="identifier">messages</span>
+
+<span class="identifier">function</span> <span class="identifier">process1</span><span class="special">(</span> <span class="identifier">contract</span> <span class="special">)</span>
+	<span class="identifier">contract</span><span class="special">.</span><span class="identifier">stage1</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+	<span class="identifier">contract</span><span class="special">.</span><span class="identifier">stage2</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+	<span class="keyword">for</span> <span class="identifier">i</span><span class="special">=</span><span class="number">1</span><span class="special">,</span><span class="number">3</span> <span class="keyword">do</span>
+		<span class="identifier">contract</span><span class="special">.</span><span class="identifier">stage3</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+	<span class="identifier">end</span>
+<span class="identifier">end</span>
+
+<span class="identifier">function</span> <span class="identifier">process2</span><span class="special">(</span> <span class="identifier">contract</span> <span class="special">)</span>
+	<span class="identifier">contract</span><span class="special">.</span><span class="identifier">stage1</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">()</span>
+	<span class="identifier">contract</span><span class="special">.</span><span class="identifier">stage2</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">()</span>
+	<span class="keyword">for</span> <span class="identifier">i</span><span class="special">=</span><span class="number">1</span><span class="special">,</span><span class="number">3</span> <span class="keyword">do</span>
+		<span class="identifier">contract</span><span class="special">.</span><span class="identifier">stage3</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">()</span>
+	<span class="identifier">end</span>
+<span class="identifier">end</span>
+
+<span class="identifier">function</span> <span class="identifier">start</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">contract</span> <span class="special">=</span> <span class="identifier">Stages</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span> <span class="special">--</span> <span class="identifier">spawn</span> <span class="identifier">channels</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">process1</span><span class="special">(</span> <span class="identifier">contract</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">process2</span><span class="special">(</span> <span class="identifier">contract</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        Contracts improve code re-use (you can produce as many instances of your
+        interface as you need) and allow you to increase extensibility (you don't
+        need to modify all the function definitions in order to add one more argument).
+        Typical example for contracts is user input:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">UserInput</span> <span class="special">=</span> <span class="identifier">Contract</span><span class="special">:</span><span class="identifier">table</span><span class="special">()</span>
+<span class="identifier">UserInput</span><span class="special">.</span><span class="identifier">axis</span> 		<span class="special">=</span> <span class="identifier">Gamepad</span><span class="special">.</span><span class="identifier">Channels</span><span class="special">.</span><span class="identifier">axis</span>
+<span class="identifier">UserInput</span><span class="special">.</span><span class="identifier">buttons</span> 	<span class="special">=</span> <span class="identifier">Gamepad</span><span class="special">.</span><span class="identifier">Channels</span><span class="special">.</span><span class="identifier">buttons</span>
+<span class="identifier">UserInput</span><span class="special">.</span><span class="identifier">dpad</span> 		<span class="special">=</span> <span class="identifier">Gamepad</span><span class="special">.</span><span class="identifier">Channels</span><span class="special">.</span><span class="identifier">dpad</span>
+
+<span class="identifier">function</span> <span class="identifier">processInput</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">ui</span> <span class="special">=</span> <span class="identifier">UserInput</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">processInput</span> <span class="special">=</span> <span class="keyword">true</span>
+	<span class="keyword">while</span> <span class="identifier">processInput</span> <span class="keyword">do</span>
+		<span class="identifier">ALT</span><span class="special">(</span>
+			<span class="identifier">ui</span><span class="special">.</span><span class="identifier">axis</span><span class="special">,</span> <span class="identifier">function</span><span class="special">(</span> <span class="identifier">code</span><span class="special">,</span> <span class="identifier">filtered_value</span><span class="special">,</span> <span class="identifier">raw_value</span> <span class="special">)</span>
+				<span class="identifier">log</span><span class="special">(</span> <span class="string">"axis:"</span><span class="special">,</span> <span class="identifier">code</span><span class="special">,</span> <span class="identifier">filtered_value</span><span class="special">,</span> <span class="identifier">raw_value</span><span class="special">,</span> <span class="string">"\n"</span> <span class="special">)</span>
+			<span class="identifier">end</span>
+			<span class="special">,</span>
+			<span class="identifier">ui</span><span class="special">.</span><span class="identifier">buttons</span><span class="special">,</span> <span class="identifier">function</span><span class="special">(</span> <span class="identifier">code</span><span class="special">,</span> <span class="identifier">state</span> <span class="special">)</span>
+				<span class="identifier">log</span><span class="special">(</span> <span class="string">"buttons:"</span><span class="special">,</span> <span class="identifier">code</span><span class="special">,</span> <span class="identifier">state</span><span class="special">,</span> <span class="string">"\n"</span> <span class="special">)</span>
+			<span class="identifier">end</span>
+			<span class="special">,</span>
+			<span class="identifier">ui</span><span class="special">.</span><span class="identifier">dpad</span><span class="special">,</span> <span class="identifier">function</span><span class="special">(</span> <span class="identifier">code</span><span class="special">,</span> <span class="identifier">state</span> <span class="special">)</span>
+				<span class="identifier">log</span><span class="special">(</span> <span class="string">"dpad:"</span><span class="special">,</span> <span class="identifier">code</span><span class="special">,</span> <span class="identifier">state</span><span class="special">,</span> <span class="string">"\n"</span> <span class="special">)</span>
+			<span class="identifier">end</span>
+		<span class="special">)</span>
+	<span class="identifier">end</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.the_language.termination"></a><a class="link" href="#manual.the_language.termination" title="Termination">Termination</a></h3></div></div></div></div></div><div class="section" title="3. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="3. Advanced Topics">3. Advanced Topics</a></h2></div></div></div><div class="section" title="Evaluation Precedence"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.evaluation"></a><a class="link" href="#manual.advanced.evaluation" title="Evaluation Precedence">Evaluation Precedence</a></h3></div></div></div><p>
+        TBD
+      </p></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing Your Own Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
+      Your Own Fundamental Operations</a></h3></div></div></div><p>
+        TBD
+      </p></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div><p>
+        TBD
+      </p></div></div><div class="section" title="5. Additional notes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.additional_notes"></a><a class="link" href="#manual.additional_notes" title="5. Additional notes">5. Additional notes</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.additional_notes.disclaimer"></a><a class="link" href="#manual.additional_notes.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
         The following priorities were taken (in declining order):
       </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
             Extend standard Lua distribution in non-intrusive way (just using allowed
@@ -548,7 +637,7 @@
       </p><p>
         A <a class="ulink" href="http://luaplus.org/" target="_top">LuaPlus</a> port would give some speed-up.
         Implementing it isn't a problem as well.
-      </p></div><div class="section" title="Application areas"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.areas"></a><a class="link" href="#manual.advanced.areas" title="Application areas">Application areas</a></h3></div></div></div><p>
+      </p></div><div class="section" title="Application areas"><div class="titlepage"><div><div><h3 class="title"><a name="manual.additional_notes.areas"></a><a class="link" href="#manual.additional_notes.areas" title="Application areas">Application areas</a></h3></div></div></div><p>
         The LuaCSP framework supposed to be used in:
       </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Video Games Development
@@ -632,7 +721,8 @@
         </li><li class="listitem">
           Make it fully test-driven.
         </li><li class="listitem">
-          Implement extra language features.
+          Implement extra language features (pluto-like serialization, google-go
+          like FIFO for multiple producers/consumers on one channel)
         </li><li class="listitem">
           Perform obvious optimizations (no heap allocs, memory pools, variants everywhere
           etc)
