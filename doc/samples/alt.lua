@@ -37,8 +37,8 @@ function foo( ch )
 			--- timeout of 100 seconds expired!
 		end
 		,
-		ch, function()
-			local v = ch:IN()
+		ch, function( v )
+			log( "v=", v )
 		end
 	)
 end
@@ -47,8 +47,7 @@ end
 //[ alt_nil
 function foo( ch1, ch2 )
 	ALT(
-		ch1, function()
-			local v = ch1:IN()
+		ch1, function( v )
 			ch2:OUT( v )
 		end
 		,

@@ -2,8 +2,8 @@
         Distributed under GNU General Public License (GPL), Version 2.0.
       </p></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#manual.introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts">2. Basic Concepts</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.origins">Origins. Communicating
       Sequential Processes (CSP)</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.channels">Channels</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.fundamentalOperations">Fundamental
-      Operations</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.alt">Alt Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.api_examples">API
-        examples</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.basicConcepts.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.termination">Termination</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
+      Operations</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition">Composition of Processes</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.basicConcepts.composition.seq">Sequential Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.par">Parallel Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.alt">Alt Composition</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.composition.api_examples">Domain-specific
+        API Examples</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.basicConcepts.contracts">Contracts</a></span></dt><dt><span class="section"><a href="#manual.basicConcepts.termination">Termination</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.theLanguage">3. The Language</a></span></dt><dt><span class="section"><a href="#manual.embedding">4. Embedding and Extending The Language</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.embedding.writing_fundamental_operations">Writing
       Your Own Fundamental Operations</a></span></dt><dt><span class="section"><a href="#manual.embedding.api">The Application Program Interface</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.advanced">5. Advanced Topics</a></span></dt><dd><dl><dt><span class="section"><a href="#manual.advanced.disclaimer">Implementation disclaimer</a></span></dt><dt><span class="section"><a href="#manual.advanced.areas">Application areas</a></span></dt></dl></dd><dt><span class="section"><a href="#manual.faq">6. Frequently Asked Questions</a></span></dt><dt><span class="section"><a href="#manual.roadmap">7. Development Roadmap</a></span></dt></dl></div><div class="section" title="1. Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.introduction"></a><a class="link" href="#manual.introduction" title="1. Introduction">1. Introduction</a></h2></div></div></div><p>
       The world is parallel. If we want to write programs that behave as other objects
       behave in the real world, then these programs will have a concurrent structure.
@@ -325,8 +325,8 @@
 			<span class="special">---</span> <span class="identifier">timeout</span> <span class="identifier">of</span> <span class="number">100</span> <span class="identifier">seconds</span> <span class="identifier">expired</span><span class="special">!</span>
 		<span class="identifier">end</span>
 		<span class="special">,</span>
-		<span class="identifier">ch</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
-			<span class="identifier">local</span> <span class="identifier">v</span> <span class="special">=</span> <span class="identifier">ch</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">ch</span><span class="special">,</span> <span class="identifier">function</span><span class="special">(</span> <span class="identifier">v</span> <span class="special">)</span>
+			<span class="identifier">log</span><span class="special">(</span> <span class="string">"v="</span><span class="special">,</span> <span class="identifier">v</span> <span class="special">)</span>
 		<span class="identifier">end</span>
 	<span class="special">)</span>
 <span class="identifier">end</span>
@@ -341,8 +341,7 @@
         </p><p>
 </p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">foo</span><span class="special">(</span> <span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">ch2</span> <span class="special">)</span>
 	<span class="identifier">ALT</span><span class="special">(</span>
-		<span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
-			<span class="identifier">local</span> <span class="identifier">v</span> <span class="special">=</span> <span class="identifier">ch1</span><span class="special">:</span><span class="identifier">IN</span><span class="special">()</span>
+		<span class="identifier">ch1</span><span class="special">,</span> <span class="identifier">function</span><span class="special">(</span> <span class="identifier">v</span> <span class="special">)</span>
 			<span class="identifier">ch2</span><span class="special">:</span><span class="identifier">OUT</span><span class="special">(</span> <span class="identifier">v</span> <span class="special">)</span>
 		<span class="identifier">end</span>
 		<span class="special">,</span>
@@ -365,8 +364,170 @@
         Of course, any process constructors can be nested, i.e. PAR or ALT can contain
         any number of other PARs and ALTs as sub processes (directly or indirectly
         via functions).
-      </p><div class="section" title="API examples"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.api_examples"></a><a class="link" href="#manual.basicConcepts.composition.api_examples" title="API examples">API
-        examples</a></h4></div></div></div></div></div><div class="section" title="Contracts"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.contracts"></a><a class="link" href="#manual.basicConcepts.contracts" title="Contracts">Contracts</a></h3></div></div></div></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.termination"></a><a class="link" href="#manual.basicConcepts.termination" title="Termination">Termination</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.theLanguage"></a><a class="link" href="#manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing Your Own Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
+      </p><div class="section" title="Domain-specific API Examples"><div class="titlepage"><div><div><h4 class="title"><a name="manual.basicConcepts.composition.api_examples"></a><a class="link" href="#manual.basicConcepts.composition.api_examples" title="Domain-specific API Examples">Domain-specific
+        API Examples</a></h4></div></div></div><p>
+          The most simple demonstration for LuaCSP domain specific API is sound playback.
+          In the following example, the PLAY function lasts as long, as sound lasts.
+          This decouples a composition structure from actual duration of participating
+          sound files and allows those files to be edited by non-programmers (sound
+          engineers) without corrupting the logic for the dialog:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">dialog</span><span class="special">(</span> <span class="identifier">sound_bank</span><span class="special">,</span> <span class="identifier">variant</span> <span class="special">)</span>
+	<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">speech1</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+	<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">speech2</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+	<span class="keyword">if</span> <span class="identifier">variant</span> <span class="identifier">then</span>
+		<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">speech3A</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+	<span class="keyword">else</span>
+		<span class="keyword">for</span> <span class="identifier">i</span><span class="special">=</span><span class="number">1</span><span class="special">,</span><span class="number">3</span> <span class="keyword">do</span>
+			<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">speech3B</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+		<span class="identifier">end</span>
+	<span class="identifier">end</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          Another simple example is mixing audio tracks for your multimedia introduction:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">intro_sound</span><span class="special">(</span> <span class="identifier">sound_bank</span> <span class="special">)</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">crowd</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">comment1</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+			<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">comment2</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">announcement1</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+			<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">announcement2</span><span class="special">:</span><span class="identifier">PLAY</span><span class="special">()</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          Your domain-specific API can include specific channels on object to listen
+          the events:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">game</span><span class="special">(</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">sound_bank</span> <span class="special">)</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">actor</span><span class="special">:</span><span class="identifier">PLAY_ANIMATION</span><span class="special">(</span><span class="string">"run"</span><span class="special">)</span>
+		<span class="identifier">end</span>
+		<span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">step</span> <span class="special">=</span> <span class="identifier">actor</span><span class="special">:</span><span class="identifier">Channel</span><span class="special">(</span><span class="string">"step"</span><span class="special">)</span>
+			<span class="identifier">local</span> <span class="identifier">heartbeat</span> <span class="special">=</span> <span class="identifier">actor</span><span class="special">:</span><span class="identifier">Channel</span><span class="special">(</span><span class="string">"heartbeat"</span><span class="special">)</span>
+			<span class="keyword">while</span> <span class="keyword">true</span> <span class="keyword">do</span>
+				<span class="identifier">ALT</span><span class="special">(</span>
+					<span class="identifier">step</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+						<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">running</span><span class="special">.</span><span class="identifier">step</span><span class="special">:</span><span class="identifier">play_and_forget</span><span class="special">()</span>
+					<span class="identifier">end</span>
+					<span class="special">,</span>
+					<span class="identifier">heartbeat</span><span class="special">,</span> <span class="identifier">function</span><span class="special">()</span>
+						<span class="identifier">sound_bank</span><span class="special">.</span><span class="identifier">running</span><span class="special">.</span><span class="identifier">heartbeat</span><span class="special">:</span><span class="identifier">play_and_forget</span><span class="special">()</span>
+					<span class="identifier">end</span>
+				<span class="special">)</span>
+			<span class="identifier">end</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          The more advanced technique is to use composition of objects and composition
+          of time-spreaded operations on those objects as two orthogonal concepts
+          helping each other. In cinematic cameras API for your virtual world you
+          can create a hierarchy of camera controllers and blenders. Then, you can
+          operate controller's parameters in time (mixing, blending, fade in, fade
+          out). Camera track is external animation for all the camera parameters,
+          created by non-programmer:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">camera_main</span><span class="special">(</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span><span class="special">,</span> <span class="identifier">relative_dof_settings</span> <span class="special">)</span>
+	<span class="identifier">local</span> <span class="identifier">viewport</span> <span class="special">=</span> <span class="identifier">Viewport</span><span class="special">:</span><span class="keyword">new</span><span class="special">(</span> <span class="identifier">posX</span><span class="special">,</span> <span class="identifier">posY</span><span class="special">,</span> <span class="identifier">sizeX</span><span class="special">,</span> <span class="identifier">sizeY</span> <span class="special">)</span>	
+
+	<span class="identifier">local</span> <span class="identifier">camera</span> <span class="special">=</span> <span class="identifier">Camera</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>	
+	<span class="identifier">viewport</span><span class="special">.</span><span class="identifier">set_camera</span><span class="special">(</span> <span class="identifier">camera</span> <span class="special">)</span>
+
+	<span class="identifier">local</span> <span class="identifier">ctrl1</span> <span class="special">=</span> <span class="identifier">CameraController</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">ctrl2</span> <span class="special">=</span> <span class="identifier">CameraController</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+	<span class="identifier">local</span> <span class="identifier">blender</span> <span class="special">=</span> <span class="identifier">CameraLinearBlend</span><span class="special">:</span><span class="keyword">new</span><span class="special">(</span> <span class="identifier">ctrl1</span><span class="special">,</span> <span class="identifier">ctrl2</span> <span class="special">)</span>
+
+	<span class="identifier">camera</span><span class="special">:</span><span class="identifier">set_controller</span><span class="special">(</span> <span class="identifier">blender</span> <span class="special">)</span>
+
+	<span class="identifier">blender</span><span class="special">:</span><span class="identifier">set_blend</span><span class="special">(</span> <span class="number">0</span> <span class="special">)</span> <span class="special">--</span> <span class="number">0</span> <span class="identifier">means</span> <span class="identifier">ctrl1</span> <span class="identifier">at</span> <span class="identifier">full</span> <span class="identifier">strength</span><span class="special">,</span> <span class="number">1</span> <span class="special">-</span> <span class="identifier">ctrl</span> <span class="number">2</span> <span class="identifier">at</span> <span class="identifier">full</span> <span class="identifier">strength</span><span class="special">.</span>
+	
+	<span class="identifier">PAR</span><span class="special">(</span>						
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">track1</span> <span class="special">=</span> <span class="identifier">CameraTracks</span><span class="special">.</span><span class="identifier">cinematics_spline1</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+			<span class="identifier">camera_play_track_lookat</span><span class="special">(</span> <span class="identifier">ctrl1</span><span class="special">,</span> <span class="identifier">track1</span><span class="special">,</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span><span class="special">,</span> <span class="identifier">relative_dof_settings</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">track2</span> <span class="special">=</span> <span class="identifier">CameraTracks</span><span class="special">.</span><span class="identifier">cinematics_maintrack</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+			<span class="identifier">camera_play_track</span><span class="special">(</span> <span class="identifier">ctrl2</span><span class="special">,</span> <span class="identifier">track2</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">local</span> <span class="identifier">transition_seconds1</span> <span class="special">=</span> <span class="number">5</span>
+			<span class="identifier">local</span> <span class="identifier">transition_seconds2</span> <span class="special">=</span> <span class="number">3</span>
+			<span class="identifier">blender</span><span class="special">:</span><span class="identifier">LINEAR_FADE_TO</span><span class="special">(</span> <span class="number">1.0</span><span class="special">,</span> <span class="identifier">transition_seconds1</span> <span class="special">)</span> <span class="special">--</span> <span class="identifier">fade</span> <span class="identifier">to</span> <span class="number">1</span> <span class="identifier">in</span> <span class="number">5</span> <span class="identifier">seconds</span>
+			<span class="identifier">blender</span><span class="special">:</span><span class="identifier">EXPONENTIAL_FADE_TO</span><span class="special">(</span> <span class="number">0.0</span><span class="special">,</span> <span class="identifier">transition_seconds2</span> <span class="special">)</span> <span class="special">--</span> <span class="identifier">fade</span> <span class="identifier">back</span> <span class="identifier">to</span> <span class="number">0</span> <span class="identifier">in</span> <span class="number">3</span> <span class="identifier">seconds</span>
+		<span class="identifier">end</span>		
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          Blender is a controller itself. So you can stick blenders and controllers
+          into each other, creating a hierarchy. CameraHermiteBlend, CameraBaryCentricBlend,
+          CameraCatmullRomBlend are possible options.
+        </p><p>
+          In the example above, camera_play_track and camera_play_track_lookat could
+          be implemented as follows:
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">camera_play_track</span><span class="special">(</span> <span class="identifier">ctrl</span><span class="special">,</span> <span class="identifier">track</span> <span class="special">)</span>
+	<span class="identifier">PAR</span><span class="special">(</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">PLAY_TRACK</span><span class="special">(</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">TRANSLATION_TRACK</span><span class="special">(</span> <span class="number">1</span><span class="special">,</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">ROTATION_TRACK</span><span class="special">(</span> <span class="number">1</span><span class="special">,</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">DOF_TRACK</span><span class="special">(</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">FOV_TRACK</span><span class="special">(</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p><p>
+          The idea is that you can play multiple tracks on controller but apply or
+          mix only certain parameters from those tracks (position, rotation, depth
+          of field (DOF), field of view (FOV) etc)
+        </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">camera_play_track_lookat</span><span class="special">(</span> <span class="identifier">ctrl</span><span class="special">,</span> <span class="identifier">track</span><span class="special">,</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span><span class="special">,</span> <span class="identifier">relative_dof_settings</span> <span class="special">)</span>
+	<span class="identifier">PAR</span><span class="special">(</span>						
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">PLAY_TRACK</span><span class="special">(</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>				
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">TRANSLATION_TRACK</span><span class="special">(</span> <span class="number">1</span><span class="special">,</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">ROTATION_TO_ACTOR</span><span class="special">(</span> <span class="number">1</span><span class="special">,</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">DOF_TO_ACTOR</span><span class="special">(</span> <span class="identifier">relative_dof_settings</span><span class="special">,</span> <span class="identifier">actor</span><span class="special">,</span> <span class="identifier">actor_bone</span><span class="special">,</span> <span class="identifier">tollerance_settings</span> <span class="special">)</span>
+		<span class="identifier">end</span><span class="special">,</span>
+		<span class="identifier">function</span><span class="special">()</span>
+			<span class="identifier">ctrl</span><span class="special">:</span><span class="identifier">FOV_TRACK</span><span class="special">(</span> <span class="identifier">track</span> <span class="special">)</span>
+		<span class="identifier">end</span>
+	<span class="special">)</span>
+<span class="identifier">end</span>
+</pre><p>
+        </p></div></div><div class="section" title="Contracts"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.contracts"></a><a class="link" href="#manual.basicConcepts.contracts" title="Contracts">Contracts</a></h3></div></div></div></div><div class="section" title="Termination"><div class="titlepage"><div><div><h3 class="title"><a name="manual.basicConcepts.termination"></a><a class="link" href="#manual.basicConcepts.termination" title="Termination">Termination</a></h3></div></div></div></div></div><div class="section" title="3. The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.theLanguage"></a><a class="link" href="#manual.theLanguage" title="3. The Language">3. The Language</a></h2></div></div></div></div><div class="section" title="4. Embedding and Extending The Language"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.embedding"></a><a class="link" href="#manual.embedding" title="4. Embedding and Extending The Language">4. Embedding and Extending The Language</a></h2></div></div></div><div class="section" title="Writing Your Own Fundamental Operations"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations"></a><a class="link" href="#manual.embedding.writing_fundamental_operations" title="Writing Your Own Fundamental Operations">Writing
       Your Own Fundamental Operations</a></h3></div></div></div></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div></div></div><div class="section" title="5. Advanced Topics"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.advanced"></a><a class="link" href="#manual.advanced" title="5. Advanced Topics">5. Advanced Topics</a></h2></div></div></div><div class="section" title="Implementation disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.advanced.disclaimer"></a><a class="link" href="#manual.advanced.disclaimer" title="Implementation disclaimer">Implementation disclaimer</a></h3></div></div></div><p>
         The following priorities were taken (in declining order):
       </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">

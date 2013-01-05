@@ -225,7 +225,35 @@ Of course, any process constructors can be nested, i.e. PAR or ALT can contain
 any number of other PARs and ALTs as sub processes (directly or indirectly via
 functions).
 
-[section:api_examples API examples]
+[section:api_examples Domain-specific API Examples]
+The most simple demonstration for LuaCSP domain specific API is sound playback.
+In the following example, the PLAY function lasts as long, as sound lasts.
+This decouples a composition structure from actual duration of participating sound files and
+allows those files to be edited by non-programmers (sound engineers) without corrupting the logic for the dialog:
+[import samples/sound.lua]
+[sound_dialog]
+Another simple example is mixing audio tracks for your multimedia introduction:
+[sound_intro]
+
+Your domain-specific API can include specific channels on object to listen the events:
+[import samples/animation.lua]
+[animation_heartbeat]
+
+The more advanced technique is to use composition of objects and composition of time-spreaded operations on those objects
+as two orthogonal concepts helping each other. In cinematic cameras API for your virtual world you can create a hierarchy
+of camera controllers and blenders. Then, you can operate controller's parameters in time (mixing, blending, fade in, fade out).
+Camera track is external animation for all the camera parameters, created by non-programmer:
+[import samples/camera.lua]
+[camera_main]
+Blender is a controller itself. So you can stick blenders and controllers into each other, creating a hierarchy.
+CameraHermiteBlend, CameraBaryCentricBlend, CameraCatmullRomBlend are possible options.
+
+In the example above, camera_play_track and camera_play_track_lookat could be implemented as follows:
+[camera_play_track]
+The idea is that you can play multiple tracks on controller but apply or mix only certain parameters from those tracks
+(position, rotation, depth of field (DOF), field of view (FOV) etc)
+[camera_play_track_lookat]
+
 [endsect] [/api_examples]
 
 [endsect] [/composition]
