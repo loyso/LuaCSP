@@ -8,4 +8,12 @@
       <UniqueIdentifier>{cc0def41-7651-4375-b8df-9e1894acf86f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lua\flow.lua">
+      <Filter>lua</Filter>
+    </None>
+    <None Include="lua\main.lua">
+      <Filter>lua</Filter>
+    </None>
+  </ItemGroup>
 </Project>

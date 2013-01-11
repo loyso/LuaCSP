@@ -62,14 +62,24 @@ namespace csp
 	void RegisterFunctions( lua::LuaState& state, lua::LuaStackValue& value, const FunctionRegistration registrations[] );
 	void UnregisterFunctions( lua::LuaState& state, lua::LuaStackValue& value, const FunctionRegistration registrations[] );
 
+
 	void InitializeCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
 		, const FunctionRegistration memberFunctions[] );
+	
+	void InitializeCspObjectEnv( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
+		, const FunctionRegistration memberFunctions[], lua::LuaStackValue& env );
+	
+	void InitilaizeCspObjectGlobals( lua::LuaState& state, const FunctionRegistration globalFunctions[]
+		, const char* scopeName );
+
 	void ShutdownCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
 		, const FunctionRegistration memberFunctions[] );
+
 
 	void PushGcObject( lua_State* luaState, GcObject& gcObject, const FunctionRegistration memberFunctions[] );
 	int GcObject_Gc( lua_State* luaState );
 	void CspSetMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] );
+	bool CspHasMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] );
 
     Host& Initialize();
     void Shutdown(Host& host);

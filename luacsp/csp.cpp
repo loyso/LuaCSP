@@ -62,6 +62,27 @@ void csp::CspSetMetatable( lua_State* luaState, const lua::LuaStackValue& value,
 	stack.SetMetaTable( value );
 }
 
+bool csp::CspHasMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] )
+{
+	lua::LuaStack stack( luaState );
+
+	stack.PushLightUserData( (void*)memberFunctions );
+	lua::LuaStackValue memberMetatable = stack.RegistryGet();
+	CORE_ASSERT( memberMetatable.IsTable() );
+
+	if( !stack.GetMetaTable( value ) )
+	{
+		stack.Pop( 1 );
+		return false;
+	}
+
+	lua::LuaStackValue metatable = stack.GetTopValue();
+
+	bool result = metatable.IsEqualByRef( memberMetatable );
+	
+	stack.Pop( 2 );
+	return result;
+}
 
 void csp::PushGcObject( lua_State* luaState, GcObject& gcObject, const FunctionRegistration memberFunctions[] )
 {
@@ -89,6 +110,18 @@ int csp::GcObject_Gc( lua_State* luaState )
 	return 0;
 }
 
+void csp::InitilaizeCspObjectGlobals( lua::LuaState& state, const FunctionRegistration globalFunctions[]
+	, const char* scopeName )
+{
+	lua::LuaStack stack = state.GetStack();
+
+	lua::LuaStackValue globals = stack.PushGlobalTable();
+	lua::LuaStackValue scope = stack.PushTable();
+	RegisterFunctions( state, scope, globalFunctions );
+	stack.SetField( globals, scopeName );
+	stack.Pop(1);
+}
+
 void csp::InitializeCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
 	, const FunctionRegistration memberFunctions[] )
 {
@@ -103,13 +136,34 @@ void csp::InitializeCspObject( lua::LuaState& state, const char* scopeName, cons
 
 	stack.RegistrySet();
 
-	lua::LuaStackValue globals = stack.PushGlobalTable();
-	lua::LuaStackValue scope = stack.PushTable();
-	RegisterFunctions( state, scope, globalFunctions );
-	stack.SetField( globals, scopeName );
-	stack.Pop(1);
+	InitilaizeCspObjectGlobals( state, globalFunctions, scopeName );
 }
 
+void csp::InitializeCspObjectEnv( lua::LuaState& state, const char* scopeName, const FunctionRegistration globalFunctions[]
+	, const FunctionRegistration memberFunctions[], lua::LuaStackValue& env )
+{
+	lua::LuaStack stack = state.GetStack();
+
+	lua::LuaStackValue functionsTable = stack.PushTable();
+	RegisterFunctions( state, functionsTable, memberFunctions );
+
+	lua::LuaStackValue functionsMetaTable = stack.PushTable();
+	env.PushValue();
+	stack.SetField( functionsMetaTable, "__index" );
+	stack.SetMetaTable( functionsTable );
+
+	stack.PushLightUserData( (void*)memberFunctions ); // registry key
+
+	lua::LuaStackValue objectMetaTable = stack.PushTable(); // registry value
+	functionsTable.PushValue();
+	stack.SetField( objectMetaTable, "__index" );
+	
+	stack.RegistrySet(); // set key, value.
+
+	stack.Pop(1); // pop functionsTable.
+
+	InitilaizeCspObjectGlobals( state, globalFunctions, scopeName );
+}
 
 void csp::ShutdownCspObject( lua::LuaState& state, const char* scopeName, const FunctionRegistration[]
 	, const FunctionRegistration memberFunctions[] )

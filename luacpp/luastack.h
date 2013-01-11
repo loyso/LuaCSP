@@ -52,6 +52,7 @@ namespace lua
 
 		void XMove( const LuaStack& toStack, int numValues );
 		void SetMetaTable( const LuaStackValue& value );
+		bool GetMetaTable( const LuaStackValue& value );
 
 		void Pop(int numValues);
 

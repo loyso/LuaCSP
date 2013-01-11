@@ -30,6 +30,10 @@
       <Project>{f8615ce4-b490-457a-b57e-2ae7b4548de3}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lua\flow.lua" />
+    <None Include="lua\main.lua" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E9E2EDE7-1393-472D-8EE4-DD973DCF778C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

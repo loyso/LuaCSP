@@ -118,7 +118,7 @@ lua::Return::Enum lua::LuaState::PrintError( Return::Enum result )
 lua::Return::Enum lua::LuaState::Resume(int numArgs, LuaState * pStateFrom)
 {
 	Return::Enum retValue = (Return::Enum)lua_resume( m_stack.InternalState(), pStateFrom ? pStateFrom->InternalState() : NULL, numArgs );
-	if( retValue == LUA_OK || retValue == LUA_YIELD )
+	if( retValue == Return::OK || retValue == Return::YIELD )
 		return retValue;
 
 	return PrintError( retValue );

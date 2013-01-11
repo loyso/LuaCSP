@@ -6,6 +6,7 @@ extern "C"
 #include <lua-5.2.1/src/lauxlib.h>
 }
 
+#include <string.h>
 
 lua::LuaStackValue::LuaStackValue( lua_State* luaState, int index )
 	: m_state( luaState )
@@ -116,6 +117,72 @@ void* lua::LuaStackValue::GetLightUserData() const
 lua_State* lua::LuaStackValue::InternalState() const
 {
 	return m_state;
+}
+
+const void* lua::LuaStackValue::ToPointer() const
+{
+	return lua_topointer( m_state, m_index );
+}
+
+bool lua::LuaStackValue::IsEqualByRef( LuaStackValue& stackValue ) const
+{
+	return ToPointer() == stackValue.ToPointer();
+}
+
+int lua::LuaStackValue::GetInteger() const
+{
+	return lua_tointeger( m_state, m_index );
+}
+
+const char* lua::LuaStackValue::GetUpValue( int n ) const
+{
+	return lua_getupvalue( m_state, m_index, n );
+}
+
+const char* lua::LuaStackValue::SetUpValue( int n )
+{
+	return lua_setupvalue( m_state, m_index, n );
+}
+
+bool lua::LuaStackValue::SetClosureEnv( LuaStackValue& env )
+{
+	for( int i = 1;; ++i )
+	{
+		const char* upvalueName = GetUpValue( i );
+		if( upvalueName == NULL )
+			break;
+
+		bool isEnv = strcmp( upvalueName, LUA_ENV ) == 0;
+		lua_pop( m_state, 1 );
+
+		if( isEnv )
+		{
+			env.PushValue();
+			SetUpValue( i );
+			return true;
+		}
+
+	}
+
+	return false;
+}
+
+bool lua::LuaStackValue::PushClosureEnv()
+{
+	for( int i = 1;; ++i )
+	{
+		const char* upvalueName = GetUpValue( i );
+		if( upvalueName == NULL )
+			break;
+
+		bool isEnv = strcmp( upvalueName, LUA_ENV ) == 0;
+		if( isEnv )
+			return true;
+
+		lua_pop( m_state, 1 );
+	}
+
+	return false;
 }
 
 

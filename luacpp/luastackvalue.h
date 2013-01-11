@@ -21,6 +21,7 @@ namespace lua
 		LuaNumber_t GetNumber() const;
 		LuaNumber_t CheckNumber() const;
 		LuaNumber_t OptNumber( LuaNumber_t default ) const;
+		int GetInteger() const;
 
 		const char* GetString() const; 
 		const char* CheckString() const; 
@@ -34,6 +35,14 @@ namespace lua
 
 		int Index() const;
 		void PushValue();
+
+		const void* ToPointer() const;
+		bool IsEqualByRef( LuaStackValue& stackValue ) const;
+
+		const char* GetUpValue( int n ) const;
+		const char* SetUpValue( int n );
+		bool SetClosureEnv( LuaStackValue& env );
+		bool PushClosureEnv();
 
 		lua_State* InternalState() const;
 

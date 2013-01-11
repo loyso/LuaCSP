@@ -112,6 +112,11 @@ void lua::LuaStack::SetMetaTable( const LuaStackValue& value )
 	lua_setmetatable( m_state, value.Index() );
 }
 
+bool lua::LuaStack::GetMetaTable( const LuaStackValue& value )
+{
+	return !!lua_getmetatable( m_state, value.Index() );
+}
+
 lua::LuaStackValue lua::LuaStack::GetField(LuaStackValue & value, const char * key) const
 {
 	lua_getfield(m_state, value.Index(), key);
