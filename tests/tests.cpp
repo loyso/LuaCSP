@@ -21,13 +21,62 @@ namespace TestsResult
 	};
 }
 
+TestsResult::Enum LoadLuaFile( csp::Host& host, const std::string& fileName )
+{
+	std::ifstream file ( fileName, std::ios::in|std::ios::binary|std::ios::ate );
+	if( !file.is_open() )
+	{
+		std::cout << "Can't open input file" << std::endl;
+		return TestsResult::OPEN_FILE_ERROR;
+	}
+
+	TestsResult::Enum result = TestsResult::LUA_ERROR;
+
+	size_t size = (size_t)file.tellg();
+
+	char* memblock = CORE_NEW char [size];
+
+	file.seekg( 0, std::ios::beg );
+	file.read( memblock, size );
+	file.close();
+
+	std::string chunkname = "@" + fileName;
+
+	lua::Return::Enum loadResult = host.LuaState().LoadFromMemory( memblock, size, chunkname.c_str() );
+	if( loadResult == lua::Return::OK )
+	{
+		lua::Return::Enum chunkCallResult = host.LuaState().Call( 0, 0 );
+		if( chunkCallResult == lua::Return::OK )
+			result = TestsResult::OK;
+	}
+
+	delete[] memblock;
+
+	return result;
+}
+
+TestsResult::Enum EvaluateLuaMain( csp::Host& host )
+{
+	TestsResult::Enum result = TestsResult::LUA_ERROR;
+
+	const float dt = 1.0f / 60.0f;
+
+	csp::WorkResult::Enum workResult = host.Main();
+	while( workResult == lua::Return::YIELD )
+		workResult = host.Work( dt );
+
+	result = TestsResult::OK;
+
+	return result;
+}
+
 int main( int argc, const char* argv[] )
 {
-	int result = TestsResult::OK;
+	TestsResult::Enum result = TestsResult::OK;
 
 	if( argc < 2 )
 	{
-		std::cout << "No input lua file specified" << std::endl;
+		std::cout << "No input lua files specified" << std::endl;
 		return TestsResult::NO_INPUT_FILE;
 	}
 
@@ -35,44 +84,17 @@ int main( int argc, const char* argv[] )
 	csp::Host& host = csp::Initialize();
 	lua::InitTests( host.LuaState() );
 
-	std::string fileName = argv[1];
-
-	std::ifstream file ( fileName, std::ios::in|std::ios::binary|std::ios::ate );
-	if( file.is_open() )
+	for( int i = 1; i < argc; ++i )
 	{
-		size_t size = (size_t)file.tellg();
-
-		char* memblock = CORE_NEW char [size];
-
-		file.seekg( 0, std::ios::beg );
-		file.read( memblock, size );
-		file.close();
-
-		result = TestsResult::LUA_ERROR;
-		std:: string chunkname = "@" + fileName;
-
-		lua::Return::Enum loadResult = host.LuaState().LoadFromMemory( memblock, size, chunkname.c_str() );
-		if( loadResult == lua::Return::OK )
-		{
-			lua::Return::Enum chunkCallResult = host.LuaState().Call( 0, 0 );
-			if( chunkCallResult == lua::Return::OK )
-			{
-				const float dt = 1.0f / 30.0f;
-
-				csp::WorkResult::Enum workResult = host.Main();
-				while( workResult == lua::Return::YIELD )
-					workResult = host.Work( dt );
-
-				result = TestsResult::OK;
-			}
-		}
-
-		delete[] memblock;
+		std::string fileName = argv[i];
+		TestsResult::Enum loadResult = LoadLuaFile( host, fileName );
+		if( loadResult != TestsResult::OK )
+			result = loadResult;
 	}
-	else
+
+	if( result == TestsResult::OK )
 	{
-		std::cout << "Can't open input file" << std::endl;
-		result = TestsResult::OPEN_FILE_ERROR;
+		result = EvaluateLuaMain( host );
 	}
 
 	lua::ShutdownTests( host.LuaState() );
