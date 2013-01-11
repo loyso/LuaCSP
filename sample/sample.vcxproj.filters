@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="sample.cpp" />
-    <ClCompile Include="cppchannel.cpp" />
+    <ClCompile Include="mycppchannel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="lua">
@@ -15,6 +15,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cppchannel.h" />
+    <ClInclude Include="mycppchannel.h" />
   </ItemGroup>
 </Project>
