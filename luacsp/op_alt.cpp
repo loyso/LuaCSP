@@ -1,3 +1,10 @@
+/**
+ * This file is a part of LuaCSP library.
+ * Copyright (c) 2012-2013 Alexey Baskakov
+ * Project page: http://github.com/loyso/LuaCSP
+ * This library is distributed under the GNU General Public License (GPL), version 2.
+ * The above copyright notice shall be included in all copies or substantial portions of the Software.
+ */
 #include "op_alt.h"
 
 #include <luacpp/luastackvalue.h>
