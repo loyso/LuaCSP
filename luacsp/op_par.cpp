@@ -87,7 +87,7 @@ csp::WorkResult::Enum csp::OpPar::Evaluate( Host& host )
 
 csp::WorkResult::Enum csp::OpPar::Work( Host& host, CspTime_t dt )
 {
-	for( int i = 0; i < m_closureToRun; ++i )
+	for( int i = m_closureToRun-1; i >= 0; --i )
 	{
 		Process& process = m_closures[ i ].process;
 		if( process.IsRunning() )
