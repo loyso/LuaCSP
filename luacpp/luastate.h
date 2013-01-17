@@ -47,6 +47,20 @@ namespace lua
 		Return::Enum Status() const;
 
 		void ReportRefLeaks() const;
+
+		void LibOpenAll();
+		
+		void LibOpenTable();
+		void LibOpenBase();
+		void LibOpenPackage();
+		void LibOpenCoroutine();
+		void LibOpenString();
+		void LibOpenMath();
+		void LibOpenBit32();
+		void LibOpenIO();
+		void LibOpenOS();
+		void LibOpenDebug();
+
 	private:
 		LuaStack m_stack;
 	};

@@ -26,10 +26,19 @@ namespace lua
 		bool IsLightUserData() const;
 		bool IsTable() const;
 
+		LuaStackValue PushLength() const;
+		size_t RawLength() const;
+
+		LuaStackValue PushRawGetIndex( int n ) const;
+		LuaStackValue PushRawGetPointer( const void* ptr ) const;
+
 		LuaNumber_t GetNumber() const;
 		LuaNumber_t CheckNumber() const;
 		LuaNumber_t OptNumber( LuaNumber_t default ) const;
+		
 		int GetInteger() const;
+		int CheckInteger() const;
+		int OptInteger( int default ) const;
 
 		const char* GetString() const; 
 		const char* CheckString() const; 
@@ -45,7 +54,9 @@ namespace lua
 		void PushValue();
 
 		const void* ToPointer() const;
-		bool IsEqualByRef( LuaStackValue& stackValue ) const;
+		
+		bool IsEqualByRef( LuaStackValue const& stackValue ) const;
+		bool IsRawEqual( LuaStackValue const& stackValue ) const;
 
 		const char* GetUpValue( int n ) const;
 		const char* SetUpValue( int n );
@@ -55,6 +66,8 @@ namespace lua
 		lua_State* InternalState() const;
 
 	private:
+		LuaStackValue GetTopValue() const;
+
 		lua_State* m_state;
 		int m_index;
 	};

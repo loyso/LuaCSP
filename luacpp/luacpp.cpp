@@ -10,6 +10,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "luastackvalue.h"
+
 int lua::Print(const char* fmt, ...)
 {
 	va_list ap;
@@ -28,6 +30,50 @@ void* lua::LuaDefaultAlloc( void*, void* ptr, size_t, size_t nsize )
 	}
 	else
 		return realloc( ptr, nsize );
+}
+
+void lua::PrintStackValue( LuaStackValue const& value )
+{
+	if( value.IsNil() )
+		lua::Print( "nil" );
+	else if( value.IsBoolean() )
+		lua::Print( value.GetBoolean() ? "true" : "false" );
+	else if( value.IsNumber() )
+		lua::Print( "%g", value.GetNumber() );
+	else if( value.IsString() )
+		lua::Print( value.GetString() );
+}
+
+void lua::PrintStackArray( LuaStackValue const& table )
+{
+	bool first = true;
+	for( LuaStackTableIterator i( table ); i; i.Next() )
+	{
+		LuaStackValue key = i.Key();
+		LuaStackValue value = i.Value();
+		if( !first )
+			Print(",");
+		first = false;
+
+		PrintStackValue( value );
+	}
+}
+
+void lua::PrintStackTable( LuaStackValue const& table )
+{
+	bool first = true;
+	for( LuaStackTableIterator i( table ); i; i.Next() )
+	{
+		LuaStackValue key = i.Key();
+		LuaStackValue value = i.Value();
+		if( !first )
+			Print(",");
+		first = false;
+
+		PrintStackValue( key );
+		Print("=");
+		PrintStackValue( value );
+	}
 }
 
 lua::LuaReader::LuaReader(const void* data, size_t size)

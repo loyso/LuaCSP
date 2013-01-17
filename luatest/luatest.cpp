@@ -19,6 +19,7 @@ namespace csp
 	int TestSuite_RUN_ALL( lua_State* luaState );
 
 	int TestSuite_checkEqualsInt( lua_State* luaState );
+	int TestSuite_checkEqualsArray( lua_State* luaState );
 
 	const csp::FunctionRegistration testSuiteGlobals[] =
 	{
@@ -29,7 +30,8 @@ namespace csp
 
 	const csp::FunctionRegistration testSuiteFunctions[] =
 	{
-		"checkEqualsInt", TestSuite_checkEqualsInt
+		  "checkEqualsInt", TestSuite_checkEqualsInt
+		, "checkEqualsArray", TestSuite_checkEqualsArray
 		, NULL, NULL
 	};
 }
@@ -107,6 +109,8 @@ csp::WorkResult::Enum csp::OpTestSuite_RunAll::Evaluate( Host& host )
 			if( m_pCurrentClosure->refKey != lua::LUA_NO_REF )
 				UnrefClosure( m_pCurrentClosure );
 
+			lua::Print( "Ok!\n" );
+
 			delete m_pCurrentClosure;
 			m_pCurrentClosure = NULL;
 		}
@@ -117,7 +121,7 @@ csp::WorkResult::Enum csp::OpTestSuite_RunAll::Evaluate( Host& host )
 		TestClosure* pClosure = ListPopFromHead( m_pClosuresHead, m_pClosuresTail );
 		CORE_ASSERT( pClosure );
 
-		lua::Print( "Running test %s.%s...\n", pClosure->suiteName, pClosure->functionName );
+		lua::Print( "Running test %s.%s... ", pClosure->suiteName, pClosure->functionName );
 
 		m_pCurrentClosure = pClosure;
 
@@ -255,6 +259,63 @@ int csp::TestSuite_checkEqualsInt( lua_State* luaState )
 	if( expected != value )
 	{
 		lua::Print( "ERROR! %s: expected=%d value=%d\n", args[3].GetString(), expected, value );
+	}
+
+	return 0;
+}
+
+int csp::TestSuite_checkEqualsArray( lua_State* luaState )
+{
+	lua::LuaStack args( luaState );
+
+	lua::LuaStackValue expectedArray = args[1];
+	lua::LuaStackValue actualArray = args[2];
+
+	if( !expectedArray.IsTable() )
+		return expectedArray.ArgError( "table expected" );
+
+	if( !actualArray.IsTable() )
+		return actualArray.ArgError( "table expected" );
+
+	if( !args[3].IsString() )
+		return args[3].ArgError( "error message string expected" );
+
+	const int expectedLen = expectedArray.RawLength();
+	const int checkLen = actualArray.RawLength();
+
+	bool err = false;
+	if( expectedLen != checkLen )
+	{
+		lua::Print( "ERROR! %s: expected array length=%d actual array length=%d\n", args[3].GetString(), expectedLen, checkLen );
+		err = true;
+	}
+
+	const int len = expectedLen > checkLen ? checkLen : expectedLen;
+	for( int i = 1; i <= len; ++i )
+	{
+		lua::LuaStackValue expected = expectedArray.PushRawGetIndex( i );
+		lua::LuaStackValue actual = actualArray.PushRawGetIndex( i );
+		
+		if( !expected.IsRawEqual( actual ) )
+		{
+			lua::Print( "ERROR! %s: expected=", args[3].GetString() );
+			lua::PrintStackValue( expected );
+			lua::Print( " actual=" );
+			lua::PrintStackValue( actual );
+			lua::Print( "\n" );
+			err = true;
+		}
+
+		args.Pop( 2 );
+	}
+
+	if( err )
+	{
+		lua::Print( "expected array = " );
+		lua::PrintStackArray( expectedArray );
+		lua::Print( "\nactual array   = " );
+		lua::PrintStackArray( actualArray );
+		lua::Print( "\n" );
 	}
 
 	return 0;

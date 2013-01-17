@@ -13,6 +13,11 @@ struct lua_State;
 
 namespace lua
 {
+	class LuaStackValue;
+}
+
+namespace lua
+{
 	typedef float LuaNumber_t; // must match lua_Number in luaconf.h
 
 	typedef int LuaRef_t;
@@ -33,6 +38,10 @@ namespace lua
     };
 
 	int Print(const char* fmt, ...);
+	void PrintStackValue( LuaStackValue const& value );
+	void PrintStackArray( LuaStackValue const& value );
+	void PrintStackTable( LuaStackValue const& value );
+	
 	void* LuaDefaultAlloc( void* ud, void* ptr, size_t osize, size_t nsize );
 
 	class LuaState;

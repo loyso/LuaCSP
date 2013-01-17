@@ -13,6 +13,7 @@ extern "C"
 {
 #include <lua-5.2.1/src/lua.h>
 #include <lua-5.2.1/src/lauxlib.h>
+#include <lua-5.2.1/src/lualib.h>
 }
 
 
@@ -174,4 +175,59 @@ void lua::LuaState::ReportRefLeaks() const
 		}
 		lua_pop( state, 1 );
 	}
+}
+
+void lua::LuaState::LibOpenAll()
+{
+	luaL_openlibs( m_stack.InternalState() );
+}
+
+void lua::LuaState::LibOpenBase()
+{
+	luaopen_base( m_stack.InternalState() );
+}
+
+void lua::LuaState::LibOpenTable()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_TABLIBNAME, luaopen_table, true );
+}
+
+void lua::LuaState::LibOpenPackage()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_LOADLIBNAME, luaopen_package, true );
+}
+
+void lua::LuaState::LibOpenCoroutine()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_COLIBNAME, luaopen_coroutine, true );
+}
+
+void lua::LuaState::LibOpenString()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_STRLIBNAME, luaopen_string, true );
+}
+
+void lua::LuaState::LibOpenMath()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_MATHLIBNAME, luaopen_math, true );
+}
+
+void lua::LuaState::LibOpenBit32()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_BITLIBNAME, luaopen_bit32, true );
+}
+
+void lua::LuaState::LibOpenIO()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_IOLIBNAME, luaopen_io, true );
+}
+
+void lua::LuaState::LibOpenOS()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_OSLIBNAME, luaopen_os, true );
+}
+
+void lua::LuaState::LibOpenDebug()
+{
+	luaL_requiref( m_stack.InternalState(), LUA_DBLIBNAME, luaopen_debug, true );
 }

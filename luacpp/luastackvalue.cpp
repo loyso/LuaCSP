@@ -131,14 +131,29 @@ const void* lua::LuaStackValue::ToPointer() const
 	return lua_topointer( m_state, m_index );
 }
 
-bool lua::LuaStackValue::IsEqualByRef( LuaStackValue& stackValue ) const
+bool lua::LuaStackValue::IsEqualByRef( LuaStackValue const& stackValue ) const
 {
 	return ToPointer() == stackValue.ToPointer();
+}
+
+bool lua::LuaStackValue::IsRawEqual( LuaStackValue const& stackValue ) const
+{
+	return !!lua_rawequal( m_state, m_index, stackValue.m_index );
 }
 
 int lua::LuaStackValue::GetInteger() const
 {
 	return lua_tointeger( m_state, m_index );
+}
+
+int lua::LuaStackValue::CheckInteger() const
+{
+	return luaL_checkinteger( m_state, m_index );
+}
+
+int lua::LuaStackValue::OptInteger( int default ) const
+{
+	return luaL_optinteger( m_state, m_index, default );
 }
 
 const char* lua::LuaStackValue::GetUpValue( int n ) const
@@ -190,6 +205,34 @@ bool lua::LuaStackValue::PushClosureEnv()
 	}
 
 	return false;
+}
+
+lua::LuaStackValue lua::LuaStackValue::PushLength() const
+{
+	lua_len( m_state, m_index );
+	return GetTopValue();
+}
+
+size_t lua::LuaStackValue::RawLength() const
+{
+	return lua_rawlen( m_state, m_index );
+}
+
+lua::LuaStackValue lua::LuaStackValue::PushRawGetIndex( int n ) const
+{
+	lua_rawgeti( m_state, m_index, n );
+	return GetTopValue();
+}
+
+lua::LuaStackValue lua::LuaStackValue::PushRawGetPointer( const void* ptr ) const
+{
+	lua_rawgetp( m_state, m_index, ptr );
+	return GetTopValue();
+}
+
+lua::LuaStackValue lua::LuaStackValue::GetTopValue() const
+{
+	return LuaStackValue( m_state, lua_gettop(m_state) );
 }
 
 

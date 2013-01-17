@@ -27,15 +27,7 @@ int helpers::log( lua_State* luaState )
 	for( int i = 1; i <= args.NumArgs(); ++i )
 	{
 		lua::LuaStackValue arg = args[i];
-		if( arg.IsNil() )
-			lua::Print( "nil" );
-		else if( arg.IsBoolean() )
-			lua::Print( arg.GetBoolean() ? "true" : "false" );
-		else if( arg.IsNumber() )
-			lua::Print( "%.5f", arg.GetNumber() );
-		else if( arg.IsString() )
-			lua::Print( arg.GetString() );
-
+		lua::PrintStackValue( arg );
 		if( i < args.NumArgs() )
 			lua::Print(" ");
 	}
