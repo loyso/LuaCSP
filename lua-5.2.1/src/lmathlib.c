@@ -27,11 +27,6 @@
 #define PI (l_tg(3.1415926535897932384626433832795))
 #define RADIANS_PER_DEGREE (PI/l_tg(180.0))
 
-void test()
-{
-	float g = fabsf(0.657676f);
-}
-
 static int math_abs (lua_State *L) {
   lua_pushnumber(L, l_tg(fabs)(luaL_checknumber(L, 1)));
   return 1;
