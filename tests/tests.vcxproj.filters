@@ -15,5 +15,8 @@
     <None Include="lua\main.lua">
       <Filter>lua</Filter>
     </None>
+    <None Include="lua\elementary.lua">
+      <Filter>lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

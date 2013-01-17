@@ -89,7 +89,11 @@ int main( int argc, const char* argv[] )
 
 	core::InitializeCore();
 	csp::Host& host = csp::Initialize();
-	csp::InitTests( host.LuaState() );
+	
+	lua::LuaState& luaState = host.LuaState();
+	luaState.LibOpenTable();
+
+	csp::InitTests( luaState );
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -104,7 +108,7 @@ int main( int argc, const char* argv[] )
 		result = EvaluateLuaMain( host );
 	}
 
-	csp::ShutdownTests( host.LuaState() );
+	csp::ShutdownTests( luaState );
 	csp::Shutdown( host );
 	core::ShutdownCore();
 
