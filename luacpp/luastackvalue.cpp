@@ -111,6 +111,11 @@ bool lua::LuaStackValue::IsTable() const
 	return !!lua_istable( m_state, m_index );
 }
 
+bool lua::LuaStackValue::IsThread() const
+{
+	return !!lua_isthread( m_state, m_index );
+}
+
 bool lua::LuaStackValue::IsLightUserData() const
 {
 	return !!lua_islightuserdata( m_state, m_index );
@@ -119,6 +124,11 @@ bool lua::LuaStackValue::IsLightUserData() const
 void* lua::LuaStackValue::GetLightUserData() const
 {
 	return lua_touserdata( m_state, m_index );
+}
+
+lua_State* lua::LuaStackValue::GetThread() const
+{
+	return lua_tothread( m_state, m_index );
 }
 
 lua_State* lua::LuaStackValue::InternalState() const
@@ -228,6 +238,16 @@ lua::LuaStackValue lua::LuaStackValue::PushRawGetPointer( const void* ptr ) cons
 {
 	lua_rawgetp( m_state, m_index, ptr );
 	return GetTopValue();
+}
+
+void lua::LuaStackValue::RawSetIndex( int n )
+{
+	lua_rawseti( m_state, m_index, n );
+}
+
+void lua::LuaStackValue::RawSetPointer( const void* ptr )
+{
+	lua_rawsetp( m_state, m_index, ptr );
 }
 
 lua::LuaStackValue lua::LuaStackValue::GetTopValue() const

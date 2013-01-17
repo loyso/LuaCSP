@@ -51,6 +51,11 @@ void csp::Process::SwitchCurrentOperation( Operation* pOperation )
 	m_operation = pOperation;
 }
 
+bool csp::Process::IsInOperation() const
+{
+	return m_operation != NULL;
+}
+
 csp::Operation& csp::Process::CurrentOperation()
 {
 	CORE_ASSERT( m_operation );

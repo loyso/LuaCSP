@@ -25,12 +25,16 @@ namespace lua
 		bool IsUserData() const;
 		bool IsLightUserData() const;
 		bool IsTable() const;
+		bool IsThread() const;
 
 		LuaStackValue PushLength() const;
 		size_t RawLength() const;
 
 		LuaStackValue PushRawGetIndex( int n ) const;
 		LuaStackValue PushRawGetPointer( const void* ptr ) const;
+
+		void RawSetIndex( int n );
+		void RawSetPointer( const void* ptr );
 
 		LuaNumber_t GetNumber() const;
 		LuaNumber_t CheckNumber() const;
@@ -47,6 +51,7 @@ namespace lua
 		bool GetBoolean() const;
 		void* GetUserData() const;
 		void* GetLightUserData() const;
+		lua_State* GetThread() const;
 
 		int ArgError( const char* errMsg );
 

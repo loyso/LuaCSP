@@ -41,8 +41,10 @@ namespace csp
 		void SwitchCurrentOperation( Operation* pOperation );
 		bool IsRunning() const;
 
-    private:
+		bool IsInOperation() const;
 		Operation& CurrentOperation();
+
+    private:
 		WorkResult::Enum Resume( int numArgs );
 		void DeleteOperation( Host& host );
 

@@ -3,82 +3,90 @@ flow = TestSuite:new()
 
 function flow:precedenceAfterTick()
 	local steps = {}
+	local step = function(n)
+		table.insert( steps, n )
+	end
+
 	PAR(
 		function()
 			PAR(
 				function()
-					table.insert( steps, 0 )
+					step( 0 )
 					SLEEP(0)
-					table.insert( steps, 4 )
+					step( 4 )
 				end
 				,
 				function()
-					table.insert( steps, 1 )
+					step( 1 )
 					SLEEP(0)
-					table.insert( steps, 5 )
+					step( 5 )
 				end
 			)
-			table.insert( steps, 6 )
+			step( 6 )
 			SLEEP(0)
-			table.insert( steps, 10 )
+			step( 10 )
 		end
 		,
 		function()
 			PAR(
 				function()
-					table.insert( steps, 2 )
+					step( 2 )
 					SLEEP(0)
-					table.insert( steps, 7 )
+					step( 7 )
 				end
 				,
 				function()
-					table.insert( steps, 3 )
+					step( 3 )
 					SLEEP(0)
-					table.insert( steps, 8 )
+					step( 8 )
 				end
 			)
-			table.insert( steps, 9 )
+			step( 9 )
 			SLEEP(0)
-			table.insert( steps, 11 )
+			step( 11 )
 		end
 	)
 
-	checkEqualsArray( { 0,1,2,3,4,5,6,7,8,9,10,11 }, steps, "wrong simulation step order" )
+	checkEqualsArray( "wrong simulation step order", { 0,1,2,3,4,5,6,7,8,9,10,11 }, steps )
 end
 
 function flow:precedenceInOut()
 	local t1 = tick()
+
 	local steps = {}
+	local step = function(n)
+		table.insert( steps, n )
+	end
 
 	local ch1 = Channel:new()
 	local ch2 = Channel:new()
 	PAR(
 		function()
-			table.insert( steps, 0 )
+			step( 0 )
 			SLEEP(0)
 			ch1:OUT()
-			table.insert( steps, 5 )
+			step( 5 )
 		end
 		,
 		function()
-			table.insert( steps, 1 )
+			step( 1 )
 			SLEEP(0)
 			ch2:IN()
-			table.insert( steps, 3 )
+			step( 3 )
 			ch1:IN()
-			table.insert( steps, 4 )
+			step( 4 )
 		end
 		,
 		function()
-			table.insert( steps, 2 )
+			step( 2 )
 			SLEEP(0)
 			ch2:OUT()
-			table.insert( steps, 6 )
+			step( 6 )
 		end
 	)
 
 	local t2 = tick()
-	checkEqualsInt( 1, t2-t1, "simulation tick difference" )
+	checkEqualsInt( "simulation tick difference", 1, t2-t1 )
 
-	checkEqualsArray( { 0,1,2,3,4,6,5 }, steps, "wrong simulation step order" )
+	checkEqualsArray( "wrong simulation step order", { 0,1,2,3,4,5,6 }, steps )
 end

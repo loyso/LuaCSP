@@ -39,6 +39,7 @@ namespace lua
 
 		LuaStackValue PushGlobalValue(const char * var) const;
 		LuaStackValue PushGlobalTable() const;
+		LuaStackValue PushMainThread() const;
 
 		LuaRef_t RefInRegistry() const;
 		void UnrefInRegistry( LuaRef_t key ) const;

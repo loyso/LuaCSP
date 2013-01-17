@@ -164,6 +164,13 @@ lua::LuaStackValue lua::LuaStack::PushGlobalTable() const
 	return GetTopValue();
 }
 
+lua::LuaStackValue lua::LuaStack::PushMainThread() const
+{
+	lua_pushinteger( m_state, LUA_RIDX_MAINTHREAD );
+	lua_rawget( m_state, LUA_REGISTRYINDEX ); 
+	return GetTopValue();
+}
+
 int lua::LuaStack::GetTop() const
 {
 	return lua_gettop( m_state );

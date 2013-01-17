@@ -17,7 +17,15 @@ namespace lua
 
 namespace csp
 {
-	class OpTestSuite_RunAll : public csp::Operation
+	class TestRunContext : public csp::Operation
+	{
+	public:
+		static TestRunContext* GetTestContext( lua_State* luaState );
+
+		virtual void SetCheckFailed() = 0;
+	};
+
+	class OpTestSuite_RunAll : public TestRunContext
 	{
 	public:
 		OpTestSuite_RunAll();
@@ -28,6 +36,8 @@ namespace csp
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual void Terminate( Host& host );
+
+		virtual void SetCheckFailed();
 
 		void InitTestSuite( lua::LuaStack& stack, InitError& initError, const char* suiteName, lua::LuaStackValue& suiteEnv );
 		void InitTestSuiteEnv( lua::LuaStack& stack, const char* suiteName, lua::LuaStackValue& suiteEnv, lua::LuaStackValue& table );
@@ -40,8 +50,10 @@ namespace csp
 			TestClosure* pNext;
 			Process process;
 			lua::LuaRef_t refKey;
+			
 			const char* suiteName;
 			const char* functionName;
+			int numChecksFailed;
 		};
 
 		void UnrefClosure( TestClosure* pClosure );
@@ -52,7 +64,9 @@ namespace csp
 		static void ListAddToTail( TestClosure*& pHead, TestClosure*& pTail, TestClosure& node );
 
 		TestClosure *m_pClosuresHead, *m_pClosuresTail;
-		TestClosure* m_pCurrentClosure;
+		TestClosure *m_pCurrentClosure;
+		int m_numTests;
+		int m_numTestsFailed;
 	};
 
 	void InitTests( lua::LuaState& luaState );
