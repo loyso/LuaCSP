@@ -18,7 +18,9 @@ namespace csp
 	int TestSuite_new( lua_State* luaState );
 	int TestSuite_RUN_ALL( lua_State* luaState );
 
+	int TestSuite_checkEquals( lua_State* luaState );
 	int TestSuite_checkEqualsInt( lua_State* luaState );
+	int TestSuite_checkEqualsFloat( lua_State* luaState );
 	int TestSuite_checkEqualsArray( lua_State* luaState );
 
 	const csp::FunctionRegistration testSuiteGlobals[] =
@@ -30,7 +32,9 @@ namespace csp
 
 	const csp::FunctionRegistration testSuiteFunctions[] =
 	{
-		  "checkEqualsInt", TestSuite_checkEqualsInt
+		  "checkEquals", TestSuite_checkEquals
+		, "checkEqualsInt", TestSuite_checkEqualsInt
+		, "checkEqualsFloat", TestSuite_checkEqualsFloat
 		, "checkEqualsArray", TestSuite_checkEqualsArray
 		, NULL, NULL
 	};
@@ -292,6 +296,34 @@ int csp::TestSuite_RUN_ALL( lua_State* luaState )
 	return pRunAll->DoInit( luaState );
 }
 
+int csp::TestSuite_checkEquals( lua_State* luaState )
+{
+	lua::LuaStack args( luaState );
+
+	TestRunContext* pTestContext = TestRunContext::GetTestContext( luaState );
+	if( pTestContext == NULL )
+		return args.Error( "Not in test run context.");
+
+	lua::LuaStackValue errMsg = args[1];
+	lua::LuaStackValue expected = args[2];
+	lua::LuaStackValue actual = args[3];
+
+	if( !errMsg.IsString() )
+		return errMsg.ArgError( "error message string expected" );
+
+	if( !expected.IsRawEqual( actual ) )
+	{
+		lua::Print( "ERROR! %s: expected=", errMsg.GetString() );
+		lua::PrintStackValue( expected );
+		lua::Print( " actual=" );
+		lua::PrintStackValue( actual );
+		lua::Print( "\n" );
+		pTestContext->SetCheckFailed();
+	}
+
+	return 0;
+}
+
 int csp::TestSuite_checkEqualsInt( lua_State* luaState )
 {
 	lua::LuaStack args( luaState );
@@ -318,6 +350,48 @@ int csp::TestSuite_checkEqualsInt( lua_State* luaState )
 	if( expectedInt != valueInt )
 	{
 		lua::Print( "ERROR! %s: expected=%d value=%d\n", errMsg.GetString(), expectedInt, valueInt );
+		pTestContext->SetCheckFailed();
+	}
+
+	return 0;
+}
+
+int csp::TestSuite_checkEqualsFloat( lua_State* luaState )
+{
+	lua::LuaStack args( luaState );
+
+	TestRunContext* pTestContext = TestRunContext::GetTestContext( luaState );
+	if( pTestContext == NULL )
+		return args.Error( "Not in test run context.");
+
+	lua::LuaStackValue errMsg = args[1];
+	lua::LuaStackValue expected = args[2];
+	lua::LuaStackValue actual = args[3];
+	lua::LuaStackValue delta = args[4];
+
+	if( !expected.IsNumber() )
+		return expected.ArgError( "number expected" );
+
+	if( !actual.IsNumber() )
+		return actual.ArgError( "number expected" );
+
+	if( !delta.IsNumber() )
+		return delta.ArgError( "number expected" );
+
+	if( !errMsg.IsString() )
+		return errMsg.ArgError( "error message string expected" );
+
+	lua::LuaNumber_t expectedFloat = expected.GetNumber();
+	lua::LuaNumber_t valueFloat = actual.GetNumber();
+	lua::LuaNumber_t deltaFloat = delta.GetNumber();
+	
+	lua::LuaNumber_t d = expectedFloat - valueFloat;
+	if( d < 0 )
+		d = -d;
+
+	if( d > deltaFloat )
+	{
+		lua::Print( "ERROR! %s: expected=%g value=%g delta=%g\n", errMsg.GetString(), expectedFloat, valueFloat, deltaFloat );
 		pTestContext->SetCheckFailed();
 	}
 

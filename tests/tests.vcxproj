@@ -31,9 +31,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="lua\alt.lua" />
     <None Include="lua\elementary.lua" />
     <None Include="lua\flow.lua" />
     <None Include="lua\main.lua" />
+    <None Include="lua\par.lua" />
+    <None Include="lua\termination.lua" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E9E2EDE7-1393-472D-8EE4-DD973DCF778C}</ProjectGuid>

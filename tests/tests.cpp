@@ -109,6 +109,7 @@ int main( int argc, const char* argv[] )
 	}
 
 	csp::ShutdownTests( luaState );
+
 	csp::Shutdown( host );
 	core::ShutdownCore();
 

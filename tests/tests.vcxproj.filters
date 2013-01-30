@@ -18,5 +18,14 @@
     <None Include="lua\elementary.lua">
       <Filter>lua</Filter>
     </None>
+    <None Include="lua\alt.lua">
+      <Filter>lua</Filter>
+    </None>
+    <None Include="lua\par.lua">
+      <Filter>lua</Filter>
+    </None>
+    <None Include="lua\termination.lua">
+      <Filter>lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
