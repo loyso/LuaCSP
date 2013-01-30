@@ -14,6 +14,7 @@ namespace lua
 	class LuaStackValue
 	{
 	public:
+		LuaStackValue();
 		LuaStackValue( lua_State* state, int index);
 
 		bool IsNil() const;

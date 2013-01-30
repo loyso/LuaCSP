@@ -15,6 +15,12 @@ extern "C"
 
 #include <string.h>
 
+lua::LuaStackValue::LuaStackValue()
+	: m_state( NULL )
+	, m_index( lua_upvalueindex(256) )
+{
+}
+
 lua::LuaStackValue::LuaStackValue( lua_State* luaState, int index )
 	: m_state( luaState )
 	, m_index( index )
