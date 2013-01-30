@@ -214,7 +214,7 @@ void csp::OpAlt::SelectTimeProcessToTrigger( Host& host )
 		if( m_pNilCase == &altCase )
 			continue;
 
-		if( altCase.m_pChannel == NULL && altCase.m_time > time )
+		if( altCase.m_pChannel == NULL && altCase.m_time <= time )
 		{
 			if( m_pCaseTriggered )
 			{
