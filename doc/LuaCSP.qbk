@@ -437,7 +437,7 @@ It allows one to receive some results in the following way:
 
 [endsect] [/writing_fundamental_operations]
 
-[section:writing_fundamental_operations_lua Writing Fundamental Operations in Plane Lua]
+[section:writing_fundamental_operations_lua Writing Fundamental Operations in Plain Lua]
 TBD
 [endsect] [/writing_fundamental_operations_lua]
 
