@@ -199,24 +199,28 @@ lua::LuaStackValue lua::LuaStack::RegistryPtrGet( const void* ptr )
 
 int lua::LuaStack::Error( const char* format, ... )
 {
-	char buffer[1024];
+	char buffer[MAX_ERROR_LENGTH];
 
 	va_list args;
 	va_start( args, format );
 	_vsnprintf( buffer, sizeof(buffer), format, args );
 	va_end( args );
+
+	buffer[MAX_ERROR_LENGTH-1] = 0;
 
 	return luaL_error( m_state, "%s", buffer );
 }
 
 int lua::LuaStack::ArgError( int arg, const char* format, ... )
 {
-	char buffer[1024];
+	char buffer[MAX_ERROR_LENGTH];
 
 	va_list args;
 	va_start( args, format );
 	_vsnprintf( buffer, sizeof(buffer), format, args );
 	va_end( args );
+
+	buffer[MAX_ERROR_LENGTH-1] = 0;
 
 	return luaL_argerror( m_state, arg, buffer );
 }

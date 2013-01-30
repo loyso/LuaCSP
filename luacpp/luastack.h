@@ -65,6 +65,7 @@ namespace lua
 
 		void Pop(int numValues);
 
+		static const int MAX_ERROR_LENGTH = 1024;
 		int Error( const char* format, ... );
 		int ArgError( int arg, const char* format, ... );
 
