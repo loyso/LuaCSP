@@ -356,7 +356,7 @@ void csp::OpAlt::DetachChannels() const
 
 void csp::OpAlt::DebugCheck( Host& host ) const
 {
-	host.DebugCheckDeletion( m_process );
+	CORE_ASSERT( !host.IsProcessOnStack( m_process ) );
 }
 
 void csp::OpAlt::Terminate( Host& host )

@@ -106,9 +106,6 @@ function testpar:parNested()
 		function()
 			flow = flow.."4"
 			ch:OUT()
-			flow = flow.."b"
-		end,
-		function()
 			flow = flow.."7"
 		end,
 		function()
@@ -119,6 +116,9 @@ function testpar:parNested()
 		end,
 		function()
 			flow = flow.."a"
+		end,
+		function()
+			flow = flow.."b"
 		end
 	)
 	checkEquals("wrong flow", "f123456789ab", flow )

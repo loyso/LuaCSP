@@ -185,12 +185,16 @@ csp::Process* csp::Host::GetTopProcess() const
 	return m_evalStepsStackTop > 0 ? m_evalStepsStack[ m_evalStepsStackTop-1 ] : NULL;
 }
 
-void csp::Host::DebugCheckDeletion( const Process& process ) const
+
+bool csp::Host::IsProcessOnStack( const Process& process ) const
 {
 	for( int i = 0; i < m_evalStepsStackTop; ++i )
 	{
-		CORE_ASSERT( &process != m_evalStepsStack[i] );
+		if( &process == m_evalStepsStack[i] )
+			return true;
 	}
+
+	return false;
 }
 
 csp::CspTime_t csp::Host::Time() const

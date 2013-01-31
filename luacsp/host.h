@@ -43,7 +43,7 @@ namespace csp
 		bool IsEvalsStackEmpty() const;
 		void RemoveProcessFromStack( const Process& process );
 
-		void DebugCheckDeletion( const Process& process ) const;
+		bool IsProcessOnStack( const Process& process ) const;
 
     private:
 		void Evaluate();

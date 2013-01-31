@@ -118,11 +118,13 @@ bool csp::OpPar::CheckFinished()
 
 void csp::OpPar::DebugCheck( Host& host ) const
 {
+#ifdef _DEBUG
 	for( int i = 0; i < m_closureToRun; ++i )
 	{
 		Process& process = m_closures[ i ].process;
-		host.DebugCheckDeletion( process );
+		CORE_ASSERT( !host.IsProcessOnStack( process ) );
 	}
+#endif
 }
 
 void csp::OpPar::UnrefClosures()

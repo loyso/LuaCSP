@@ -113,7 +113,7 @@ csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 		host.PushEvalStep( *this );
 	else if ( result == WorkResult::FINISH && m_parentProcess )
 	{
-		if( host.GetTopProcess() != m_parentProcess )
+		if( !host.IsProcessOnStack( *m_parentProcess ) )
 			host.PushEvalStep( *m_parentProcess );
 	}
 
