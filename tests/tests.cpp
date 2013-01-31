@@ -91,6 +91,7 @@ int main( int argc, const char* argv[] )
 	csp::Host& host = csp::Initialize();
 	
 	lua::LuaState& luaState = host.LuaState();
+	luaState.LibOpenBase();
 	luaState.LibOpenTable();
 
 	csp::InitTests( luaState );

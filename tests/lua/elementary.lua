@@ -152,3 +152,37 @@ function elementary:range()
 	checkEqualsInt( "no communication", 21, v )
 	helpers:endTickCheck(0)
 end
+
+function elementary:surviveGc()
+	helpers:startTickCheck()
+
+	local flow = "f"
+	local ch = Channel:new()
+	
+	local str 
+	local tab 
+	local ch2
+	
+	PAR(
+		function()
+			flow=flow.."1"
+			ch:OUT( "hi", {1,2,3}, Channel:new() )
+			flow=flow.."5"
+		end,
+		function()
+			flow=flow.."2"
+			collectgarbage()
+			flow=flow.."3"
+			str, tab, ch2 = ch:IN()
+			flow=flow.."4"
+			ch2:close()
+		end
+	)
+	
+	checkEquals( "no communication", "hi", str )
+	checkEqualsArray( "no communication", {1,2,3}, tab )
+	checkEquals( "wrong flow", "f12345", flow )
+
+	helpers:endTickCheck(0)
+end
+
