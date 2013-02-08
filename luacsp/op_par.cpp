@@ -118,6 +118,7 @@ bool csp::OpPar::CheckFinished()
 
 void csp::OpPar::DebugCheck( Host& host ) const
 {
+	(void)host;
 #ifdef _DEBUG
 	for( int i = 0; i < m_closureToRun; ++i )
 	{

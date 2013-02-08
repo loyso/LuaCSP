@@ -251,6 +251,7 @@ bool csp::OpSwarmMain::Init( lua::LuaStack& args, InitError& initError )
 
 void csp::OpSwarmMain::DebugCheck( Host& host ) const
 {
+	(void)host;
 #ifdef _DEBUG
 	DebugCheckList( host, m_pClosuresHead );
 	DebugCheckList( host, m_pClosuresToRunHead );
@@ -259,11 +260,14 @@ void csp::OpSwarmMain::DebugCheck( Host& host ) const
 
 void csp::OpSwarmMain::DebugCheckList( Host& host, SwarmClosure* pHead ) const
 {
+	(void)host, (void)pHead;
+#ifdef _DEBUG
 	for( SwarmClosure* pClosure = pHead; pClosure; pClosure = pClosure->pNext )
 	{
 		Process& process = pClosure->process;
 		CORE_ASSERT( !host.DebugIsProcessOnStack( process ) );
 	}
+#endif
 }
 
 
