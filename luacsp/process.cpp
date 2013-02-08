@@ -16,6 +16,7 @@ csp::Process::Process()
 	: m_luaThread()
 	, m_parentProcess()
 	, m_operation()
+	, m_isOnStack( false )
 {
 }
 
@@ -113,7 +114,7 @@ csp::WorkResult::Enum csp::Process::Evaluate( Host& host, int numArgs )
 		host.PushEvalStep( *this );
 	else if ( result == WorkResult::FINISH && m_parentProcess )
 	{
-		if( !host.IsProcessOnStack( *m_parentProcess ) )
+		if( !m_parentProcess->IsOnStack() )
 			host.PushEvalStep( *m_parentProcess );
 	}
 
@@ -143,7 +144,8 @@ void csp::Process::Terminate( Host& host )
 		DeleteOperation( host );
 	}
 	
-	host.RemoveProcessFromStack( *this );
+	if( IsOnStack() )
+		host.RemoveProcessFromStack( *this );
 }
 
 void csp::Process::DeleteOperation( Host& host )
@@ -168,4 +170,14 @@ void csp::Process::SetLuaThread( const lua::LuaState& luaThread )
 void csp::Process::SetParentProcess( Process& parentProcess )
 {
 	m_parentProcess = &parentProcess;
+}
+
+void csp::Process::SetIsOnStack( bool isOnStack )
+{
+	m_isOnStack = isOnStack;
+}
+
+bool csp::Process::IsOnStack() const
+{
+	return m_isOnStack;
 }

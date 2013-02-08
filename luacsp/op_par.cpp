@@ -122,7 +122,7 @@ void csp::OpPar::DebugCheck( Host& host ) const
 	for( int i = 0; i < m_closureToRun; ++i )
 	{
 		Process& process = m_closures[ i ].process;
-		CORE_ASSERT( !host.IsProcessOnStack( process ) );
+		CORE_ASSERT( !host.DebugIsProcessOnStack( process ) );
 	}
 #endif
 }

@@ -137,6 +137,9 @@ void csp::Host::PushEvalStep( Process& process )
 {
 	CORE_ASSERT( m_evalStepsStackTop >= 0 && m_evalStepsStackTop < CHANNEL_STACK_SIZE );
 
+	CORE_ASSERT( !process.IsOnStack() );
+	process.SetIsOnStack( true );
+
 	m_evalStepsStack[ m_evalStepsStackTop ] = &process;
 	++m_evalStepsStackTop;
 }
@@ -149,6 +152,8 @@ csp::Process& csp::Host::PopEvalStep()
 	Process* pProcess = m_evalStepsStack[ m_evalStepsStackTop ];
 	CORE_ASSERT( pProcess );
 	m_evalStepsStack[ m_evalStepsStackTop ] = NULL;
+
+	pProcess->SetIsOnStack( false );
 
 	return *pProcess;
 }
@@ -186,7 +191,7 @@ csp::Process* csp::Host::GetTopProcess() const
 }
 
 
-bool csp::Host::IsProcessOnStack( const Process& process ) const
+bool csp::Host::DebugIsProcessOnStack( const Process& process ) const
 {
 	for( int i = 0; i < m_evalStepsStackTop; ++i )
 	{

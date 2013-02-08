@@ -44,6 +44,9 @@ namespace csp
 		bool IsInOperation() const;
 		Operation& CurrentOperation();
 
+		void SetIsOnStack( bool isOnStack );
+		bool IsOnStack() const;
+
     private:
 		WorkResult::Enum Resume( int numArgs );
 		void DeleteOperation( Host& host );
@@ -51,5 +54,6 @@ namespace csp
 		lua::LuaState m_luaThread;
 		Process* m_parentProcess;
         Operation* m_operation;
+		bool m_isOnStack;
     };
 }

@@ -39,13 +39,13 @@ namespace csp
 		void PushEvalStep( Process& process );
 		Process& PopEvalStep();
 		
-		Process* GetTopProcess() const;
 		bool IsEvalsStackEmpty() const;
 		void RemoveProcessFromStack( const Process& process );
 
-		bool IsProcessOnStack( const Process& process ) const;
+		bool DebugIsProcessOnStack( const Process& process ) const;
 
     private:
+		Process* GetTopProcess() const;
 		void Evaluate();
 
         lua::LuaState m_luaState;
