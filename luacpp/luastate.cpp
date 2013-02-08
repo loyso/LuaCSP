@@ -80,8 +80,8 @@ int lua::LuaState::GetTop() const
 }
 
 lua::Return::Enum lua::LuaState::Call( int numArgs, int numResults )
-{
-	if (!GetTopValue().IsFunction())
+{	
+	if( !lua_isfunction( m_stack.InternalState(), -numArgs-1 ) )
 		return Return::ERRRUN;
 
 	return (Return::Enum)lua_pcall( m_stack.InternalState(), numArgs, numResults, 0 ); // TODO: use msgh to trace stack.

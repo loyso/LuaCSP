@@ -22,6 +22,7 @@ namespace lua
 
 	typedef int LuaRef_t;
 	const LuaRef_t LUA_NO_REF = -2; // matches LUA_NOREF
+	const int LUA_MULT_RET = -1; // matches LUA_MULTRET
 
     namespace Return
     {

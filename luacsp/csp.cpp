@@ -195,5 +195,3 @@ csp::GcObject::GcObject()
 csp::GcObject::~GcObject()
 {
 }
-
-

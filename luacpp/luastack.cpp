@@ -98,6 +98,21 @@ void lua::LuaStack::Pop( int numValues )
 	lua_pop(m_state, numValues);
 }
 
+void lua::LuaStack::Insert( int position )
+{
+	lua_insert(m_state, position);
+}
+
+void lua::LuaStack::Remove( int position )
+{
+	lua_remove(m_state, position);
+}
+
+void lua::LuaStack::Replace( int position )
+{
+	lua_replace(m_state, position);
+}
+
 void lua::LuaStack::PushLightUserData( const void* userData )
 {
 	lua_pushlightuserdata( m_state, const_cast< void* >( userData ) );

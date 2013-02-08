@@ -12,6 +12,7 @@
     <ClCompile Include="swarm.cpp" />
     <ClCompile Include="cppchannel.cpp" />
     <ClCompile Include="contract.cpp" />
+    <ClCompile Include="op_lua.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csp.h" />
@@ -25,5 +26,6 @@
     <ClInclude Include="swarm.h" />
     <ClInclude Include="cppchannel.h" />
     <ClInclude Include="contract.h" />
+    <ClInclude Include="op_lua.h" />
   </ItemGroup>
 </Project>

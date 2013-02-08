@@ -167,7 +167,7 @@ function testalt:timeGuard()
 	flow=flow.."9"
 
 	local t2 = time()
-	checkEqualsFloat("wrong timing", 0.4, t2-t1, 0.001)
+	checkEqualsFloat("wrong timing", 0.4, t2-t1, 0.02)
 	checkEquals("wrong flow", "f1234569", flow )
 end
 

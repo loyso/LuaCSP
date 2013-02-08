@@ -63,7 +63,10 @@ namespace lua
 		void SetMetaTable( const LuaStackValue& value );
 		bool GetMetaTable( const LuaStackValue& value );
 
-		void Pop(int numValues);
+		void Pop( int numValues );
+		void Insert( int position );
+		void Remove( int position );
+		void Replace( int position );
 
 		static const int MAX_ERROR_LENGTH = 1024;
 		int Error( const char* format, ... );

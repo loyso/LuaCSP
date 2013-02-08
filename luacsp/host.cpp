@@ -15,6 +15,7 @@
 #include "cppchannel.h"
 #include "swarm.h"
 #include "contract.h"
+#include "op_lua.h"
 
 namespace csp
 {
@@ -67,10 +68,12 @@ void csp::Host::Initialize()
 	
 	RegisterStandardHelpers( m_luaState, globals );
 	RegisterStandardOperations( m_luaState, globals );
+	
 	InitializeChannels( m_luaState );
 	InitializeCppChannels( m_luaState );
 	InitializeSwarms( m_luaState );
 	InitializeContracts( m_luaState );
+	InitializeOpLua( m_luaState );
 	
 	m_luaState.GetStack().Pop(1);
 
@@ -91,6 +94,8 @@ void csp::Host::Shutdown()
 	ShutdownSwarms( m_luaState );
 	ShutdownCppChannels( m_luaState );
 	ShutdownChannels( m_luaState );
+	ShutdownOpLua( m_luaState );
+	
 	UnregisterStandardOperations( m_luaState, globals );	
 	UnregisterStandardHelpers( m_luaState, globals );	
 	
