@@ -16,6 +16,7 @@ extern "C"
 #include <lua-5.2.1/src/lualib.h>
 }
 
+static_assert( LUAI_EXTRASPACE == sizeof(void*), "Lua must be compiled with #define LUAI_EXTRASPACE sizeof(void*)" );
 
 lua::LuaState::LuaState()
 	: m_stack( NULL )
