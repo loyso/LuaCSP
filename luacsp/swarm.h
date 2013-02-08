@@ -48,11 +48,15 @@ namespace csp
 		int Go( lua::LuaStack& args );
 
 	private:
+		struct SwarmClosure;
+
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Evaluate( Host& host );
 		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 		virtual void Terminate( Host& host );
+		virtual void DebugCheck( Host& host ) const;
 		
+		void DebugCheckList( Host& host, SwarmClosure* pHead ) const;
 		void CheckFinished();
 
 		Swarm* m_pSwarm;

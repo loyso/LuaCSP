@@ -182,7 +182,9 @@ int csp::OpSwarmMain::Go( lua::LuaStack& args )
 	}
 
 	Host& host = Host::GetHost( args.InternalState() );
-	host.PushEvalStep( ThisProcess() );
+	
+	if( !ThisProcess().IsOnStack() )
+		host.PushEvalStep( ThisProcess() );
 
 	return 0;
 }
@@ -246,6 +248,24 @@ bool csp::OpSwarmMain::Init( lua::LuaStack& args, InitError& initError )
 
 	return true;
 }
+
+void csp::OpSwarmMain::DebugCheck( Host& host ) const
+{
+#ifdef _DEBUG
+	DebugCheckList( host, m_pClosuresHead );
+	DebugCheckList( host, m_pClosuresToRunHead );
+#endif
+}
+
+void csp::OpSwarmMain::DebugCheckList( Host& host, SwarmClosure* pHead ) const
+{
+	for( SwarmClosure* pClosure = pHead; pClosure; pClosure = pClosure->pNext )
+	{
+		Process& process = pClosure->process;
+		CORE_ASSERT( !host.DebugIsProcessOnStack( process ) );
+	}
+}
+
 
 void csp::PushSwarm( lua_State* luaState, Swarm& swarm )
 {
