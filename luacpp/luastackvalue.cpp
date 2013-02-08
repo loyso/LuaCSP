@@ -17,7 +17,7 @@ extern "C"
 
 lua::LuaStackValue::LuaStackValue()
 	: m_state( NULL )
-	, m_index( lua_upvalueindex(256) )
+	, m_index( 0 )
 {
 }
 
