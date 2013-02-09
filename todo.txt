@@ -1,0 +1,48 @@
+- channel multiple in/out, FIFO
+- IN, OUT, ALT if channel closed. Report errors. What to return on channel closure?
+- correct error unwinding. report stack trace for the whole tree, error bubbling.
+- ALT -> select
+- pluto serialization
+- lua checkstack everywhere
+- catchterminate
+- make it a module, non-invasive. Avoid LUAI_EXTRASPACE. how?
+
+- TDD: runtime error must be test failure.
+- lua variant for arguments (ref/unref is too slow). 
+  Consider to use table with __gc instead of userdata. And put all the refs (ch+args) there.
+  Use uservalue feature for userdata.
+- userdata variant for C++ type checks.
+- memory pools, HWMs.
+- channel for in/out only (in/out qualifiers?)
+- x64
+- cmake
+- 'defer' keyword.
+
+
+
+
+ALT(
+	ch1, function( arg1, arg2 )
+	end
+	,
+	ch2, arg1, arg2, function()
+	end
+)
+
+ALT(
+	ch1, IN, function( arg1, arg2 )
+	end
+	,
+	ch2, OUT, { arg1, arg2 }, function()
+	end
+)
+
+ALT(
+	ch1, function( arg1, arg2 )
+	end
+	,
+	ch2, { arg1, arg2 }, function()
+	end
+)
+
+
