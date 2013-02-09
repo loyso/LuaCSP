@@ -151,7 +151,8 @@ csp::WorkResult::Enum csp::OpTestSuite_RunAll::Evaluate( Host& host )
 
 		m_pCurrentClosure = pClosure;
 
-		pClosure->process.StartEvaluation( host, 0 );
+		pClosure->process.LuaThread().GetTopValue().PushClosureEnv();
+		pClosure->process.StartEvaluation( host, 1 );
 	}
 
 	WorkResult::Enum isFinished = IsFinished();
