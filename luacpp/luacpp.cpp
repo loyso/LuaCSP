@@ -42,6 +42,16 @@ void lua::PrintStackValue( LuaStackValue const& value )
 		lua::Print( "%g", value.GetNumber() );
 	else if( value.IsString() )
 		lua::Print( value.GetString() );
+	else if( value.IsCFunction() )
+		lua::Print( "[C function %p]", value.GetCFunction() );
+	else if( value.IsFunction() )
+		lua::Print( "[Lua function %p]", value.ToPointer() );
+	else if( value.IsTable() )
+	{
+		lua::Print( "{ " );
+		lua::PrintStackTable( value );
+		lua::Print( " }" );
+	}
 }
 
 void lua::PrintStackArray( LuaStackValue const& table )

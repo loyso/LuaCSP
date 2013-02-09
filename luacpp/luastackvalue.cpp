@@ -137,6 +137,11 @@ lua_State* lua::LuaStackValue::GetThread() const
 	return lua_tothread( m_state, m_index );
 }
 
+lua::CFunction_t lua::LuaStackValue::GetCFunction() const
+{
+	return lua_tocfunction( m_state, m_index );
+}
+
 lua_State* lua::LuaStackValue::InternalState() const
 {
 	return m_state;

@@ -53,6 +53,7 @@ namespace lua
 		void* GetUserData() const;
 		void* GetLightUserData() const;
 		lua_State* GetThread() const;
+		CFunction_t GetCFunction() const;
 
 		int ArgError( const char* errMsg );
 
