@@ -1,33 +1,14 @@
 
 elementary = TestSuite:new()
 
-
-elementary.helpers = {}
-
-function elementary.helpers:startTickCheck()
-	self.t1 = tick()
-end
-
-function elementary.helpers:endTickCheck( expected, t1 )
-	local t2 = tick()
-	checkEqualsInt( "simulation tick difference", expected, t2-self.t1 )
-end
-
-function elementary.helpers:sleepTicks( ticks )
-	for i=1,ticks do
-		SLEEP(0)
-	end
-end
-
-
 function elementary:sleep1tick()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	SLEEP(0)
-	helpers:endTickCheck(1)
+	endTickCheck( self, 1)
 end
 
 function elementary:inAndOut()
-	helpers:startTickCheck()
+	startTickCheck( self )
 
 	local ch = Channel:new()
 	local errMsg = "communication error"
@@ -48,12 +29,12 @@ function elementary:inAndOut()
 		end
 	)
 
-	helpers:endTickCheck(1)
+	endTickCheck( self, 1)
 end
 
 
 function elementary:swarm()
-	helpers:startTickCheck()
+	startTickCheck( self )
 
 	local swarm = Swarm:new()
 	local ch = Channel:new()
@@ -72,7 +53,7 @@ function elementary:swarm()
 			local ch2 = Channel:new()
 			swarm:go(
 				function()
-					helpers:sleepTicks(4)
+					sleepTicks(4)
 					neverFalse = false
 				end,
 				function()
@@ -82,14 +63,14 @@ function elementary:swarm()
 			)
 			swarm:go(
 				function()
-					helpers:sleepTicks(5)
+					sleepTicks(5)
 					neverFalse = false
 				end,
 				function()
 					ch2:OUT(42)
 				end
 			)
-			helpers:sleepTicks(3)
+			sleepTicks(3)
 			ch:OUT()
 			neverFalse = false
 		end
@@ -97,7 +78,7 @@ function elementary:swarm()
 
 	checkEquals( "no swarms communication", 42, num )
 	checkEquals( "code was not terminated", true, neverFalse )
-	helpers:endTickCheck(3)
+	endTickCheck( self, 3)
 end
 
 
@@ -108,7 +89,7 @@ Stages.stage2 = Channel
 Stages.stage3 = Channel
 
 function elementary:contract()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	
 	local c = Stages:new()
 	local v = 0
@@ -126,11 +107,11 @@ function elementary:contract()
 	)
 	
 	checkEqualsInt( "no communication", 6, v )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function elementary:range()
-	helpers:startTickCheck()
+	startTickCheck( self )
 
 	local ch = Channel:new()
 	local v = 0
@@ -150,11 +131,11 @@ function elementary:range()
 	)
 	
 	checkEqualsInt( "no communication", 21, v )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function elementary:surviveGc()
-	helpers:startTickCheck()
+	startTickCheck( self )
 
 	local flow = "f"
 	local ch = Channel:new()
@@ -183,6 +164,6 @@ function elementary:surviveGc()
 	checkEqualsArray( "no communication", {1,2,3}, tab )
 	checkEquals( "wrong flow", "f12345", flow )
 
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 

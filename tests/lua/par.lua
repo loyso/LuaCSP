@@ -1,20 +1,8 @@
 
 testpar = TestSuite:new()
 
-testpar.helpers = {}
-
-function testpar.helpers:startTickCheck()
-	self.t1 = tick()
-end
-
-function testpar.helpers:endTickCheck( expected, t1 )
-	local t2 = tick()
-	checkEqualsInt( "simulation tick difference", expected, t2-self.t1 )
-end
-
-
 function testpar:elementary()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local flow = "f"
 	PAR(
 		function()
@@ -42,11 +30,11 @@ function testpar:elementary()
 	flow = flow.."9"
 	checkEquals("wrong flow", "f123456789", flow )
 	SLEEP(0)
-	helpers:endTickCheck(2)
+	endTickCheck( self, 2)
 end
 
 function testpar:emptyPar()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local flow = "f"
 	PAR(
 		function()
@@ -57,11 +45,11 @@ function testpar:emptyPar()
 		end
 	)
 	checkEquals("wrong flow", "f12", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function testpar:emptyNestedPar()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local flow = "f"
 	PAR(
 		function()
@@ -81,11 +69,11 @@ function testpar:emptyNestedPar()
 		end
 	)
 	checkEquals("wrong flow", "f12345", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function testpar:parNested()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local ch = Channel:new()
 	local flow = "f"
 	PAR(
@@ -122,6 +110,6 @@ function testpar:parNested()
 		end
 	)
 	checkEquals("wrong flow", "f123456789ab", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 

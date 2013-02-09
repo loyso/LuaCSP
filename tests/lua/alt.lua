@@ -1,19 +1,8 @@
 
 testalt = TestSuite:new()
 
-testalt.helpers = {}
-
-function testalt.helpers:startTickCheck()
-	self.t1 = tick()
-end
-
-function testalt.helpers:endTickCheck( expected, t1 )
-	local t2 = tick()
-	checkEqualsInt( "simulation tick difference", expected, t2-self.t1 )
-end
-
 function testalt:startFirst()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local ch1 = Channel:new()
 	local ch2 = Channel:new()
 	local ch3 = Channel:new()
@@ -52,11 +41,11 @@ function testalt:startFirst()
 	checkEquals("no communication", true, bool )
 	checkEquals("no communication", "hi", str )
 	checkEquals("wrong flow", "f12567", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function testalt:startSecond()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local ch1 = Channel:new()
 	local ch2 = Channel:new()
 
@@ -91,11 +80,11 @@ function testalt:startSecond()
 	checkEquals("no communication", true, bool )
 	checkEquals("no communication", "hi", str )
 	checkEquals("wrong flow", "f123456", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function testalt:polling()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local ch = Channel:new()
 
 	local flow = "f"
@@ -111,11 +100,11 @@ function testalt:polling()
 	)
 
 	checkEquals("wrong flow", "f1", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function testalt:pollingAgainstTime()
-	helpers:startTickCheck()
+	startTickCheck( self )
 
 	local flow = "f"
 
@@ -130,7 +119,7 @@ function testalt:pollingAgainstTime()
 	)
 
 	checkEquals("wrong flow", "f1", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 
 function testalt:timeGuard()

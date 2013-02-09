@@ -1,20 +1,8 @@
 
 termination = TestSuite:new()
 
-termination.helpers = {}
-
-function termination.helpers:startTickCheck()
-	self.t1 = tick()
-end
-
-function termination.helpers:endTickCheck( expected, t1 )
-	local t2 = tick()
-	checkEqualsInt( "simulation tick difference", expected, t2-self.t1 )
-end
-
-
 function termination:subprocesses()
-	helpers:startTickCheck()
+	startTickCheck( self )
 
 	local flow="f"
 
@@ -68,11 +56,11 @@ function termination:subprocesses()
 		end
 	)
 	checkEquals("wrong flow", "f1234567", flow )
-	helpers:endTickCheck(1)
+	endTickCheck( self, 1)
 end
 
 function termination:onInput()
-	helpers:startTickCheck()
+	startTickCheck( self )
 	local flow = "f"
 	local ch = Channel:new()
 	PARWHILE(
@@ -88,6 +76,6 @@ function termination:onInput()
 		end
 	)
 	checkEquals("wrong flow", "f123", flow )
-	helpers:endTickCheck(0)
+	endTickCheck( self, 0)
 end
 

@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="lua\alt.lua" />
+    <None Include="lua\csp_operation.lua" />
     <None Include="lua\elementary.lua" />
     <None Include="lua\flow.lua" />
     <None Include="lua\main.lua" />

@@ -27,5 +27,8 @@
     <None Include="lua\termination.lua">
       <Filter>lua</Filter>
     </None>
+    <None Include="lua\csp_operation.lua">
+      <Filter>lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
