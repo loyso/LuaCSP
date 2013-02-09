@@ -428,7 +428,7 @@ The final stage. Expose your operation to Lua:
 [operation_cpp_sleep_reg]
 
 If you want to return values from your operation, just override PushResults method
-and push arguments onto provided Lua stack. Overrided PushResults method should return the number of passed arguments.
+and push arguments onto provided Lua stack. Overridden PushResults method should return the number of passed arguments.
 Consider dummy example:
 [operation_cpp_push_results]
 It allows one to receive some results in the following way:
@@ -438,7 +438,35 @@ It allows one to receive some results in the following way:
 [endsect] [/writing_fundamental_operations]
 
 [section:writing_fundamental_operations_lua Writing Fundamental Operations in Plain Lua]
-TBD
+Writing a fundamental operation in Plain Lua typically occurs in three steps:
+
+# Declare your new operation class.
+# Override the methods you need (there are three of them: Work, PushResults and Terminate)
+# Declare a function to be yielded, i.e. fundamental operation itself.
+
+Take a look at the following implementaion of SLEEP in Plain Lua:
+
+[import samples/lua_operation.lua]
+[lua_operation_sleep]
+
+# OpLuaSleep is a new operation class.
+# OpLuaSleep:Work is a method to be called every simulation tick.
+# LUA_SLEEP is an API function to be called from LuaCSP code.
+
+Overridden Work function must return either self.Finish or self.Yield integer constant to resume or yield current CSP process.
+
+Your API fundamental function (named in capital letters) must create an instance of your operation, initialize member parameters (if any) and return operation:Init() result as a tail call.
+
+If you want your operation to return some results, override the PushResults method:
+[lua_operation_pushresults]
+
+Override Terminate method to perform any activities, related to [sref manual.the_language.termination] in PARWHILE scope:
+[lua_operation_terminate]
+
+Notice that the code in overridden methods can't yield.
+
+Of course, you should have something to be wrapped, if you want to get some sense. Some asyncronous C++/Lua functions with completion callbacks, for example.
+
 [endsect] [/writing_fundamental_operations_lua]
 
 [section:api The Application Program Interface]
@@ -511,6 +539,11 @@ The LuaCSP framework supposed to be used in:
     So, they lack the communication aspect (the letter C in CSP). 
 	Secondly, Lua coroutine only suspends/resumes it's execution by explicitly calling yield/resume functions. 
 	In LuaCSP all the coroutine yields are hidden inside the C++ system functions. The domain-specific language user sees none of this, which is the point. 
+
+* [*Q]: I noticed the Lua 5.2.1 distribution in LuaCSP repo. How invasive are your changes?
+	* [*A]: LuaCSP comes with unmodified Lua distribution except for LUA_NUMBER to be float (including minor modifications to avoid warnings
+    while compiling in Microsoft Visual C++). There was no invasive changes at all. The only requirement is that Lua must be compiled with #define LUAI_EXTRASPACE sizeof(void*)
+    option. It allows LuaCSP to have a mapping from Lua thread to some internal C++ object.
 
 [endsect] [/faq]
 

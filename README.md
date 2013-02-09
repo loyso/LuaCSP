@@ -44,6 +44,7 @@ So, LuaCSP:
 
 LuaCSP can be used under GNU General Public License (GPL), version 2.
 http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Commercial licensing for proprietary products is also available.
 
 Copyright (c) 2012-2013 Alexey Baskakov.
 Feel free to contact the author for additional features, consulting and support.

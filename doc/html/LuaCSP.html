@@ -945,7 +945,7 @@
 </pre><p>
       </p><p>
         If you want to return values from your operation, just override PushResults
-        method and push arguments onto provided Lua stack. Overrided PushResults
+        method and push arguments onto provided Lua stack. Overridden PushResults
         method should return the number of passed arguments. Consider dummy example:
       </p><p>
 </p><pre class="programlisting"><span class="keyword">int</span> <span class="identifier">OpMyDummyOp</span><span class="special">::</span><span class="identifier">PushResults</span><span class="special">(</span> <span class="identifier">lua</span><span class="special">::</span><span class="identifier">LuaStack</span><span class="special">&amp;</span> <span class="identifier">luaStack</span> <span class="special">)</span>
@@ -968,7 +968,69 @@
         contain 'true'.
       </p></div><div class="section" title="Writing Fundamental Operations in Plain Lua"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.writing_fundamental_operations_lua"></a><a class="link" href="#manual.embedding.writing_fundamental_operations_lua" title="Writing Fundamental Operations in Plain Lua">Writing
       Fundamental Operations in Plain Lua</a></h3></div></div></div><p>
-        TBD
+        Writing a fundamental operation in Plain Lua typically occurs in three steps:
+      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+            Declare your new operation class.
+          </li><li class="listitem">
+            Override the methods you need (there are three of them: Work, PushResults
+            and Terminate)
+          </li><li class="listitem">
+            Declare a function to be yielded, i.e. fundamental operation itself.
+          </li></ol></div><p>
+        Take a look at the following implementaion of SLEEP in Plain Lua:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">OpLuaSleep</span> <span class="special">=</span> <span class="identifier">CspOperation</span><span class="special">:</span><span class="identifier">table</span><span class="special">()</span>
+
+<span class="identifier">function</span> <span class="identifier">OpLuaSleep</span><span class="special">:</span><span class="identifier">Work</span><span class="special">(</span> <span class="identifier">deltaTime</span> <span class="special">)</span>
+	<span class="identifier">self</span><span class="special">.</span><span class="identifier">seconds</span> <span class="special">=</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">seconds</span> <span class="special">-</span> <span class="identifier">deltaTime</span>
+	<span class="keyword">if</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">seconds</span> <span class="special">&gt;</span> <span class="number">0</span> <span class="identifier">then</span>
+		<span class="keyword">return</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">Yield</span>
+	<span class="keyword">else</span>
+		<span class="keyword">return</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">Finish</span>
+	<span class="identifier">end</span>
+<span class="identifier">end</span>
+
+<span class="identifier">function</span> <span class="identifier">LUA_SLEEP</span><span class="special">(</span> <span class="identifier">seconds</span> <span class="special">)</span>
+	<span class="identifier">local</span> <span class="identifier">op</span> <span class="special">=</span> <span class="identifier">OpLuaSleep</span><span class="special">:</span><span class="keyword">new</span><span class="special">()</span>
+	<span class="identifier">op</span><span class="special">.</span><span class="identifier">seconds</span> <span class="special">=</span> <span class="identifier">seconds</span>
+	<span class="keyword">return</span> <span class="identifier">op</span><span class="special">:</span><span class="identifier">Init</span><span class="special">()</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+            OpLuaSleep is a new operation class.
+          </li><li class="listitem">
+            OpLuaSleep:Work is a method to be called every simulation tick.
+          </li><li class="listitem">
+            LUA_SLEEP is an API function to be called from LuaCSP code.
+          </li></ol></div><p>
+        Overridden Work function must return either self.Finish or self.Yield integer
+        constant to resume or yield current CSP process.
+      </p><p>
+        Your API fundamental function (named in capital letters) must create an instance
+        of your operation, initialize member parameters (if any) and return operation:Init()
+        result as a tail call.
+      </p><p>
+        If you want your operation to return some results, override the PushResults
+        method:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">OpMyComputation</span><span class="special">:</span><span class="identifier">PushResults</span><span class="special">()</span>
+	<span class="keyword">return</span> <span class="identifier">self</span><span class="special">.</span><span class="identifier">result</span><span class="special">,</span> <span class="string">"hi"</span><span class="special">,</span> <span class="keyword">true</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        Override Terminate method to perform any activities, related to <a class="xref" href="#manual.the_language.termination" title="Termination">Termination</a> in
+        PARWHILE scope:
+      </p><p>
+</p><pre class="programlisting"><span class="identifier">function</span> <span class="identifier">OpSoundPlayback</span><span class="special">:</span><span class="identifier">Terminate</span><span class="special">()</span>
+	<span class="identifier">self</span><span class="special">.</span><span class="identifier">sound</span><span class="special">:</span><span class="identifier">Stop</span><span class="special">()</span>
+<span class="identifier">end</span>
+</pre><p>
+      </p><p>
+        Notice that the code in overridden methods can't yield.
+      </p><p>
+        Of course, you should have something to be wrapped, if you want to get some
+        sense. Some asyncronous C++/Lua functions with completion callbacks, for
+        example.
       </p></div><div class="section" title="The Application Program Interface"><div class="titlepage"><div><div><h3 class="title"><a name="manual.embedding.api"></a><a class="link" href="#manual.embedding.api" title="The Application Program Interface">The Application Program Interface</a></h3></div></div></div><p>
         TBD
       </p></div></div><div class="section" title="5. Additional Notes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.additional_notes"></a><a class="link" href="#manual.additional_notes" title="5. Additional Notes">5. Additional Notes</a></h2></div></div></div><div class="section" title="Implementation Disclaimer"><div class="titlepage"><div><div><h3 class="title"><a name="manual.additional_notes.disclaimer"></a><a class="link" href="#manual.additional_notes.disclaimer" title="Implementation Disclaimer">Implementation Disclaimer</a></h3></div></div></div><p>
@@ -1081,6 +1143,18 @@
                 calling yield/resume functions. In LuaCSP all the coroutine yields
                 are hidden inside the C++ system functions. The domain-specific language
                 user sees none of this, which is the point.
+              </li></ul></div>
+        </li><li class="listitem">
+          <span class="bold"><strong>Q</strong></span>: I noticed the Lua 5.2.1 distribution
+          in LuaCSP repo. How invasive are your changes?
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+                <span class="bold"><strong>A</strong></span>: LuaCSP comes with unmodified
+                Lua distribution except for LUA_NUMBER to be float (including minor
+                modifications to avoid warnings while compiling in Microsoft Visual
+                C++). There was no invasive changes at all. The only requirement
+                is that Lua must be compiled with #define LUAI_EXTRASPACE sizeof(void*)
+                option. It allows LuaCSP to have a mapping from Lua thread to some
+                internal C++ object.
               </li></ul></div>
         </li></ul></div></div><div class="section" title="7. Development Roadmap"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="manual.roadmap"></a><a class="link" href="#manual.roadmap" title="7. Development Roadmap">7. Development Roadmap</a></h2></div></div></div><p>
       Reacting to user requests is priority number one. Next:
