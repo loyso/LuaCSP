@@ -57,24 +57,29 @@ void csp::UnregisterFunctions( lua::LuaState & state, lua::LuaStackValue & value
 	}
 }
 
-void csp::CspSetMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] )
+
+lua::LuaStackValue csp::PushCspMetatable( lua_State* luaState, const FunctionRegistration memberFunctions[] )
 {
 	lua::LuaStack stack( luaState );
 
 	stack.PushLightUserData( (void*)memberFunctions );
 	lua::LuaStackValue metatable = stack.RegistryGet();
 	CORE_ASSERT( metatable.IsTable() );
+	return metatable;
+}
 
+void csp::CspSetMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] )
+{
+	lua::LuaStack stack( luaState );
+	PushCspMetatable( luaState, memberFunctions );
 	stack.SetMetaTable( value );
 }
 
 bool csp::CspHasMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] )
 {
 	lua::LuaStack stack( luaState );
-
-	stack.PushLightUserData( (void*)memberFunctions );
-	lua::LuaStackValue memberMetatable = stack.RegistryGet();
-	CORE_ASSERT( memberMetatable.IsTable() );
+	
+	lua::LuaStackValue memberMetatable = PushCspMetatable( luaState, memberFunctions );
 
 	if( !stack.GetMetaTable( value ) )
 	{

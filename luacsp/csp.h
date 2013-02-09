@@ -85,6 +85,8 @@ namespace csp
 
 	void PushGcObject( lua_State* luaState, GcObject& gcObject, const FunctionRegistration memberFunctions[] );
 	int GcObject_Gc( lua_State* luaState );
+
+	lua::LuaStackValue PushCspMetatable( lua_State* luaState, const FunctionRegistration memberFunctions[] );
 	void CspSetMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] );
 	bool CspHasMetatable( lua_State* luaState, const lua::LuaStackValue& value, const FunctionRegistration memberFunctions[] );
 

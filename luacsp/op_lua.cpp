@@ -70,7 +70,17 @@ csp::WorkResult::Enum csp::OpLua::Work( Host& host, CspTime_t dt )
 	lua::LuaStackValue callResult = stack.GetTopValue();
 	if( callResult.IsNumber() )
 	{
-		workResult = (WorkResult::Enum)callResult.GetInteger();
+		switch( callResult.GetInteger() )
+		{
+		case WorkResult::FINISH:
+			workResult = WorkResult::FINISH;
+			break;
+		case WorkResult::YIELD:
+			workResult = WorkResult::YIELD;
+			break;
+		default:
+			break;
+		}
 	}
 		
 	stack.Pop( 1 );
@@ -169,6 +179,18 @@ int csp::OpLua_Init( lua_State* luaState )
 void csp::InitializeOpLua( lua::LuaState& state )
 {
 	InitializeCspObject( state, "CspOperation", cspOperationGlobals, cspOperationFunctions );
+
+	lua::LuaStackValue metatable = PushCspMetatable( state.InternalState(), cspOperationFunctions );
+
+	lua::LuaStack stack = state.GetStack();
+	
+	stack.PushInteger( WorkResult::FINISH );
+	stack.SetField( metatable, "Finish" );
+	
+	stack.PushInteger( WorkResult::YIELD );
+	stack.SetField( metatable, "Yield" );
+
+	stack.Pop(1);
 }
 
 void csp::ShutdownOpLua( lua::LuaState& state )

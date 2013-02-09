@@ -40,9 +40,9 @@ function OpLuaSleep:Work( deltaTime )
 	self.time = self.time + deltaTime
 	self.ticks = self.ticks - 1
 	if self.ticks > 0 then
-		return 1 --CspOperation.Yield
+		return self.Yield
 	else
-		return 0 --CspOperation.Finish
+		return self.Finish
 	end
 end
 
@@ -64,7 +64,7 @@ end
 OpOnTerminate = CspOperation:table()
 
 function OpOnTerminate:Work( deltaTime )
-	return 1 --CspOperation.Yield
+	return self.Yield
 end
 
 function OpOnTerminate:Terminate()
