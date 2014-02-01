@@ -37,10 +37,12 @@ So, LuaCSP:
 - Introduces restrictions and rules, how entities behave and interact.
 - Extends Lua in standard way, includes it as a subset.
 
-[Read the comprehensive documentation (an article)]( http://htmlpreview.github.com/?https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
+[Read the comprehensive documentation (an article) here]( http://htmlpreview.github.com/?https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
 
 LuaCSP can be used under GNU General Public License (GPL), version 2.
+
 http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
 Please, contact Alexey Baskakov if you want to use LuaCSP under any other license.
 
 Copyright (c) 2012-2014 Alexey Baskakov.
