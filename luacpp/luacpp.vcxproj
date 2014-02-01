@@ -84,7 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\lua-5.2.1\lua-5.2.1.vcxproj">
+    <ProjectReference Include="..\lua\lua.vcxproj">
       <Project>{58a96fc6-c017-4f92-8dda-89a22d96fc8e}</Project>
     </ProjectReference>
   </ItemGroup>

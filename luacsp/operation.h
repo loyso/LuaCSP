@@ -72,7 +72,7 @@ namespace csp
 		virtual bool Init( lua::LuaStack& args, InitError& initError );
 		virtual WorkResult::Enum Work( Host& host, CspTime_t dt );
 
-		float m_seconds;
+		csp::CspTime_t m_seconds;
 	};
 
 	void RegisterStandardOperations( lua::LuaState& state, lua::LuaStackValue& value );

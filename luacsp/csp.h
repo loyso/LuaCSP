@@ -26,7 +26,7 @@ namespace csp
 
 namespace csp
 {
-	typedef float CspTime_t;
+	typedef double CspTime_t;
 
 	namespace WorkResult
 	{

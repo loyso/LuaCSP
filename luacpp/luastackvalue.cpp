@@ -9,8 +9,8 @@
 
 extern "C"
 {
-#include <lua-5.2.1/src/lua.h>
-#include <lua-5.2.1/src/lauxlib.h>
+#include <lua/src/lua.h>
+#include <lua/src/lauxlib.h>
 }
 
 #include <string.h>
