@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "core\core.vcxproj", "{1017276B-F91C-4426-8423-28E2E48B391F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-5.2.1", "lua-5.2.1\lua-5.2.1.vcxproj", "{58A96FC6-C017-4F92-8DDA-89A22D96FC8E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "lua\lua.vcxproj", "{58A96FC6-C017-4F92-8DDA-89A22D96FC8E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1017276B-F91C-4426-8423-28E2E48B391F} = {1017276B-F91C-4426-8423-28E2E48B391F}
 	EndProjectSection
