@@ -11,9 +11,9 @@
 
 extern "C"
 {
-#include <lua-5.2.1/src/lua.h>
-#include <lua-5.2.1/src/lauxlib.h>
-#include <lua-5.2.1/src/lualib.h>
+#include <lua/src/lua.h>
+#include <lua/src/lauxlib.h>
+#include <lua/src/lualib.h>
 }
 
 static_assert( LUAI_EXTRASPACE == sizeof(void*), "Lua must be compiled with #define LUAI_EXTRASPACE sizeof(void*)" );
