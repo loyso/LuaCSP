@@ -18,7 +18,7 @@ namespace lua
 
 namespace lua
 {
-	typedef double LuaNumber_t; // must match lua_Number in luaconf.h
+	typedef float LuaNumber_t; // must match lua_Number in luaconf.h
 
 	typedef int LuaRef_t;
 	const LuaRef_t LUA_NO_REF = -2; // matches LUA_NOREF
