@@ -6,7 +6,9 @@ Communicating Sequential Processes in Lua: an extension.
 LuaCSP library is a framework that allows you to create pseudo-concurrent
 programming language embeddable in your application.
 
-[Read the comprehensive documentation (an article) here]( http://htmlpreview.github.com/?https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
+[Read the comprehensive documentation (an article) here](http://htmlpreview.github.com/?https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
+
+[See the introductional slides here](https://www.slideshare.net/AlexeyBaskakov/lua-csp-slides).
 
 Why?
 
