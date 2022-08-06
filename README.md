@@ -8,7 +8,7 @@ programming language embeddable in your application.
 
 [Read the comprehensive documentation (an article) here](http://htmlpreview.github.com/?https://github.com/loyso/LuaCSP/blob/master/doc/html/LuaCSP.html).
 
-[See the introductional slides here](https://www.slideshare.net/AlexeyBaskakov/lua-csp-slides).
+[See the introductional slides here](https://docs.google.com/presentation/d/e/2PACX-1vRlyPnFoHmeKGqGNUyObV1aGpJ8hCD8gVz7c8aIkX_AuvCXhSI3wYRphWC95YvWR7PkQp7OWu1pHGkV/pub?start=false&loop=false&delayms=3000).
 
 Why?
 
